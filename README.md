@@ -4,6 +4,8 @@ Aplicación web local que aumenta el **realismo visual** de retratos de personas
 
 Proyecto de Innovación SENATI «Mejora de piel con IA».
 
+> **¿Primera vez en una computadora nueva?** Sigue **[docs/LAPTOP_PASO_A_PASO.md](docs/LAPTOP_PASO_A_PASO.md)**: desde instalar los programas y clonar este repositorio hasta ver la web funcionando.
+
 ## Requisitos
 
 - Windows 10/11 · Python 3.12 · Node.js 20 o superior · PostgreSQL 17

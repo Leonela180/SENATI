@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+backend/.venv/
+.venv/
+.pytest_cache/
+*.coverage
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/test-results/
+frontend/playwright-report/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Local data and AI assets
+private_data/
+models/
+*.log
+scripts/.pids
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,5 @@
+RNF-03 en la PC de desarrollo (sin IA), 2026-11-13 10:59, 20 solicitudes por operación
+GET /auth/me         media    1.1 ms   máx    1.8 ms
+GET /jobs            media    2.5 ms   máx    8.8 ms
+GET /images/{id}     media    1.6 ms   máx    2.7 ms
+GET /workspaces      media    2.0 ms   máx    5.7 ms

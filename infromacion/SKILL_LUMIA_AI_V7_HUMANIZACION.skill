@@ -1,0 +1,418 @@
+# SKILL MAESTRO TÉCNICO — LUMIA AI V7.0
+## Humanización visual de imágenes generadas por inteligencia artificial
+
+**Misión:** construir un prototipo web instalable en otra computadora Windows que permita subir imágenes de personas creadas por IA y obtener una versión visualmente más natural y fotográfica. El producto debe parecer una aplicación profesional, no una demostración escolar de formularios.
+
+**Alcance inicial decidido para terminar pronto:** retratos y personas generadas por IA, priorizando rostro, piel, cabello, iluminación y detalles visibles. **Manos y cuerpo completo son objetivos de evaluación**, no promesas automáticas: solo se anuncian si el motor elegido los mejora en pruebas. No abarcar paisajes ni objetos en el MVP. Esta delimitación es una propuesta operativa hasta que la estudiante confirme otro alcance.
+
+**Importante:** «humanizar» significa aumentar el realismo visual percibido. No demostrar que una persona existe, ni afirmar que una imagen deja de ser sintética. No eliminar metadatos de procedencia deliberadamente ni ofrecer funciones de suplantación. Conservar el original, identificar el resultado como imagen editada con IA y respetar permisos de uso.
+
+---
+
+## 1. Qué verá y hará el usuario
+
+1. Entra a la **landing pública**: presentación de LUMIA AI, explicación clara, ejemplo antes/después autorizado, preguntas frecuentes, privacidad y acceso.
+2. Se registra o inicia sesión y entra a su **estudio privado**.
+3. Arrastra o selecciona una imagen JPG/PNG/WebP generada por IA.
+4. Ve vista previa y elige una opción sencilla: **Natural**, **Fotográfico** o **Detalle suave**, **solo si el motor real admite controles diferenciados**. En caso contrario, un único botón **Humanizar imagen**.
+5. El servidor valida el archivo y registra el trabajo en PostgreSQL.
+6. Un trabajador local ejecuta el modelo de edición; la web muestra **En cola / Procesando / Completado / Error**.
+7. Compara con deslizador antes/después; descarga el resultado y consulta el historial.
+8. Opcional en segunda fase: crear equipo, invitar miembros, compartir una imagen de forma explícita, estadísticas agregadas y supervisión técnica.
+
+**Resultado principal:** imagen generada por IA → imagen editada para verse más humana/natural, manteniendo lo más posible identidad aparente, pose, composición, ropa, fondo y tono de piel. **No** embellecer obligatoriamente, alisar piel, cambiar facciones, edad, etnia o cuerpo.
+
+### Problemas visuales a tratar
+- Piel excesivamente lisa/plástica → microtextura, poros y variación natural sin artefactos.
+- Ojos irreales → brillo/reflejos y bordes más coherentes, sin alterar expresión.
+- Cabello artificial → hebras y transiciones más naturales.
+- Luz y sombras incongruentes → armonización moderada.
+- Contornos, dientes y detalles → corrección solo cuando el modelo sea confiable.
+- Manos/dedos/anatomía → **función experimental**, no garantía de reparación.
+
+---
+
+## 2. Lenguajes y stack técnico
+
+| Capa | Lenguaje | Herramientas | Función |
+|---|---|---|---|
+| Web | TypeScript / TSX | React + Vite | Interfaz y navegación |
+| Diseño | CSS / TSX | Tailwind CSS + **shadcn/ui** (Radix) | Sistema visual y componentes accesibles |
+| Datos de interfaz | TypeScript | fetch + TanStack Query | API, caché, carga y errores |
+| API | Python 3.12 objetivo | Flask | Reglas de negocio, autenticación, validación |
+| ORM | Python | SQLAlchemy 2 | Persistencia |
+| Migraciones | Python / SQL | Alembic | Evolución controlada de PostgreSQL |
+| BD | SQL | PostgreSQL 17 | Usuarios, trabajos, archivos, equipos |
+| IA | Python | PyTorch o Diffusers/ONNX según prueba | Inferencia de edición *image-to-image* |
+| Worker | Python | Proceso independiente | Procesamiento sin bloquear Flask |
+| Tests | Python / TypeScript | pytest, Vitest, Playwright | Validación reproducible |
+| Instalación | PowerShell | scripts `.ps1` | Instalación y ejecución Windows |
+
+**shadcn/ui no reemplaza Tailwind:** usa Tailwind como base, pero aporta componentes de alta calidad y personalizables. No usar bibliotecas adicionales sin necesidad. Mantener versiones compatibles con el código ya existente.
+
+---
+
+## 3. Arquitectura y recorrido
+
+```text
+NAVEGADOR
+  React / TypeScript / shadcn-ui / Tailwind
+      │  HTTP local (HTTPS si se publica)
+      ▼
+FLASK API
+  ├── Autenticación, sesiones y CSRF
+  ├── Validación de archivos y permisos
+  ├── Servicio de trabajos
+  ├── PostgreSQL 17 (metadatos)
+  ├── Almacén privado local (originales/resultados)
+  └── Cola en PostgreSQL ──► Worker Python
+                              └── Motor IA image-to-image
+```
+
+**Flujo transaccional:** subida validada → guardar original privado → crear `processing_job` con estado `queued` → worker lo reclama sin duplicados → `processing` → edición real → guardar resultado → `completed` o `failed` con error seguro → consulta de estado → comparación → descarga autenticada. Un resultado no debe mostrarse como completo hasta que exista el archivo.
+
+**Rapidez:** un frontend, un backend, una BD y un worker. Sin microservicios, Kubernetes, Redis ni nube obligatorios. Para desarrollo local, Vite y Flask pueden ejecutarse por separado; para demostración, servir la compilación del frontend desde Flask o usar un servidor local empaquetado y documentado.
+
+---
+
+## 4. Estructura específica del repositorio
+
+```text
+lumia-ai/
+├── README.md
+├── .gitignore
+├── .env.example
+├── docs/
+│   ├── estado.md
+│   ├── arquitectura.md
+│   ├── modelo-datos.md
+│   ├── permisos.md
+│   ├── motor-ia.md
+│   ├── desarrollo-local.md
+│   └── instalacion-otra-pc.md
+├── frontend/
+│   ├── package.json
+│   ├── vite.config.ts
+│   ├── index.html
+│   └── src/
+│       ├── main.tsx
+│       ├── app/router.tsx
+│       ├── app/layouts/PublicLayout.tsx
+│       ├── app/layouts/AppLayout.tsx
+│       ├── pages/Home.tsx
+│       ├── pages/Login.tsx
+│       ├── pages/Register.tsx
+│       ├── pages/Dashboard.tsx
+│       ├── pages/Humanize.tsx
+│       ├── pages/History.tsx
+│       ├── pages/JobDetail.tsx
+│       ├── pages/Profile.tsx
+│       ├── pages/Team.tsx
+│       ├── pages/Admin.tsx
+│       ├── components/ui/           # shadcn/ui personalizados
+│       ├── components/ImageUploader.tsx
+│       ├── components/BeforeAfterSlider.tsx
+│       ├── components/JobProgress.tsx
+│       ├── features/auth/
+│       ├── features/images/
+│       ├── features/jobs/
+│       ├── features/teams/
+│       ├── lib/api.ts
+│       ├── styles/globals.css
+│       └── tests/
+├── backend/
+│   ├── pyproject.toml
+│   ├── alembic.ini
+│   ├── migrations/
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   ├── extensions.py
+│   │   ├── models/
+│   │   │   ├── user.py
+│   │   │   ├── workspace.py
+│   │   │   ├── image.py
+│   │   │   ├── job.py
+│   │   │   └── audit.py
+│   │   ├── api/
+│   │   │   ├── auth.py
+│   │   │   ├── users.py
+│   │   │   ├── images.py
+│   │   │   ├── jobs.py
+│   │   │   ├── teams.py
+│   │   │   └── admin.py
+│   │   ├── services/
+│   │   │   ├── permission_service.py
+│   │   │   ├── image_service.py
+│   │   │   ├── job_service.py
+│   │   │   └── team_service.py
+│   │   ├── ai/
+│   │   │   ├── interface.py
+│   │   │   ├── local_engine.py
+│   │   │   ├── evaluation.py
+│   │   │   └── prompts.py
+│   │   ├── workers/image_worker.py
+│   │   ├── storage/local_private.py
+│   │   └── security/uploads.py
+│   └── tests/
+├── scripts/
+│   ├── diagnostico.ps1
+│   ├── instalar.ps1
+│   ├── iniciar.ps1
+│   ├── detener.ps1
+│   └── verificar.ps1
+└── private_data/                # fuera de Git y de carpetas públicas
+    ├── originals/
+    └── results/
+```
+
+Este árbol es el **objetivo**. Si ya hay código real, conservar su estructura cuando sea compatible y adaptar el Skill, no mover archivos indiscriminadamente.
+
+---
+
+## 5. Base de datos PostgreSQL: esquema propuesto
+
+**`users`**: `id BIGINT PK`, `email VARCHAR(254) UNIQUE NOT NULL`, `password_hash TEXT NOT NULL`, `display_name VARCHAR(120) NOT NULL`, `global_role VARCHAR(20) DEFAULT 'user' CHECK(user/admin)`, `is_active BOOLEAN`, `created_at TIMESTAMPTZ`, `updated_at TIMESTAMPTZ`.
+
+**`workspaces`**: `id BIGINT PK`, `name VARCHAR(120)`, `kind VARCHAR(16) CHECK(personal/team)`, `owner_user_id BIGINT FK users`, `created_at TIMESTAMPTZ`. Un espacio personal por usuario mediante índice único parcial; equipo según permisos.
+
+**`team_memberships`**: `id BIGINT PK`, `team_workspace_id BIGINT FK workspaces`, `user_id BIGINT UNIQUE FK users`, `role VARCHAR(16) CHECK(owner/member)`, `joined_at TIMESTAMPTZ`. `UNIQUE(user_id)` asegura máximo un equipo activo si las membresías terminadas se eliminan. Validar transaccionalmente que el espacio sea de tipo `team`.
+
+**`team_invitations`**: `id BIGINT PK`, `team_workspace_id BIGINT FK workspaces`, `created_by BIGINT FK users`, `token_hash TEXT UNIQUE`, `expires_at TIMESTAMPTZ`, `used_at TIMESTAMPTZ NULL`, `created_at TIMESTAMPTZ`. Token de un solo uso y vencimiento.
+
+**`images`**: `id BIGINT PK`, `owner_user_id BIGINT FK users`, `workspace_id BIGINT FK workspaces`, `original_storage_key TEXT UNIQUE NOT NULL`, `original_filename VARCHAR(255)`, `mime_type VARCHAR(50)`, `byte_size BIGINT CHECK(>0)`, `width INT CHECK(>0)`, `height INT CHECK(>0)`, `source_type VARCHAR(20) DEFAULT 'ai_generated'`, `visibility VARCHAR(16) DEFAULT 'private' CHECK(private/team)`, `created_at TIMESTAMPTZ`. **No confiar en `source_type` como detector fiable de origen**; es declaración del usuario.
+
+**`processing_jobs`**: `id BIGINT PK`, `image_id BIGINT FK images`, `requested_by BIGINT FK users`, `status VARCHAR(16) CHECK(queued/processing/completed/failed)`, `model_id VARCHAR(120)`, `model_version VARCHAR(80)`, `preset VARCHAR(40)`, `parameters JSONB`, `idempotency_key VARCHAR(100)`, `result_storage_key TEXT NULL UNIQUE`, `error_code VARCHAR(60) NULL`, `attempt_count INT DEFAULT 0`, `created_at TIMESTAMPTZ`, `started_at TIMESTAMPTZ NULL`, `finished_at TIMESTAMPTZ NULL`, `UNIQUE(requested_by,idempotency_key)`.
+
+**`audit_events`**: `id BIGINT PK`, `actor_user_id BIGINT NULL FK users`, `action VARCHAR(80)`, `entity_type VARCHAR(40)`, `entity_id BIGINT NULL`, `metadata JSONB`, `created_at TIMESTAMPTZ`. Nunca registrar secretos o fotos.
+
+**`service_incidents` (opcional)**: `id`, `service_name`, `error_code`, `status`, `occurred_at`, `resolved_at`.
+
+**Relaciones:** usuario 1:N imágenes; espacio 1:N imágenes; imagen 1:N trabajos; trabajo 0..1 archivo de resultado; equipo 1:N membresías; usuario 0..1 equipo activo; equipo 1:N invitaciones. Índices para `processing_jobs(status,created_at)`, `images(owner_user_id,created_at)`, `images(workspace_id,created_at)` y expiración de invitaciones.
+
+**Integridad:** solo marcar `completed` cuando exista resultado; separar originales de salidas; nunca almacenar bytes de imágenes como texto; implementar migraciones Alembic reales. Modelo de clases y DER deberán derivarse de estas migraciones **una vez verificadas**, no presentarlas como implementadas antes.
+
+---
+
+## 6. Backend Flask: endpoints mínimos
+
+| Método | Ruta | Responsabilidad |
+|---|---|---|
+| POST | `/api/v1/auth/register` | Crear usuario y espacio personal |
+| POST | `/api/v1/auth/login` | Abrir sesión |
+| POST | `/api/v1/auth/logout` | Cerrar sesión |
+| GET | `/api/v1/auth/me` | Consultar sesión |
+| PATCH | `/api/v1/users/me` | Editar perfil |
+| POST | `/api/v1/users/me/change-password` | Cambiar clave |
+| GET | `/api/v1/workspaces` | Listar espacios permitidos |
+| POST | `/api/v1/images` | Subir imagen validada y privada |
+| GET | `/api/v1/images/{id}` | Metadatos autorizados |
+| GET | `/api/v1/images/{id}/content` | Original autorizado |
+| POST | `/api/v1/jobs` | Solicitar humanización idempotente |
+| GET | `/api/v1/jobs` | Historial paginado |
+| GET | `/api/v1/jobs/{id}` | Estado y parámetros permitidos |
+| GET | `/api/v1/jobs/{id}/compare` | Información para antes/después |
+| GET | `/api/v1/jobs/{id}/download` | Resultado protegido |
+| POST | `/api/v1/teams` | Crear equipo (fase posterior) |
+| GET | `/api/v1/teams/{id}/members` | Ver miembros |
+| POST | `/api/v1/teams/{id}/invitations` | Generar invitación |
+| POST | `/api/v1/invitations/accept` | Aceptar invitación |
+| DELETE | `/api/v1/teams/{id}/members/{userId}` | Salir/expulsar con permisos |
+| GET | `/api/v1/admin/overview` | Estadísticas técnicas agregadas |
+
+Formato de respuesta: `{"data":...,"error":null}` o `{"data":null,"error":{"code":"...","message":"..."}}`. Usar códigos HTTP reales, paginación, validación estricta, permisos en servidor, límites de carga, CSRF si hay cookies de sesión, rate limiting y logs depurados. No exponer originales mediante rutas estáticas.
+
+---
+
+## 7. Frontend premium: experiencia, no solo colores
+
+**Identidad visual:** estilo editorial tecnológico, elegante, limpio y original. Elegir paleta y tipografía después de probar prototipos visuales; no imponer colores arbitrarios. Mucho espacio bien utilizado, jerarquía tipográfica, fotografías autorizadas de calidad, microinteracciones discretas, estados de carga bien diseñados y botones claros.
+
+**Páginas:** `/` portada; `/login`; `/registro`; `/app` panel; `/app/humanizar` estudio de carga y edición; `/app/historial`; `/app/trabajos/:id`; `/app/perfil`; `/app/equipo` (fase posterior); `/app/admin` (fase posterior).
+
+**Landing:** hero impactante con propuesta verdadera («De imagen generada a apariencia más natural»), demostración antes/después **solo si corresponde a resultados reales** o rotulada como concepto, explicación en tres pasos, beneficios con límites, privacidad, preguntas frecuentes y CTA. No usar imágenes privadas en marketing.
+
+**Estudio:** zona drag-and-drop, vista previa grande, botón de humanizar, progreso, tarjeta de resultado, comparador deslizable fluido y descarga. Mantener siempre accesibles el original y el historial. No saturar con parámetros de IA que el motor no soporte.
+
+**shadcn/ui:** usar Button, Card, Dialog, Tabs, Tooltip, DropdownMenu, Form y Toast/Sonner cuando sean útiles; personalizarlos para identidad LUMIA. Tailwind CSS es la base de estilos. Responsive desde móvil hasta monitor; contraste accesible, navegación por teclado, estados de foco y `prefers-reduced-motion`.
+
+---
+
+## 8. Motor de IA: investigación y selección REAL
+
+**No elegir GFPGAN ni Real-ESRGAN como motor principal por costumbre:** restauración facial o superresolución **no equivale** a humanización de imágenes sintéticas. La función requiere **edición image-to-image controlada**, capaz de añadir naturalidad y conservar composición/identidad visual.
+
+### Alternativas que el agente debe investigar y probar
+
+- **Diffusers** (biblioteca de Hugging Face): https://github.com/huggingface/diffusers — infraestructura para ejecutar modelos de difusión, **no es por sí sola un modelo con licencia y pesos elegidos**.
+- **Stable Diffusion image-to-image**: familia de flujos de edición con fuerza de transformación baja/moderada; comprobar versión exacta, licencia de pesos, hardware y fidelidad a la entrada.
+- **Inpainting** por regiones para piel, ojos, cabello o manos: opcional si se dispone de máscaras fiables y modelo adecuado.
+- **ControlNet/IP-Adapter u otros mecanismos de control**: evaluar solo si realmente reducen cambios indeseados y funcionan en el hardware disponible.
+- **GFPGAN / CodeFormer / Real-ESRGAN**: únicamente complementos potenciales; pueden suavizar o cambiar rasgos y deben superar pruebas de fidelidad antes de usarse.
+- **API externa**: alternativa **solo** si el usuario la aprueba, su precio/licencia/privacidad son conocidos y no hay opción local viable. No afirmar gratuidad ilimitada.
+
+### Selección basada en evidencia
+
+1. Comprobar **CPU, GPU, VRAM, RAM y espacio** del equipo actual y del equipo de demostración previsto.
+2. Investigar repositorio oficial, licencia del código **y de los pesos**, permiso de uso, tamaño, descarga, compatibilidad Windows, dependencias y seguridad.
+3. Probar un conjunto pequeño de imágenes sintéticas autorizadas con diferentes tonos de piel, edades aparentes, iluminación, rostro y manos.
+4. Medir tiempo de inferencia, memoria, fallos, fidelidad visual, naturalidad percibida y artefactos; registrar versión del modelo y parámetros.
+5. Comparar **entrada/salida** con criterios: naturalidad, conservación de rasgos, preservación del tono, composición, errores nuevos. No afirmar «100 % realista».
+6. Seleccionar un motor que pueda **instalarse y demostrarse** en la computadora objetivo. Si no es viable, reducir resolución/alcance o documentar bloqueo.
+
+### Interfaz de software del motor
+
+```python
+class HumanizationEngine:
+    def humanize(self, input_path: str, output_path: str,
+                 preset: str, seed: int | None = None) -> dict:
+        """Devuelve metadatos del procesamiento; falla explícitamente ante error."""
+```
+
+Un `MockEngine` sirve **solo** para probar el circuito de subida/cola/descarga; debe rotularse «simulación, sin IA real». La entrega final debe usar `LocalHumanizationEngine` **con modelo probado**.
+
+### Prompt de edición de imagen (candidato de prueba, NO garantía)
+
+**Prompt positivo en inglés:**
+
+> Photorealistic natural human appearance, authentic subtle skin microtexture and pores, realistic fine hair strands, coherent eyes and catchlights, believable lighting and shadows, natural facial detail, preserve the original person's apparent identity, pose, expression, skin tone, hairstyle, clothing, framing and background, avoid beauty retouching, documentary photographic realism.
+
+**Prompt negativo (si el modelo lo admite):**
+
+> plastic skin, airbrushed skin, waxy face, uncanny eyes, oversmoothing, exaggerated pores, distorted anatomy, extra fingers, altered identity, different skin tone, excessive sharpening, halos, artifacts, cartoon, CGI look.
+
+**Advertencia:** los prompts no aseguran conservación de identidad ni reparación anatómica. Ajustar intensidad de edición y semillas mediante experimentos. No presentar estos textos como instrucciones compatibles con cualquier modelo; algunos no usan prompt negativo.
+
+---
+
+## 9. Seguridad, privacidad y confianza
+
+- Contraseñas con Argon2id u otro hash moderno probado; nunca guardar contraseñas en claro.
+- Sesiones seguras, cookies HttpOnly/SameSite, CSRF en operaciones mutadoras y HTTPS fuera de localhost.
+- Cada consulta comprueba propietario/espacio/rol en **Flask**, no solo en React.
+- Límite de tamaño y píxeles; validar bytes y decodificación, no solo extensión. Nombres aleatorios y rutas privadas.
+- Prohibir traversal, acceso a archivos de otros usuarios, elevación de roles, invitaciones repetidas, jobs duplicados y procesamiento simultáneo del mismo trabajo.
+- Original y resultado protegidos, retención/borrado definidos, consentimiento y declaración de que la imagen es generada por IA.
+- Administrador global ve métricas técnicas agregadas, no fotos privadas por defecto.
+- No enviar fotos a servicios externos sin consentimiento y autorización. No eliminar metadatos de procedencia para aparentar origen real.
+- `.env` fuera de Git, `.env.example` sin secretos, PostgreSQL con usuario de mínimos privilegios.
+
+---
+
+## 10. Variables de entorno de ejemplo
+
+```dotenv
+APP_ENV=development
+SECRET_KEY=
+DATABASE_URL=
+PRIVATE_STORAGE_ROOT=./private_data
+MAX_UPLOAD_MB=10
+MAX_IMAGE_PIXELS=24000000
+AI_ENGINE=mock
+AI_MODEL_ID=
+AI_MODEL_PATH=
+AI_WORKER_CONCURRENCY=1
+FRONTEND_ORIGIN=http://localhost:5173
+```
+
+`AI_ENGINE=mock` nunca equivale a humanización real. No poner contraseñas reales en instrucciones ni commits.
+
+---
+
+## 11. Instalable en otra computadora Windows: requisito de entrega
+
+**Meta:** el instructor dice «instálalo en esta PC» y el proyecto puede montarse siguiendo un procedimiento repetible, **si el equipo cumple requisitos**. No prometer un instalador universal sin probarlo.
+
+**Entregar:**
+- `scripts/diagnostico.ps1`: verificar Windows, Python, Node (si se compila ahí), PostgreSQL, espacio libre, RAM y GPU/VRAM.
+- `scripts/instalar.ps1`: instalar dependencias del proyecto en entorno virtual, compilar frontend, crear directorios privados y preparar migraciones. No instalar PostgreSQL ni drivers silenciosamente sin autorización.
+- `scripts/iniciar.ps1`: levantar API, worker y abrir navegador; mensajes claros si faltan variables, BD o pesos.
+- `scripts/detener.ps1`: cerrar procesos de LUMIA sin afectar servicios ajenos.
+- `scripts/verificar.ps1`: ejecutar health checks, conexión autenticada de BD, migraciones, pruebas mínimas y un trabajo de inferencia real con imagen de prueba autorizada.
+- `docs/instalacion-otra-pc.md`: instrucciones paso a paso, requisitos mínimos medidos, configuración local de secretos, descarga **autorizada** de pesos, solución de errores y tiempo de instalación estimado **medido**.
+
+**Dos modos:** `desarrollo` (Vite+Flask) y `demostración` (frontend compilado y backend local). Si no hay GPU, evaluar modo CPU con mediciones; no declarar compatibilidad hasta probarlo. Sin Internet, solo funciona si dependencias, instaladores y pesos están previamente disponibles conforme a sus licencias.
+
+---
+
+## 12. Fases para terminar en poco tiempo
+
+**F0 — Inspección:** leer repositorio real, `docs/estado.md`, migraciones y pruebas; medir hardware. No destruir ni mover código que funciona.
+
+**F1 — Producto navegable:** landing premium, login/registro, perfil, PostgreSQL y permisos.
+
+**F2 — Flujo completo:** subida privada → job → worker → historial → comparador → descarga; motor simulado **solo durante integración**.
+
+**F3 — Humanización real:** investigar modelos, seleccionar con evidencia, integrar motor local, evaluar naturalidad/fidelidad y medir tiempo en PC objetivo. **Esta fase es imprescindible para afirmar que LUMIA AI cumple su misión.**
+
+**F4 — Extras controlados:** equipos, invitaciones, compartir explícito, estadísticas agregadas y admin técnico; si el tiempo falta, documentar como siguiente versión.
+
+**F5 — Entrega:** experiencia responsive y accesible, pruebas de seguridad, scripts Windows, instalación en PC limpia, guía y demostración real.
+
+**Prioridad de negocio:** mejor una humanización real bien demostrada y una web impecable que diez paneles vacíos. No sacrificar seguridad básica ni falsificar resultados para cumplir un plazo.
+
+---
+
+## 13. Relación con los diagramas del proyecto académico
+
+Siete grupos funcionales propuestos: G01 acceso, G02 perfil, G03 subida y **humanización de imágenes sintéticas**, G04 historial/comparación/descarga, G05 equipos, G06 estadísticas de equipo, G07 supervisión técnica. Derivar del sistema real **1 diagrama general de casos de uso, 7 específicos, 7 actividades distintas, 1 de clases y enseguida 1 DER**. No dibujar una función que no se haya clasificado como «implementada» o «propuesta». No copiar los diagramas anteriores de suavizado de piel.
+
+---
+
+## 14. Criterios de aceptación
+
+1. La portada pública carga sin iniciar sesión y comunica la **humanización de imágenes generadas por IA**, no tratamiento de piel.
+2. Registro, login, logout y permisos funcionan.
+3. Carga válida crea original privado y trabajo; carga inválida se rechaza.
+4. **Modelo real comprobado** produce un resultado que se evalúa visualmente, sin simularlo.
+5. Estado, historial, comparación y descarga funcionan con autorización.
+6. Otro usuario no puede acceder al original ni resultado ajeno.
+7. El diseño se siente cuidado en móvil y escritorio, con controles accesibles.
+8. Migraciones PostgreSQL y pruebas ejecutadas realmente, con resultados documentados.
+9. Instalación y ejecución repetidas en otra PC compatible, con requisitos y pasos claros.
+10. El agente declara con precisión qué está implementado, qué está probado y qué sigue pendiente.
+
+---
+
+## 15. PROMPT MAESTRO PARA CODEX — COPIAR Y PEGAR
+
+```text
+Actúa como arquitecto, diseñador de producto y desarrollador full-stack senior de LUMIA AI.
+Lee primero SKILL_LUMIA_AI_V7_HUMANIZACION.md y úsalo como especificación objetivo.
+
+MISIÓN CORRECTA:
+LUMIA AI recibe una imagen de PERSONA GENERADA POR INTELIGENCIA ARTIFICIAL y la edita para lograr una apariencia más humana, natural y fotográfica. NO es una app de suavizado de piel ni de embellecimiento facial. Conserva en lo posible rostro, tono, pose, ropa y composición; identifica el resultado como editado con IA.
+
+STACK:
+React + TypeScript + Vite + Tailwind CSS + shadcn/ui; Flask + Python; SQLAlchemy + Alembic; PostgreSQL 17; worker Python y motor local image-to-image real seleccionado tras pruebas.
+
+ANTES DE MODIFICAR:
+1. Lee README, docs/estado.md, docs/desarrollo-local.md, .env.example, backend, frontend, modelos, migraciones y pruebas. Inspecciona git status.
+2. Informa qué existe, qué funciona, qué contradice este Skill y qué falta.
+3. Diagnostica CPU/GPU/VRAM/RAM y requisitos para instalar en otra PC Windows.
+4. Investiga motores de edición image-to-image apropiados para humanizar imágenes sintéticas; comprueba licencias de código/pesos, compatibilidad, calidad, fidelidad y costos. No des por hecho que GFPGAN o Real-ESRGAN resuelven el problema.
+5. Propón un plan mínimo por fases y pruebas. No borres ni reestructures código funcional sin motivo.
+
+IMPLEMENTA:
+F1 landing premium, autenticación, perfil y PostgreSQL;
+F2 carga privada, trabajos, worker, estados, historial, comparador y descarga;
+F3 modelo real de humanización y evaluación con imágenes autorizadas;
+F4 equipos, invitaciones y supervisión solo después de F1-F3;
+F5 pruebas, accesibilidad y scripts de instalación Windows.
+
+FRONTEND:
+Diseña una experiencia original, elegante y memorable, de nivel producto profesional. shadcn/ui sobre Tailwind CSS, tipografía y espacios excelentes, hero editorial, comparador antes/después protagonista, microinteracciones sobrias, responsive y accesibilidad. No fijes colores arbitrarios ni muestres resultados falsos como demostración real.
+
+BACKEND Y DATOS:
+Implementa endpoints, entidades, migraciones, restricciones, permisos, idempotencia, procesamiento asíncrono local y archivos privados conforme al Skill. Los diagramas y documentación deben coincidir con el código real.
+
+INSTALACIÓN:
+Prepara diagnostico.ps1, instalar.ps1, iniciar.ps1, detener.ps1, verificar.ps1 y una guía para instalar en otra computadora Windows. Verifica dependencias, PostgreSQL, pesos del modelo y capacidad de hardware. No prometas que funcionará en cualquier PC.
+
+SEGURIDAD Y VERACIDAD:
+Nunca inventes claves, pruebas, mejoras medidas, licencias o costos. No uses APIs pagadas ni subas imágenes a terceros sin aprobación. MockEngine solo para pruebas, jamás como resultado de IA real. Ejecuta tests y documenta salidas. Si el motor no es viable, explica el bloqueo y alternativas verificables.
+
+EMPIEZA POR EL DIAGNÓSTICO DEL REPOSITORIO Y UN PLAN CORTO. No hagas cambios destructivos ni instales servicios de pago sin mi aprobación.
+```
+
+**Fin del Skill V7.0.**

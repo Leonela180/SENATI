@@ -1,0 +1,36 @@
+PC de desarrollo (sin GPU NVIDIA), PostgreSQL 16 temporal, AI_ENGINE=mock. 2026-11-13 10:58
+Python 3.11.9
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\HOME\AppData\Local\Temp\claude\d8f2f3124dd12346\cf28b688-de0c-4ac0-a541-821ff4ff0c3d\scratchpad\venv_rev\Scripts\python.exe
+rootdir: C:\Users\HOME\Documents\episodio\Proyecto_Senati_IA_completo\backend
+configfile: pyproject.toml
+testpaths: tests
+plugins: platformdirs-4.14.5, timeout-2.4.0
+collecting ... collected 24 items
+
+tests/test_auth.py::test_cp01_registro_valido PASSED                     [  4%]
+tests/test_auth.py::test_cp02_correo_existente PASSED                    [  8%]
+tests/test_auth.py::test_cp03_login_invalido PASSED                      [ 12%]
+tests/test_auth.py::test_rf03_logout PASSED                              [ 16%]
+tests/test_auth.py::test_cp13_csrf PASSED                                [ 20%]
+tests/test_auth.py::test_rnf01_limite_de_intentos PASSED                 [ 25%]
+tests/test_auth.py::test_rf05_cambio_de_clave PASSED                     [ 29%]
+tests/test_equipos.py::test_rf18_invitacion_un_solo_uso PASSED           [ 33%]
+tests/test_equipos.py::test_rf18_invitacion_vencida PASSED               [ 37%]
+tests/test_equipos.py::test_rf19_compartir_explicito PASSED              [ 41%]
+tests/test_equipos.py::test_rf20_estadisticas_agregadas PASSED           [ 45%]
+tests/test_equipos.py::test_rf21_admin PASSED                            [ 50%]
+tests/test_imagenes.py::test_cp04_carga_jpg_valida PASSED                [ 54%]
+tests/test_imagenes.py::test_cp05_extension_falsa PASSED                 [ 58%]
+tests/test_imagenes.py::test_cp06_sin_declaracion PASSED                 [ 62%]
+tests/test_imagenes.py::test_rf06_demasiados_pixeles PASSED              [ 66%]
+tests/test_imagenes.py::test_rf08_sin_ruta_publica PASSED                [ 70%]
+tests/test_trabajos.py::test_cp07_idempotencia PASSED                    [ 75%]
+tests/test_trabajos.py::test_cp08_dos_workers PASSED                     [ 79%]
+tests/test_trabajos.py::test_cp09_fallo_del_motor PASSED                 [ 83%]
+tests/test_trabajos.py::test_rnf07_completed_solo_con_archivo PASSED     [ 87%]
+tests/test_trabajos.py::test_cp11_acceso_cruzado PASSED                  [ 91%]
+tests/test_trabajos.py::test_cp12_descarga_autorizada PASSED             [ 95%]
+tests/test_trabajos.py::test_rnf10_trazabilidad PASSED                   [100%]
+
+============================= 24 passed in 7.09s ==============================

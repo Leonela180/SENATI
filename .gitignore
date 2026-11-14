@@ -24,6 +24,8 @@ frontend/playwright-report/
 # Local data and AI assets
 private_data/
 models/
+/imagenes_prueba/
+/SENATI/
 *.log
 scripts/.pids
 

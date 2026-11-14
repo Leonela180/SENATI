@@ -1,3 +1,4 @@
+import os
 import time
 import diffusers
 import torch
@@ -13,13 +14,30 @@ class LocalHumanizationEngine(HumanizationEngine):
         self.model_version = f"diffusers-{diffusers.__version__}"
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         dtype = torch.float16 if self.device == "cuda" else torch.float32
+        load_kwargs = {
+            "torch_dtype": dtype,
+            "use_safetensors": True,
+            "local_files_only": True,
+        }
+        if self.device == "cuda":
+            load_kwargs["variant"] = "fp16"
         try:
-            self.pipe = StableDiffusionImg2ImgPipeline.from_pretrained(
-                model_path, torch_dtype=dtype, variant="fp16", use_safetensors=True, local_files_only=True)
+            if os.path.isfile(model_path):
+                self.pipe = StableDiffusionImg2ImgPipeline.from_single_file(
+                    model_path,
+                    config=os.path.join(os.path.dirname(model_path), "stable-diffusion-v1-5"),
+                    original_config=os.path.join(os.path.dirname(model_path), "v1-inference.yaml"),
+                    torch_dtype=dtype,
+                    local_files_only=True,
+                    safety_checker=None,
+                )
+            else:
+                self.pipe = StableDiffusionImg2ImgPipeline.from_pretrained(model_path, **load_kwargs)
         except Exception as e:                                    # pesos ausentes o dañados (CP-09)
             raise EngineError("modelo_no_disponible") from e
         self.pipe = self.pipe.to(self.device)
-        self.pipe.enable_attention_slicing()                       # menos VRAM (6 GB)
+        if not hasattr(torch.nn.functional, "scaled_dot_product_attention"):
+            self.pipe.enable_attention_slicing()
         self.pipe.set_progress_bar_config(disable=True)
 
     def humanize(self, input_path, output_path, preset, seed=None):

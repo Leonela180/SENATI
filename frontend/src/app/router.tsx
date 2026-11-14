@@ -12,6 +12,10 @@ import Profile from "@/pages/Profile";
 import Team from "@/pages/Team";
 import Admin from "@/pages/Admin";
 import NotFound from "@/pages/NotFound";
+import Studio from "@/pages/Studio";
+import Gallery from "@/pages/Gallery";
+import Generate from "@/pages/Generate";
+import Hours from "@/pages/Hours";
 
 export const router = createBrowserRouter([
   { element: <PublicLayout />, children: [{ path: "/", element: <Home /> }] },
@@ -23,6 +27,10 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Dashboard /> },
       { path: "humanizar", element: <Humanize /> },
+      { path: "estudio", element: <Studio /> },
+      { path: "galeria", element: <Gallery /> },
+      { path: "generar", element: <Generate /> },
+      { path: "horas", element: <Hours /> },
       { path: "historial", element: <History /> },
       { path: "trabajos/:id", element: <JobDetail /> },
       { path: "perfil", element: <Profile /> },

@@ -5,6 +5,7 @@ import sys
 import time
 from sqlalchemy import text
 from app import create_app
+from app.ai.editing import EditingEngine
 from app.ai.interface import EngineError, MockEngine
 from app.extensions import db, utc_now
 from app.models import ProcessingJob, ServiceIncident
@@ -13,6 +14,7 @@ from app.storage.local_private import new_key, path_for
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("worker")
 POLL_SECONDS = 2
+EDITOR = EditingEngine()                     # herramientas del Estudio: siempre disponibles, sin GPU
 STALE_MINUTES = 15
 running = True
 
@@ -63,16 +65,19 @@ def process_one(app, engine) -> bool:
     key = new_key("png")
     dst = path_for("results", key)
     try:
-        if engine is None:
-            raise EngineError("modelo_no_disponible")
         src = path_for("originals", job.image.original_storage_key)
-        meta = engine.humanize(str(src), str(dst), job.preset, seed=(job.parameters or {}).get("seed"))
+        if job.tool == "humanizar":
+            if engine is None:
+                raise EngineError("modelo_no_disponible")
+            meta = engine.humanize(str(src), str(dst), job.preset, seed=(job.parameters or {}).get("seed"))
+        else:                                                                # Estudio de edición (CPU)
+            meta = EDITOR.apply(job.tool, str(src), str(dst), job.parameters or {})
         if not dst.is_file() or dst.stat().st_size == 0:                     # RNF-07
             raise EngineError("resultado_inexistente")
         job.result_storage_key = key
         job.model_id, job.model_version = meta.get("model_id"), meta.get("model_version")
         job.parameters = {**(job.parameters or {}),
-                          **{k: meta[k] for k in ("seconds", "vram_gb", "work_size", "device") if k in meta}}
+                          **{k: meta[k] for k in ("seconds", "vram_gb", "work_size", "device", "filtro_seguridad", "width", "height") if k in meta}}
         job.status, job.error_code, job.finished_at = "completed", None, utc_now()
         log.info("Trabajo %s completado en %s s", job.id, meta.get("seconds"))
     except Exception as e:                                                   # noqa: BLE001

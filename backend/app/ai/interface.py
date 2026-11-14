@@ -19,13 +19,13 @@ class HumanizationEngine(ABC):
         """Devuelve metadatos del procesamiento; falla explícitamente ante error."""
 
 
-def save_labeled(img: Image.Image, output_path: str, source_info: dict) -> None:
-    """RF-16: rotula el resultado como editado con IA y conserva los metadatos de procedencia del original."""
+def save_labeled(img: Image.Image, output_path: str, source_info: dict, label: str = "editado con IA") -> None:
+    """RF-16: rotula el resultado (editado con IA / edición digital) y conserva los metadatos de procedencia del original."""
     meta = PngInfo()
     for key, value in source_info.items():
         if isinstance(value, str) and key not in ("LUMIA-AI", "Software"):
             meta.add_text(key, value)                   # no se borran metadatos de procedencia (skill §9)
-    meta.add_text("LUMIA-AI", "editado con IA")
+    meta.add_text("LUMIA-AI", label)
     meta.add_text("Software", "LUMIA AI")
     kwargs = {"pnginfo": meta}
     if source_info.get("exif"):

@@ -18,8 +18,14 @@ def upload():
     file = request.files.get("file")
     if not file:
         return fail("sin_archivo", "Selecciona una imagen.", 400)
+    album_id = request.form.get("album_id", type=int)
+    if album_id is not None:
+        from ..models import Album
+        album = db.session.get(Album, album_id)
+        if not album or album.owner_user_id != g.user.id:
+            return fail("no_encontrado", "Álbum no encontrado.", 404)
     try:
-        image = create_image(g.user, file)
+        image = create_image(g.user, file, album_id=album_id)
     except UploadError as e:
         return fail(e.code, e.message, 400)                                             # CP-05
     db.session.commit()

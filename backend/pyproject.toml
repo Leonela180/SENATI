@@ -19,6 +19,9 @@ dependencies = [
   "python-dotenv>=1.0",
   "Pillow>=11",
   "waitress>=3,<4",
+  "numpy>=1.26",
+  "opencv-python-headless>=4.9",
+  "rembg[cpu]>=2.0.50",
 ]
 
 [project.optional-dependencies]

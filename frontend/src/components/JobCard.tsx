@@ -30,7 +30,7 @@ export function JobCard({ job }: { job: Job }) {
           <p className="truncate text-sm font-medium" title={job.image_filename}>{job.image_filename}</p>
           <StatusBadge status={job.status} />
         </div>
-        <p className="text-xs text-muted-foreground">{presetLabel(job.preset)} · {fecha(job.created_at)}</p>
+        <p className="text-xs text-muted-foreground">{job.tool === "humanizar" ? `Humanización ${presetLabel(job.preset).toLowerCase()}` : job.tool_label} · {fecha(job.created_at)}</p>
       </div>
     </Link>
   );

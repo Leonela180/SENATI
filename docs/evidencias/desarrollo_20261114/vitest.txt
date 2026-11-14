@@ -1,0 +1,11 @@
+
+ RUN  v3.2.7 C:/Users/HOME/Documents/episodio/Proyecto_Senati_IA_completo/frontend
+
+ ✓ src/tests/api.test.ts (2 tests) 5ms
+ ✓ src/tests/BeforeAfterSlider.test.tsx (1 test) 59ms
+
+ Test Files  2 passed (2)
+      Tests  3 passed (3)
+   Start at  09:23:21
+   Duration  1.30s (transform 51ms, setup 270ms, collect 150ms, tests 64ms, environment 1.34s, prepare 205ms)
+

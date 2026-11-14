@@ -30,6 +30,14 @@ class Config:
     AI_MAX_ATTEMPTS = 3                                        # reintentos limitados (RNF-08)
     FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
 
+    # Generación de imágenes con Gemini (servicio EXTERNO: requiere consentimiento en cada solicitud)
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+    GEMINI_IMAGE_MODEL = os.getenv("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
+    GEMINI_TIMEOUT = int(os.getenv("GEMINI_TIMEOUT", "90"))
+
+    # Horario y horas: zona horaria de la empresa (Perú, UTC−5, sin horario de verano)
+    APP_TZ_OFFSET_HOURS = int(os.getenv("APP_TZ_OFFSET_HOURS", "-5"))
+
     # Sesión y cookies (RNF-01)
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Cpu, History as HistoryIcon, Images, Sparkles, Users } from "lucide-react";
+import { ArrowRight, CalendarClock, Cpu, History as HistoryIcon, Images, Sparkles, Users, Wand2, WandSparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState, PageHeader } from "@/components/PageHeader";
 import { JobCard } from "@/components/JobCard";
@@ -7,6 +7,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { useMe } from "@/features/auth/useAuth";
 import { useHealth, useJobs } from "@/features/jobs/useJobs";
 import { useWorkspaces } from "@/features/teams/useTeams";
+import { useHoursStatus, useHoursSummary } from "@/features/hours/useHours";
 
 function Stat({ icon: Icon, label, children }: { icon: typeof Images; label: string; children: React.ReactNode }) {
   return (
@@ -25,6 +26,14 @@ export default function Dashboard() {
   const team = workspaces?.find((w) => w.kind === "team");
   const last = jobs?.items[0];
   const firstName = me?.display_name.split(" ")[0] ?? "";
+  const { data: hours } = useHoursSummary("week");
+  const { data: clock } = useHoursStatus();
+  const MODULES = [
+    { to: "/app/humanizar", icon: Sparkles, title: "Humanizar", text: "Piel, ojos, cabello y luz más naturales con IA local." },
+    { to: "/app/estudio", icon: Wand2, title: "Estudio de edición", text: "Quitar lunares, cambiar fondo, desenfoque y calidad." },
+    { to: "/app/generar", icon: WandSparkles, title: "Generar con IA", text: "Crea imágenes nuevas describiéndolas (Gemini)." },
+    { to: "/app/galeria", icon: Images, title: "Galería", text: "Sube, organiza en álbumes y procesa en lote." },
+  ];
 
   return (
     <div className="space-y-10">
@@ -35,9 +44,29 @@ export default function Dashboard() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat icon={Images} label="Trabajos realizados">{jobs?.total ?? 0}</Stat>
         <Stat icon={HistoryIcon} label="Último trabajo">{last ? <StatusBadge status={last.status} /> : "—"}</Stat>
-        <Stat icon={Cpu} label="Motor de IA">{health ? (health.engine === "local" ? "Local (GPU)" : "Simulación") : "—"}</Stat>
+        <Stat icon={Cpu} label="Motor de IA">{health ? (health.engine === "local" ? "IA local" : "Simulación") : "—"}</Stat>
         <Stat icon={Users} label="Equipo">{team?.name ?? "Sin equipo"}</Stat>
       </div>
+
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Módulos">
+        {MODULES.map(({ to, icon: Icon, title, text }) => (
+          <Link key={to} to={to} className="group rounded-3xl border bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+            <span className="grid size-10 place-items-center rounded-2xl bg-primary text-primary-foreground"><Icon className="size-5" aria-hidden /></span>
+            <p className="mt-4 font-semibold">{title}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{text}</p>
+            <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-brand-strong">Abrir <ArrowRight className="size-4 transition group-hover:translate-x-0.5" aria-hidden /></span>
+          </Link>
+        ))}
+      </section>
+
+      <Link to="/app/horas" className="flex flex-wrap items-center gap-6 rounded-3xl border bg-card p-5 shadow-sm transition hover:shadow-md">
+        <span className="grid size-11 place-items-center rounded-2xl bg-brand-soft text-brand-strong"><CalendarClock className="size-5" aria-hidden /></span>
+        <div className="min-w-40"><p className="text-xs text-muted-foreground">Mi semana</p>
+          <p className="font-semibold">{hours ? `${hours.worked} h trabajadas de ${hours.expected_to_date} h esperadas` : "—"}</p></div>
+        <div className="min-w-32"><p className="text-xs text-muted-foreground">Por recuperar</p>
+          <p className={hours && hours.to_recover > 0 ? "font-semibold text-red-700" : "font-semibold text-emerald-700"}>{hours ? (hours.to_recover > 0 ? `${hours.to_recover} h` : "Nada") : "—"}</p></div>
+        <span className="ml-auto rounded-full bg-secondary px-3 py-1 text-sm">{clock?.open_entry ? "🟢 En jornada" : "Marcar entrada →"}</span>
+      </Link>
 
       <section className="space-y-5">
         <div className="flex items-center justify-between">

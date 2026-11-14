@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { AlertTriangle, Download, RotateCcw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -11,6 +11,7 @@ import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import { presetLabel } from "@/components/JobCard";
 import { useUploadImage } from "@/features/images/useImages";
 import { useCreateJob, useHealth } from "@/features/jobs/useJobs";
+import { useImage } from "@/features/gallery/useGallery";
 import { cn } from "@/lib/utils";
 import type { ImageInfo, Job } from "@/lib/types";
 
@@ -50,7 +51,17 @@ export default function Humanize() {
   const [done, setDone] = useState<Job | null>(null);
   const presets = health?.presets ?? [];
 
-  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
+  useEffect(() => () => { if (preview.startsWith("blob:")) URL.revokeObjectURL(preview); }, [preview]);
+  // Desde la galería o el Estudio: /app/humanizar?image=ID (la imagen ya está subida y declarada)
+  const [params] = useSearchParams();
+  const fromGallery = Number(params.get("image")) || null;
+  const { data: galleryImage } = useImage(fromGallery);
+  useEffect(() => {
+    if (galleryImage && !image) {
+      setImage(galleryImage); setPreview(`/api/v1/images/${galleryImage.id}/content`); setDeclared(true);
+      setFile(new File([], galleryImage.filename));
+    }
+  }, [galleryImage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const step = done?.status === "completed" ? 2 : jobId ? 1 : 0;
   const busy = upload.isPending || createJob.isPending;
@@ -93,7 +104,7 @@ export default function Humanize() {
             <aside className="space-y-6 rounded-3xl border bg-card p-6 shadow-sm lg:self-start">
               <div>
                 <p className="truncate font-medium" title={file.name}>{file.name}</p>
-                <p className="text-sm text-muted-foreground">{file.size < 1024 * 1024 ? `${Math.max(1, Math.round(file.size / 1024))} KB` : `${(file.size / 1024 / 1024).toFixed(1)} MB`} ·{" "}
+                <p className="text-sm text-muted-foreground">{image && !file.size ? "Desde tu galería" : file.size < 1024 * 1024 ? `${Math.max(1, Math.round(file.size / 1024))} KB` : `${(file.size / 1024 / 1024).toFixed(1)} MB`} ·{" "}
                   <button className="font-medium text-brand-strong underline-offset-4 hover:underline" onClick={reset}>Cambiar imagen</button></p>
               </div>
 

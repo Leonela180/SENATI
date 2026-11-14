@@ -27,8 +27,8 @@ def create_app(config_object=Config, **overrides):
     limiter.init_app(app)
     CORS(app, resources={r"/api/*": {"origins": [app.config["FRONTEND_ORIGIN"]]}}, supports_credentials=True)
 
-    from .api import auth, users, images, jobs, teams, admin
-    for module in (auth, users, images, jobs, teams, admin):
+    from .api import auth, users, images, jobs, teams, admin, gallery, generations, hours
+    for module in (auth, users, images, jobs, teams, admin, gallery, generations, hours):
         app.register_blueprint(module.bp, url_prefix="/api/v1")
 
     # ---------- Errores con formato uniforme y sin trazas internas (RF-12) ----------

@@ -21,7 +21,7 @@ export function ProcessingView({ jobId, preview, onDone }: { jobId: number; prev
   const steps = [
     { key: "upload", label: "Imagen recibida", done: true, active: false },
     { key: "queued", label: "En cola", done: status !== "queued", active: status === "queued" },
-    { key: "processing", label: "Humanizando en tu PC", done: status === "completed" || status === "failed", active: status === "processing" },
+    { key: "processing", label: "Procesando en tu PC", done: status === "completed" || status === "failed", active: status === "processing" },
     { key: "done", label: "Listo para comparar", done: status === "completed", active: false },
   ];
 
@@ -34,7 +34,7 @@ export function ProcessingView({ jobId, preview, onDone }: { jobId: number; prev
           <div className="scan-line h-1/3 w-full bg-gradient-to-b from-transparent via-white/35 to-transparent" />
         </div>
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 text-sm text-white">
-          {status === "processing" ? "Ajustando piel, ojos, cabello y luz…" : "Esperando turno en la cola…"}
+          {status === "processing" ? "Aplicando los cambios…" : "Esperando turno en la cola…"}
         </div>
       </div>
 

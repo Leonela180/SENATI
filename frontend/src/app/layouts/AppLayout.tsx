@@ -1,16 +1,25 @@
 import { Navigate, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { History, LayoutDashboard, LogOut, ShieldCheck, Sparkles, User, Users } from "lucide-react";
+import { CalendarClock, History, Images, LayoutDashboard, LogOut, ShieldCheck, Sparkles, User, Users, Wand2, WandSparkles } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { useLogout, useMe } from "@/features/auth/useAuth";
 import { useHealth } from "@/features/jobs/useJobs";
 import { cn } from "@/lib/utils";
 
-const LINKS = [
-  { to: "/app", label: "Panel", icon: LayoutDashboard, end: true },
-  { to: "/app/humanizar", label: "Humanizar", icon: Sparkles },
-  { to: "/app/historial", label: "Historial", icon: History },
-  { to: "/app/equipo", label: "Equipo", icon: Users },
-  { to: "/app/perfil", label: "Perfil", icon: User },
+type NavItem = { to: string; label: string; icon: typeof Sparkles; end?: boolean };
+const SECTIONS: { title: string; items: NavItem[] }[] = [
+  { title: "", items: [{ to: "/app", label: "Panel", icon: LayoutDashboard, end: true }] },
+  { title: "Imágenes", items: [
+    { to: "/app/humanizar", label: "Humanizar", icon: Sparkles },
+    { to: "/app/estudio", label: "Estudio de edición", icon: Wand2 },
+    { to: "/app/generar", label: "Generar con IA", icon: WandSparkles },
+    { to: "/app/galeria", label: "Galería", icon: Images },
+    { to: "/app/historial", label: "Historial", icon: History },
+  ] },
+  { title: "Trabajo", items: [
+    { to: "/app/horas", label: "Horario y horas", icon: CalendarClock },
+    { to: "/app/equipo", label: "Equipo", icon: Users },
+  ] },
+  { title: "Cuenta", items: [{ to: "/app/perfil", label: "Perfil", icon: User }] },
 ];
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -27,7 +36,9 @@ export default function AppLayout() {
   if (isLoading) return <p className="p-10 text-muted-foreground" aria-live="polite">Cargando…</p>;
   if (isError || !me) return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
 
-  const links = me.role === "admin" ? [...LINKS, { to: "/app/admin", label: "Admin", icon: ShieldCheck }] : LINKS;
+  const sections = SECTIONS.map((s) => (s.title === "Cuenta" && me.role === "admin"
+    ? { ...s, items: [...s.items, { to: "/app/admin", label: "Admin", icon: ShieldCheck }] } : s));
+  const links = sections.flatMap((s) => s.items);
   const salir = () => logout.mutate(undefined, { onSettled: () => nav("/") });
   const initial = me.display_name.trim().charAt(0).toUpperCase() || "?";
 
@@ -38,9 +49,14 @@ export default function AppLayout() {
       {/* Barra lateral (escritorio) */}
       <aside className="sticky top-0 hidden h-screen flex-col border-r bg-sidebar p-5 lg:flex">
         <Logo to="/app" />
-        <nav className="mt-10 flex flex-1 flex-col gap-1" aria-label="Principal">
-          {links.map(({ to, label, icon: Icon, end }) => (
-            <NavLink key={to} to={to} end={end} className={linkClass}><Icon className="size-4" aria-hidden />{label}</NavLink>
+        <nav className="mt-8 flex flex-1 flex-col gap-5 overflow-y-auto" aria-label="Principal">
+          {sections.map((s) => (
+            <div key={s.title || "inicio"} className="space-y-1">
+              {s.title && <p className="px-3 text-[11px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">{s.title}</p>}
+              {s.items.map(({ to, label, icon: Icon, end }) => (
+                <NavLink key={to} to={to} end={end} className={linkClass}><Icon className="size-4" aria-hidden />{label}</NavLink>
+              ))}
+            </div>
           ))}
         </nav>
         <div className="flex items-center gap-3 rounded-2xl border bg-card p-3">

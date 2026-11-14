@@ -2,6 +2,7 @@ import importlib.util
 from pathlib import Path
 
 import numpy as np
+import pytest
 from PIL import Image
 
 
@@ -12,6 +13,8 @@ eye_prototype = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(eye_prototype)
 
 
+@pytest.mark.skipif(not eye_prototype.DEFAULT_INPUT.exists(),
+                    reason="Imagen de referencia privada ausente (private_data no se sube a GitHub)")
 def test_eye_edit_masks_are_separate_and_confined_to_eye_components():
     _, image = eye_prototype.load_reference(eye_prototype.DEFAULT_INPUT)
     masks = eye_prototype.build_eye_masks(image)

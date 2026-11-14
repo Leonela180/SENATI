@@ -163,7 +163,20 @@ Para apagar, usa `.\scripts\detener.ps1`.
 
 ---
 
-## PARTE F: Encender la IA real (necesita NVIDIA)
+## PARTE E2: Módulos que funcionan sin tarjeta NVIDIA (tu HP con Radeon)
+
+Funcionan desde el primer momento, solo con el procesador:
+
+- **Estudio de edición:** quitar lunar, cambiar fondo, desenfoque, mejorar calidad y ajustes.
+- **Galería**, **Historial**, **Horario y horas**, **Equipo** y **Admin**.
+
+La primera vez que uses «Cambiar fondo» o «Desenfocar solo el fondo», el sistema descarga un modelo de unos 170 MB. `instalar.ps1` ya intenta descargarlo durante la instalación.
+
+**Generar con IA (Gemini):** abre `notepad .env`, pega tu clave en la línea `GEMINI_API_KEY=` y reinicia con `detener.ps1` e `iniciar.ps1`. La clave se crea en https://aistudio.google.com/apikey. **No la pegues en el chat ni la subas a GitHub.**
+
+## PARTE F: Encender la IA real (humanización)
+
+> **Tu laptop no tiene NVIDIA (es una HP con Radeon):** igual puedes usar la humanización real en el procesador. `instalar.ps1` instala PyTorch para CPU automáticamente. Trabaja a 512 px y tarda **varios minutos por imagen** con 16 GB de RAM. Cierra otros programas mientras procesa. En el paso F1, `torch.cuda.is_available()` va a decir **False**; en tu caso es lo normal. Las Radeon no usan CUDA.
 
 ### F1. Instalar el motor de IA
 

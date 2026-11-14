@@ -6,10 +6,23 @@ Proyecto de Innovación SENATI «Mejora de piel con IA».
 
 > **¿Primera vez en una computadora nueva?** Sigue **[docs/LAPTOP_PASO_A_PASO.md](docs/LAPTOP_PASO_A_PASO.md)**: desde instalar los programas y clonar este repositorio hasta ver la web funcionando.
 
+## Módulos
+
+| Módulo | Qué hace | ¿Necesita GPU? |
+|---|---|---|
+| **Humanizar** | Stable Diffusion 1.5 *image-to-image*: piel, ojos, cabello y luz más naturales | Recomendable; en CPU funciona a 512 px y tarda minutos |
+| **Estudio de edición** | Quitar lunares o manchas, cambiar el fondo (color, desenfocado o transparente), desenfoque gaussiano, mejorar calidad (×2) y ajustes de color y rotación | No (CPU, segundos) |
+| **Generar con IA** | Crea imágenes a partir de una descripción con Gemini (Google), con aviso y consentimiento | No (servicio externo) |
+| **Galería** | Subida múltiple, álbumes, búsqueda, mover, borrar y procesamiento por lotes | No |
+| **Historial y detalle** | Comparador antes/después, descarga rotulada y trazabilidad | No |
+| **Horario y horas** | Horario semanal, marcar entrada/salida, registros manuales con motivo, horas trabajadas vs. esperadas, horas por recuperar y reporte del equipo en CSV | No |
+| **Equipo y administración** | Invitaciones de un solo uso, compartir imágenes, estadísticas agregadas y supervisión técnica | No |
+
 ## Requisitos
 
 - Windows 10/11 · Python 3.12 · Node.js 20 o superior · PostgreSQL 17
-- Para la IA real: GPU NVIDIA con 6 GB de VRAM o más y unos 4 GB libres para los pesos del modelo
+- 16 GB de RAM. Sin GPU NVIDIA funciona todo; la humanización corre en el procesador (más lenta)
+- Para generar imágenes: una clave de Gemini en `.env` (`GEMINI_API_KEY`) e internet
 
 ## Arranque rápido
 

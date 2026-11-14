@@ -32,6 +32,12 @@ if ($SinIA) {
 }
 if (-not $SinIA) { & $py -m pip install -e ".[ia]" }
 
+Write-Host "2b/4 Modelo para recortar el fondo (Estudio de edición, ~170 MB, una sola vez)" -ForegroundColor Cyan
+Push-Location "$rootackend"
+& $py -c "from app.ai import editing; from rembg import new_session; new_session(editing.SEGMENT_MODEL); print('Modelo de segmentación listo:', editing.SEGMENT_MODEL)"
+if ($LASTEXITCODE -ne 0) { Write-Warning "No se pudo descargar el modelo de segmentación. Se reintentará la primera vez que uses «Cambiar fondo»." }
+Pop-Location
+
 Write-Host "3/4 Migraciones de PostgreSQL" -ForegroundColor Cyan
 & "$root\backend\.venv\Scripts\alembic.exe" upgrade head
 

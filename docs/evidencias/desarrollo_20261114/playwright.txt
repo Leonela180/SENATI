@@ -1,0 +1,10 @@
+
+Running 5 tests using 1 worker
+
+  ✓  1 e2e\equipo.spec.ts:12:1 › equipo: crear, invitar y unirse con el enlace (RF-18) (979ms)
+  ✓  2 e2e\flujo.spec.ts:3:1 › registro → carga → humanización → comparación → descarga (2.8s)
+  ✓  3 e2e\modulos.spec.ts:12:1 › galería → estudio (fondo) → seguir editando (desenfoque) (5.5s)
+  ✓  4 e2e\modulos.spec.ts:28:1 › horario y horas: horario, entrada y salida (628ms)
+  ✓  5 e2e\modulos.spec.ts:40:1 › generar con IA pide consentimiento y avisa si falta la clave (427ms)
+
+  5 passed (10.9s)

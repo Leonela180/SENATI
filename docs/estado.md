@@ -1,5 +1,20 @@
 # Estado de LUMIA AI
 
+> **Actualización del 14/11/2026: módulos nuevos.**
+> - **Estudio de edición:** quitar lunar, cambiar fondo, desenfoque gaussiano, mejorar calidad y ajustes.
+> - **Galería:** álbumes, subida múltiple y procesamiento por lotes.
+> - **Generar con IA:** con Gemini, aviso y consentimiento.
+> - **Horario y horas:** horario, marcación, registros manuales, horas por recuperar y CSV del equipo.
+>
+> Evidencias, ejecutadas en la PC de desarrollo con PostgreSQL y el motor en modo simulación, en `docs/evidencias/desarrollo_20261114/`:
+> - pytest: 55 pasan y 1 se omite (la prueba de ojos, porque falta su imagen privada);
+> - Vitest: 3 pasan;
+> - Playwright: 5 pasan;
+> - `alembic check`: sin diferencias.
+>
+> La segmentación real (U²-Net) se probó con imágenes: unos 0,3 s por imagen en CPU.
+> **No se probó todavía:** la generación real con Gemini (falta tu clave) y la humanización en la laptop HP con Radeon.
+
 Actualizado el 13/11/2026.
 
 Lo marcado como «probado» se ejecutó en la PC de desarrollo, que no tiene GPU NVIDIA, con `AI_ENGINE=mock`, primero en un PostgreSQL 16 temporal y después en el **PostgreSQL 17.12 real** (usuario `lumia_app` sin superusuario). Las salidas están en `docs/evidencias/desarrollo_20261113/`; las de PostgreSQL 17 terminan en `_postgresql17.txt`, incluida la estructura de las 8 tablas.
@@ -47,6 +62,15 @@ Además, estas pruebas pasan:
 - **Playwright:** 2 flujos completos en el navegador.
 
 ## Diferencias con el informe
+
+- **Módulos nuevos que el informe aún no describe:**
+  - Estudio de edición (5 herramientas);
+  - Galería con álbumes;
+  - Generación con Gemini (servicio externo con consentimiento);
+  - Horario y horas.
+
+  Hay que agregar sus RF, casos de uso, tablas (`albums`, `generations`, `work_schedules`, `time_entries` y la columna `processing_jobs.tool`) y endpoints.
+- **Laptop real:** es una HP con Radeon y unos 16 GB de RAM, sin NVIDIA. Hay que actualizar los costos, los requisitos y el motor en CPU.
 
 - **Endpoints nuevos.** Estos 5 no están en la Tabla E1:
   - `GET /auth/csrf`

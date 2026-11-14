@@ -32,6 +32,7 @@ Proyecto de Innovación SENATI «Mejora de piel con IA».
 .\scripts\iniciar.ps1          # API + worker y abre http://localhost:5000
 .\scripts\verificar.ps1        # salud, migraciones, pruebas e inferencia real
 .\scripts\detener.ps1          # cierra solo lo que abrió iniciar.ps1
+.\scripts\compartir.ps1        # enlace https temporal para que cualquiera lo abra (Parte H de la guía)
 ```
 
 Antes de instalar, copia `.env.example` como `.env` y complétalo. **El `.env` nunca se sube a Git.** Para probar sin GPU usa `.\scripts\instalar.ps1 -SinIA` y deja `AI_ENGINE=mock`: la interfaz avisa «Simulación, sin IA real».

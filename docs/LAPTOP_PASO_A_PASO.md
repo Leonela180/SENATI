@@ -311,6 +311,50 @@ git push
 
 ---
 
+## PARTE H: Compartir LUMIA AI con cualquier persona (enlace por internet)
+
+Sirve para que tu profesor, tu equipo o el jurado abran LUMIA AI desde **su celular o su computadora**, sin instalar nada. Usa **Cloudflare Tunnel**, que es gratis y no necesita cuenta: crea un enlace seguro (https) hacia tu laptop.
+
+### H1. Activarlo (una sola vez)
+
+1. Abre el `.env` con `notepad .env` y cambia `TRUST_PROXY=0` por **`TRUST_PROXY=1`**. Si la línea no existe, agrégala al final. Guarda.
+2. Reinicia LUMIA AI:
+   ```powershell
+   .\scripts\detener.ps1
+   .\scripts\iniciar.ps1
+   ```
+
+### H2. Crear el enlace (cada vez que quieras compartir)
+
+Con LUMIA AI encendido, abre **otra** ventana de PowerShell y ejecuta:
+
+```powershell
+cd C:\proyectos\SENATI
+.\scripts\compartir.ps1
+```
+
+- La primera vez descarga el programa oficial `cloudflared` (unos 60 MB).
+- En unos segundos aparece un enlace como **`https://palabras-al-azar.trycloudflare.com`**, que **ya queda copiado**.
+- Pégalo en WhatsApp o en un correo. Quien lo abra verá la página de inicio de LUMIA AI, podrá crear su cuenta y usar los módulos.
+- Las **invitaciones de equipo** que generes mientras compartes ya usan ese enlace público, así que las puedes enviar a cualquiera.
+
+### H3. Dejar de compartir
+
+En la ventana del enlace, presiona **Ctrl + C** o ciérrala. LUMIA AI sigue funcionando en tu laptop, pero ya no desde internet.
+
+### Ten en cuenta
+
+| | |
+|---|---|
+| ⏻ **Laptop encendida** | El enlace funciona solo mientras tu laptop, LUMIA AI y la ventana de `compartir.ps1` estén encendidos. Si la laptop se suspende, el enlace deja de responder |
+| 🔁 **El enlace cambia** | Cada vez que ejecutas `compartir.ps1` sale un enlace nuevo. Envía el nuevo |
+| 🔒 **Privacidad** | Las imágenes que suban otras personas se guardan **en tu laptop**. Comparte el enlace solo con quien lo necesite y ciérralo al terminar |
+| 🛡️ **Seguridad** | Siguen activos el inicio de sesión, la protección CSRF y el límite de intentos por persona. Cada visitante solo ve sus propias imágenes |
+| 🐢 **Velocidad** | Depende de tu internet. Las herramientas del Estudio responden rápido. La humanización sin NVIDIA puede tardar minutos |
+| 🎓 **Para el informe** | LUMIA AI sigue siendo una aplicación local. El enlace es solo para **demostraciones**, no un servidor en la nube |
+
+---
+
 ## Si algo sale mal
 
 | Mensaje | Solución |
@@ -331,3 +375,7 @@ git push
 | `gpu_memoria` o la PC se pone muy lenta al humanizar | Cierra otros programas y usa imágenes más pequeñas. Con 8 GB de RAM, mejor deja `AI_ENGINE=mock` |
 | El trabajo termina en «Error · modelo_no_disponible» al humanizar | Faltan los pesos en `models\stable-diffusion-v1-5` (repite F2) |
 | Al registrarte: demasiadas solicitudes | Es el límite de seguridad de 10 registros por hora. Espera o reinicia con `detener` e `iniciar` |
+| Compartiendo, todos los visitantes reciben «demasiadas solicitudes» | Falta `TRUST_PROXY=1` en el `.env`, o no reiniciaste después de agregarlo (Parte H1) |
+| `compartir.ps1`: «LUMIA AI no está encendido» | Primero ejecuta `.\scripts\iniciar.ps1` en otra ventana |
+| `compartir.ps1`: «No se pudo abrir el túnel» | Revisa tu internet. Algunas redes de institutos bloquean estos túneles; prueba con los datos del celular |
+| Al enviar un formulario por el enlace: «Falta o venció el token de seguridad» | Recarga la página. Si el enlace cambió, abre el nuevo |

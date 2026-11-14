@@ -35,6 +35,10 @@ class Config:
     GEMINI_IMAGE_MODEL = os.getenv("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
     GEMINI_TIMEOUT = int(os.getenv("GEMINI_TIMEOUT", "90"))
 
+    # Compartir por internet (scripts/compartir.ps1): confiar en las cabeceras del túnel para conocer la IP
+    # real de cada visitante (límite de intentos por persona) y el https del enlace público.
+    TRUST_PROXY = os.getenv("TRUST_PROXY", "0") == "1"
+
     # Horario y horas: zona horaria de la empresa (Perú, UTC−5, sin horario de verano)
     APP_TZ_OFFSET_HOURS = int(os.getenv("APP_TZ_OFFSET_HOURS", "-5"))
 

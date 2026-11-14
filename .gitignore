@@ -32,3 +32,4 @@ scripts/.pids
 # OS files
 .DS_Store
 Thumbs.db
+/tools/

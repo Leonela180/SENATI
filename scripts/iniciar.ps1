@@ -19,7 +19,13 @@ if (Test-Path "$PSScriptRoot\.pids") { Write-Error "LUMIA AI ya parece estar en 
 if ($LASTEXITCODE -ne 0) { Write-Error "No se pudo conectar con PostgreSQL. Revisa el servicio y DATABASE_URL." }
 
 $pids = @()
-$api = Start-Process $py -ArgumentList "-m", "waitress", "--listen=127.0.0.1:5000", "wsgi:app" `
+$waitressArgs = @("-m", "waitress", "--listen=127.0.0.1:5000")
+if ($envs["TRUST_PROXY"] -eq "1") {
+    # Modo compartir (scripts\compartir.ps1): Waitress acepta las cabeceras del túnel local de Cloudflare
+    $waitressArgs += @("--trusted-proxy=127.0.0.1", '--trusted-proxy-headers="x-forwarded-for x-forwarded-proto x-forwarded-host"')
+}
+$waitressArgs += "wsgi:app"
+$api = Start-Process $py -ArgumentList $waitressArgs `
        -WorkingDirectory "$root\backend" -PassThru -WindowStyle Minimized
 $pids += $api.Id
 $n = [int]($envs["AI_WORKER_CONCURRENCY"]); if ($n -lt 1) { $n = 1 }

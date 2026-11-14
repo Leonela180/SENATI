@@ -22,6 +22,10 @@ def create_app(config_object=Config, **overrides):
     for sub in ("originals", "results"):
         (storage / sub).mkdir(parents=True, exist_ok=True)
 
+    if app.config.get("TRUST_PROXY"):
+        from werkzeug.middleware.proxy_fix import ProxyFix
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)   # detrás del túnel de Cloudflare
+
     db.init_app(app)
     csrf.init_app(app)
     limiter.init_app(app)

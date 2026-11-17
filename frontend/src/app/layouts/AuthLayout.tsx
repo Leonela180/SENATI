@@ -13,24 +13,24 @@ const POINTS = [
 export function AuthLayout({ title, subtitle, children, footer }: { title: string; subtitle: string; children: ReactNode; footer: ReactNode }) {
   return (
     <div className="grid min-h-screen bg-background font-sans text-foreground lg:grid-cols-2">
-      <aside className="relative hidden overflow-hidden bg-[oklch(0.12_0.03_282)] text-white lg:flex lg:flex-col lg:justify-between lg:p-12">
+      <aside className="relative hidden overflow-hidden bg-secondary text-foreground lg:flex lg:flex-col lg:justify-between lg:p-12">
         <div aria-hidden className="aurora absolute inset-0" />
         <div aria-hidden className="grid-lines absolute inset-0 opacity-60" />
-        <Logo light className="relative" />
+        <Logo className="relative" />
         <div className="relative space-y-8">
           <p className="font-display text-4xl leading-tight font-semibold text-balance">
             Retratos generados por IA que se ven <span className="text-gradient">reales</span>.
           </p>
           <ul className="space-y-4">
             {POINTS.map(({ icon: Icon, text }) => (
-              <li key={text} className="flex items-start gap-3 text-sm text-white/85">
-                <span className="bg-brand-gradient grid size-8 shrink-0 place-items-center rounded-xl"><Icon className="size-4" aria-hidden /></span>
+              <li key={text} className="flex items-start gap-3 text-sm text-muted-foreground">
+                <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-card text-brand-strong shadow-sm"><Icon className="size-4" aria-hidden /></span>
                 <span className="pt-1.5">{text}</span>
               </li>
             ))}
           </ul>
         </div>
-        <p className="relative text-xs text-white/60">Procesamiento local · Resultados rotulados «editado con IA»</p>
+        <p className="relative text-xs text-muted-foreground">Procesamiento local · Resultados rotulados «editado con IA»</p>
       </aside>
 
       <main className="flex flex-col px-4 py-8 md:px-10">

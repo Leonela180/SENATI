@@ -2,7 +2,7 @@ import { useId } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
-/** Marca de LUMIA AI: un destello de luz sobre el degradado del acento elegido (Aurora por defecto). */
+/** Marca de LUMIA AI: un destello de luz sobre el degradado del acento elegido (celeste por defecto). */
 export function LogoMark({ className }: { className?: string }) {
   // id único: si hay dos logos y uno está oculto (display:none), el degradado compartido no se pintaría
   const g = `lumia-g-${useId().replace(/:/g, "")}`;

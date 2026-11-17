@@ -9,6 +9,8 @@ import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 
 /** Ejemplo real de la portada, preparado con backend/tools/preparar_portada.py (si no existe, se muestran capturas de la app). */
 type Demo = { before: string; after: string; caption: string };
+/** Ejemplos reales por herramienta, preparados con backend/tools/preparar_ejemplos.py. */
+type Ejemplo = { tool: string; title: string; text: string; before: string; after: string; caption: string };
 
 const HERRAMIENTAS = [
   { icon: Sparkles, t: "Humanización con IA", d: "Piel con microtextura y ojos con reflejos coherentes en retratos generados por IA." },
@@ -46,10 +48,51 @@ function useDemo() {
   return demo;
 }
 
+function useEjemplos() {
+  const [items, setItems] = useState<Ejemplo[]>([]);
+  useEffect(() => {
+    fetch("/demo/ejemplos.json").then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (Array.isArray(d)) setItems(d.filter((x) => x?.before && x?.after)); }).catch(() => null);
+  }, []);
+  return items;
+}
+
+/** Galería de ejemplos «antes / después»: una pestaña por herramienta. */
+function Ejemplos({ items }: { items: Ejemplo[] }) {
+  const [i, setI] = useState(0);
+  const ex = items[Math.min(i, items.length - 1)];
+  return (
+    <section id="ejemplos" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-24 md:px-6">
+      <div className="mx-auto max-w-2xl space-y-4 text-center">
+        <p className="text-xs font-semibold tracking-[0.2em] text-brand-strong uppercase">Ejemplos reales</p>
+        <h2 className="font-display text-4xl font-bold text-balance md:text-5xl">Mira la diferencia</h2>
+        <p className="text-muted-foreground">Cada ejemplo es el resultado real de la herramienta, sin retoques externos. Desliza para comparar.</p>
+      </div>
+      <div role="tablist" aria-label="Herramientas" className="mt-10 flex flex-wrap justify-center gap-2">
+        {items.map((x, j) => (
+          <button key={x.tool + j} role="tab" aria-selected={j === i} onClick={() => setI(j)}
+                  className={"rounded-full border px-4 py-2 text-sm transition " + (j === i ? "border-transparent bg-primary text-primary-foreground shadow-sm" : "bg-card hover:bg-accent")}>
+            {x.title}
+          </button>
+        ))}
+      </div>
+      <div className="mt-10 grid items-center gap-10 lg:grid-cols-[1.3fr_1fr]">
+        <BeforeAfterSlider key={ex.after} before={ex.before} after={ex.after} afterLabel="Con LUMIA" />
+        <div className="space-y-4">
+          <h3 className="font-display text-3xl font-semibold">{ex.title}</h3>
+          <p className="text-muted-foreground">{ex.text}</p>
+          <p className="rounded-2xl bg-secondary p-4 text-xs text-muted-foreground">{ex.caption}</p>
+          <Button asChild className="rounded-full"><Link to="/registro">Probarlo con mi imagen <ArrowRight className="size-4" aria-hidden /></Link></Button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /** Marco de navegador con una captura real de la aplicación. */
 function AppShot({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
   return (
-    <div className={`overflow-hidden rounded-2xl border bg-card shadow-2xl shadow-black/40 ${className}`}>
+    <div className={`overflow-hidden rounded-2xl border bg-card shadow-xl shadow-black/10 ${className}`}>
       <div className="flex items-center gap-1.5 border-b px-3 py-2">
         <span className="size-2.5 rounded-full bg-red-400/80" /><span className="size-2.5 rounded-full bg-amber-400/80" /><span className="size-2.5 rounded-full bg-emerald-400/80" />
         <span className="ml-3 truncate text-[11px] text-muted-foreground">localhost:5000</span>
@@ -61,56 +104,52 @@ function AppShot({ src, alt, className = "" }: { src: string; alt: string; class
 
 export default function Home() {
   const demo = useDemo();
+  const ejemplos = useEjemplos();
   return (
     <>
       {/* ---------- Portada ---------- */}
       <section className="relative overflow-hidden">
         <div aria-hidden className="aurora absolute inset-0" />
-        <div aria-hidden className="grid-lines absolute inset-0" />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-4 pt-14 pb-24 md:px-6 lg:grid-cols-[1.05fr_1fr] lg:pt-24 lg:pb-32">
-          <div className="space-y-8">
-            <p className="glass inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-medium">
-              <span className="bg-brand-gradient grid size-5 place-items-center rounded-full text-white"><Sparkles className="size-3" aria-hidden /></span>
-              Estudio de imágenes con IA local
-            </p>
-            <h1 className="font-display text-5xl leading-[1.02] font-bold text-balance md:text-7xl">
-              Tus retratos de IA, <span className="text-gradient shine">más reales.</span>
-            </h1>
-            <p className="max-w-xl text-lg text-muted-foreground md:text-xl">
-              Humaniza, restaura y edita en un solo lugar. Piel natural, ojos con vida y fondos perfectos,
-              conservando siempre tu original.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Button size="lg" asChild className="h-13 rounded-full px-8 text-base">
-                <Link to="/registro">Empezar gratis <ArrowRight className="size-4" aria-hidden /></Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild className="glass h-13 rounded-full px-8 text-base">
-                <a href="#herramientas">Ver herramientas</a>
-              </Button>
-            </div>
-            <dl className="grid max-w-lg grid-cols-3 gap-4 pt-2">
-              {[["9", "herramientas"], ["100 %", "en tu PC"], ["S/ 0", "en licencias"]].map(([n, l]) => (
-                <div key={l}><dt className="sr-only">{l}</dt><dd className="font-display text-3xl font-bold text-gradient">{n}</dd><p className="text-xs text-muted-foreground">{l}</p></div>
-              ))}
-            </dl>
+        <div className="relative mx-auto max-w-6xl px-4 pt-16 pb-20 text-center md:px-6 lg:pt-24">
+          <p className="mx-auto inline-flex items-center gap-2 rounded-full border bg-card px-3.5 py-1.5 text-xs font-medium shadow-sm">
+            <Sparkles className="size-3.5 text-brand-strong" aria-hidden /> Estudio de imágenes con IA local
+          </p>
+          <h1 className="font-display mx-auto mt-6 max-w-4xl text-5xl leading-[1.05] font-bold text-balance md:text-7xl">
+            Tus retratos de IA, <span className="text-gradient">más reales.</span>
+          </h1>
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
+            Humaniza, restaura y mejora tus fotos en un solo lugar. Piel natural, mejor calidad y fondos limpios,
+            conservando siempre tu original.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Button size="lg" asChild className="h-12 rounded-full px-8 text-base">
+              <Link to="/registro">Empezar gratis <ArrowRight className="size-4" aria-hidden /></Link>
+            </Button>
+            <Button size="lg" variant="outline" asChild className="h-12 rounded-full bg-card px-8 text-base">
+              <a href={ejemplos.length ? "#ejemplos" : "#herramientas"}>{ejemplos.length ? "Ver ejemplos" : "Ver herramientas"}</a>
+            </Button>
           </div>
 
-          <div className="relative mx-auto w-full max-w-lg">
-            <div aria-hidden className="bg-brand-gradient absolute -inset-6 rounded-[2.5rem] opacity-30 blur-3xl" />
+          <div className="relative mx-auto mt-16 max-w-4xl">
             {demo ? (
-              <div className="relative space-y-3">
+              <div className="space-y-3">
                 <BeforeAfterSlider before={demo.before} after={demo.after} beforeLabel="Generado con IA" afterLabel="Humanizado en LUMIA" />
-                <p className="text-center text-xs text-muted-foreground">{demo.caption}</p>
+                <p className="text-xs text-muted-foreground">{demo.caption}</p>
               </div>
             ) : (
-              <div className="relative pb-10">
-                <AppShot src="/showcase/estudio.webp" alt="Estudio de edición de LUMIA AI" className="float-slow" />
-                <AppShot src="/showcase/panel.webp" alt="Panel de LUMIA AI" className="absolute -bottom-2 -left-8 hidden w-1/2 sm:block" />
-              </div>
+              <AppShot src="/showcase/estudio.webp" alt="Estudio de edición de LUMIA AI" />
             )}
           </div>
+
+          <dl className="mx-auto mt-14 grid max-w-2xl grid-cols-3 gap-4">
+            {[["9", "herramientas"], ["100 %", "en tu computadora"], ["S/ 0", "en licencias"]].map(([n, l]) => (
+              <div key={l}><dt className="sr-only">{l}</dt><dd className="font-display text-3xl font-bold text-brand-strong">{n}</dd><p className="text-xs text-muted-foreground">{l}</p></div>
+            ))}
+          </dl>
         </div>
       </section>
+
+      {ejemplos.length > 0 && <Ejemplos items={ejemplos} />}
 
       {/* ---------- Herramientas ---------- */}
       <section id="herramientas" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-24 md:px-6">
@@ -121,8 +160,8 @@ export default function Home() {
         </div>
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {HERRAMIENTAS.map(({ icon: Icon, t, d }) => (
-            <article key={t} className="group relative rounded-3xl border bg-card p-6 transition duration-300 hover:-translate-y-1 hover:glow">
-              <span className="bg-brand-gradient grid size-12 place-items-center rounded-2xl text-white shadow-lg transition group-hover:scale-110"><Icon className="size-6" aria-hidden /></span>
+            <article key={t} className="group relative rounded-3xl border bg-card p-6 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+              <span className="grid size-12 place-items-center rounded-2xl bg-brand-soft text-brand-strong transition group-hover:scale-105"><Icon className="size-6" aria-hidden /></span>
               <h3 className="mt-5 text-lg font-semibold">{t}</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{d}</p>
             </article>
@@ -133,7 +172,7 @@ export default function Home() {
 
       {/* ---------- Cómo funciona ---------- */}
       <section id="como-funciona" className="relative scroll-mt-24 overflow-hidden border-y">
-        <div aria-hidden className="aurora absolute inset-0 opacity-60" />
+        <div aria-hidden className="absolute inset-0 bg-secondary/60" />
         <div className="relative mx-auto max-w-6xl px-4 py-24 md:px-6">
           <div className="max-w-2xl space-y-4">
             <p className="text-xs font-semibold tracking-[0.2em] text-brand-strong uppercase">Cómo funciona</p>
@@ -141,8 +180,8 @@ export default function Home() {
           </div>
           <ol className="mt-14 grid gap-5 md:grid-cols-4">
             {PASOS.map(({ icon: Icon, t, d }, i) => (
-              <li key={t} className="glass relative rounded-3xl border p-6">
-                <span className="font-display absolute top-5 right-6 text-5xl font-bold text-gradient opacity-40">{i + 1}</span>
+              <li key={t} className="relative rounded-3xl border bg-card p-6">
+                <span className="font-display absolute top-5 right-6 text-5xl font-bold text-brand-strong opacity-20">{i + 1}</span>
                 <span className="grid size-11 place-items-center rounded-2xl border bg-background"><Icon className="size-5 text-brand-strong" aria-hidden /></span>
                 <p className="mt-6 text-lg font-semibold">{t}</p>
                 <p className="mt-1.5 text-sm text-muted-foreground">{d}</p>
@@ -154,8 +193,8 @@ export default function Home() {
 
       {/* ---------- Privacidad ---------- */}
       <section id="privacidad" className="mx-auto grid max-w-6xl scroll-mt-24 gap-6 px-4 py-24 md:px-6 lg:grid-cols-2">
-        <div className="ring-gradient rounded-3xl p-8">
-          <span className="bg-brand-gradient grid size-12 place-items-center rounded-2xl text-white"><Lock className="size-6" aria-hidden /></span>
+        <div className="rounded-3xl border bg-card p-8">
+          <span className="grid size-12 place-items-center rounded-2xl bg-brand-soft text-brand-strong"><Lock className="size-6" aria-hidden /></span>
           <h2 className="font-display mt-6 text-3xl font-bold">Privacidad por diseño</h2>
           <ul className="mt-6 space-y-3 text-sm text-muted-foreground">
             {["Solo tú ves tus imágenes, salvo que compartas una con tu equipo.",
@@ -187,7 +226,7 @@ export default function Home() {
           {FAQ.map((f) => (
             <details key={f.q} className="group p-6 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
-                {f.q}<span className="text-gradient text-2xl transition group-open:rotate-45" aria-hidden>+</span>
+                {f.q}<span className="text-2xl text-brand-strong transition group-open:rotate-45" aria-hidden>+</span>
               </summary>
               <p className="mt-3 text-sm text-muted-foreground">{f.a}</p>
             </details>
@@ -198,8 +237,7 @@ export default function Home() {
       {/* ---------- Llamado final ---------- */}
       <section className="px-4 pb-24 md:px-6">
         <div className="bg-brand-gradient relative mx-auto max-w-6xl overflow-hidden rounded-[2rem] px-8 py-16 text-center text-white">
-          <div aria-hidden className="grid-lines absolute inset-0 opacity-40" />
-          <h2 className="font-display relative text-4xl font-bold text-balance md:text-5xl">Haz que tus imágenes se vean reales</h2>
+                    <h2 className="font-display relative text-4xl font-bold text-balance md:text-5xl">Haz que tus imágenes se vean reales</h2>
           <p className="relative mx-auto mt-4 max-w-xl text-white/85">Crea tu cuenta y prueba el estudio completo en minutos.</p>
           <Button size="lg" variant="secondary" asChild className="relative mt-8 h-13 rounded-full bg-white px-8 text-base text-neutral-900 hover:bg-white/90">
             <Link to="/registro">Crear mi cuenta gratis <ArrowRight className="size-4" aria-hidden /></Link>

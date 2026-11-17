@@ -16,7 +16,7 @@ test('personalizacion persistente y restauracion continua al cambiar de pantalla
   await register(page, `restaurar${Date.now()}@demo.pe`);
   await page.goto('/app/perfil');
   await page.getByRole('button', { name: 'Oscuro', exact: true }).click();
-  await page.getByRole('button', { name: 'Océano', exact: true }).click();
+  await page.getByRole('button', { name: 'Azul marino', exact: true }).click();
   await page.getByRole('button', { name: 'Cámara', exact: true }).click();
   await page.reload();
   await expect(page.locator('html')).toHaveClass(/dark/);

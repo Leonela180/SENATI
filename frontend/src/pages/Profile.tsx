@@ -47,7 +47,7 @@ export default function Profile() {
           <fieldset className="space-y-2"><legend className="mb-2 text-sm font-medium">Color de acento</legend><div className="flex flex-wrap gap-2">{Object.entries(ACCENTS).map(([accent, label]) => <Button key={accent} variant={appearance.accent === accent ? "default" : "outline"} aria-pressed={appearance.accent === accent} onClick={() => personalize({ accent: accent as keyof typeof ACCENTS })}>{label}</Button>)}</div></fieldset>
           <fieldset className="space-y-2"><legend className="mb-2 text-sm font-medium">Avatar</legend><div className="flex flex-wrap gap-2">{Object.entries(AVATARS).map(([avatar, label]) => <Button key={avatar} variant={appearance.avatar === avatar ? "default" : "outline"} aria-pressed={appearance.avatar === avatar} onClick={() => personalize({ avatar: avatar as keyof typeof AVATARS })}>{label}</Button>)}</div></fieldset>
           <label className="flex items-center gap-3 text-sm"><input type="checkbox" checked={appearance.compact} onChange={e => personalize({ compact: e.target.checked })} className="size-4" />Navegación compacta en escritorio</label>
-          <Button variant="ghost" onClick={() => personalize({ mode: "dark", accent: "violet", avatar: "initials", compact: false })}>Restablecer apariencia</Button>
+          <Button variant="ghost" onClick={() => personalize({ mode: "light", accent: "sky", avatar: "initials", compact: false })}>Restablecer apariencia</Button>
         </div>
       </Section>
       <Section icon={UserRound} title="Datos personales" description="El nombre visible aparece en tu panel y para tu equipo.">

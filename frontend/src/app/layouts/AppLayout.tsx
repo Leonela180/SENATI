@@ -28,7 +28,7 @@ const SECTIONS: { title: string; items: NavItem[] }[] = [
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   cn("flex shrink-0 items-center gap-3 rounded-xl px-3 py-2 text-sm transition",
-     isActive ? "bg-brand-gradient text-white glow font-medium" : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground");
+     isActive ? "bg-primary/10 text-brand-strong font-semibold" : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground");
 
 export default function AppLayout() {
   const { data: me, isLoading, isError, error, isFetching, refetch } = useMe();

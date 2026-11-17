@@ -1,12 +1,12 @@
 import { useSyncExternalStore } from "react";
 
-export const ACCENTS = { violet: "Aurora", copper: "Atardecer", ocean: "Océano", forest: "Esmeralda" } as const;
+export const ACCENTS = { sky: "Celeste", ocean: "Azul marino", violet: "Lavanda", forest: "Salvia", copper: "Arena" } as const;
 export const AVATARS = { initials: "Iniciales", camera: "Cámara", spark: "Destello", leaf: "Hoja", mountain: "Montaña" } as const;
 type Appearance = { mode: "light" | "dark" | "system"; accent: keyof typeof ACCENTS; avatar: keyof typeof AVATARS; compact: boolean };
-const defaults: Appearance = { mode: "dark", accent: "violet", avatar: "initials", compact: false };
+const defaults: Appearance = { mode: "light", accent: "sky", avatar: "initials", compact: false };
 let current = defaults;
 try {
-  const value = JSON.parse(localStorage.getItem("lumia-appearance") || "{}");
+  const value = JSON.parse(localStorage.getItem("lumia-apariencia-v2") || "{}");
   current = { mode: ["light", "dark", "system"].includes(value.mode) ? value.mode : defaults.mode,
     accent: Object.prototype.hasOwnProperty.call(ACCENTS, value.accent) ? value.accent : defaults.accent,
     avatar: Object.prototype.hasOwnProperty.call(AVATARS, value.avatar) ? value.avatar : defaults.avatar,
@@ -25,7 +25,7 @@ media.addEventListener("change", apply);
 export function updateAppearance(patch: Partial<Appearance>) {
   current = { ...current, ...patch };
   let persisted = true;
-  try { localStorage.setItem("lumia-appearance", JSON.stringify(current)); } catch { persisted = false; }
+  try { localStorage.setItem("lumia-apariencia-v2", JSON.stringify(current)); } catch { persisted = false; }
   apply();
   listeners.forEach(listener => listener());
   return persisted;

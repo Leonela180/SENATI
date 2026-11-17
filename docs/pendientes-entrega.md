@@ -1,42 +1,39 @@
 # LUMIA AI — Hoja de pendientes para la entrega SENATI
 
-**Corte:** 16 de noviembre de 2026. **Nivel:** proyecto final de instituto.
+**Actualizado:** 17 de noviembre de 2026. Esta hoja separa tres cosas: lo que está implementado y comprobado, lo que solo se puede comprobar en la laptop del proyecto y lo que depende de servicios externos.
 
-Esta hoja distingue implementación, funcionamiento técnico y calidad visual. Los porcentajes comunicados son estimaciones; no sustituyen los criterios de aceptación de abajo.
+## ✅ Resuelto en esta etapa
 
-## Pendientes de la entrega
-
-**Inicio — referencia visual del usuario:** la captura `Captura de pantalla 2026-11-16 230840.png` muestra el rostro dibujado con los rótulos «Antes · piel plástica» y «Después · textura natural». Se debe reemplazar esa ilustración por un retrato de aspecto fotográfico. La comparación mostrará el mismo retrato generado con IA y su resultado real procesado por LUMIA, sin simular la mejora con dibujos ni usar dos personas diferentes. También deben sustituirse las muestras ilustradas de piel, ojos, cabello y luz. El resultado debe superar la revisión visual antes de publicarse; la portada incluirá todas las funciones actuales y se comprobará en celular y escritorio.
-
-| Prioridad | Pendiente | Situación actual | Se considera terminado cuando… |
-|---|---|---|---|
-| Alta | Corregir el efecto de mascarilla | El resultado `lumia_10_editado_IA.png` presenta parches visibles en el rostro. Se revisó junto al original; aún no se corrigió. | El antes/después no muestra bordes, parches ni cambios de tono artificiales en piel, ojos y mandíbula. |
-| Alta | Validar naturalidad de piel y ojos | Hay un ajuste de microtextura y reflejos, pero ejecutar el algoritmo no demuestra calidad. | Se comparan varios retratos propios o autorizados, con distintas poses e iluminación, y se aprueba visualmente el resultado sin cambiar los rasgos. |
-| Alta | Revisar ropa, cabello y resto de la imagen | El ajuste específico actual se concentra en el rostro; no existe una mejora validada de textura de ropa. | Se conserva el detalle y no se deterioran prendas ni cabello. Cualquier mejora adicional se demuestra; no se promete recuperar información inexistente. |
-| Alta | Completar las fotografías del inicio | Existe un retrato sintético nuevo y una ejecución real del motor sobre él. Faltan preparar y comprobar los recursos públicos definitivos. | La portada carga ambos archivos y muestra el mismo retrato antes/después de LUMIA, con procedencia clara y calidad visual aprobada. No se usan fotos privadas del usuario. |
-| Alta | Publicar la portada actualizada | El texto de las funciones y el comparador están editados localmente; aún no están compilados, comprobados ni subidos en esta última versión. | Se ven las funciones actuales, las imágenes cargan y el comparador funciona con toque y teclado, en celular y escritorio. |
-| Alta | Incorporar chatbot conversacional | Existe **Asistente de edición**, una guía de recorridos preparados. No es un chatbot generativo. | Se integra y prueba un motor real, con respuestas útiles sobre LUMIA, identificación del proveedor y errores claros. Si se usa Ollama, se coordina con la humanización para no agotar la RAM. |
-| Alta | Ejecutar las comprobaciones finales | La etapa anterior pasó sus pruebas; los cambios posteriores del inicio y la corrección visual pendiente necesitan nueva validación. | Pasan las pruebas afectadas, la compilación, el recorrido nuevo del inicio y la revisión visual de las imágenes finales. |
-| Alta | Subir los cambios finales a GitHub | La etapa anterior está publicada en `main`, commit `935832d`. Hay cambios locales posteriores pendientes. | El commit final está en GitHub y se verifica que no contiene claves, fotos privadas, modelos ni respaldos. |
-| Media | Actualizar documentación y evidencia | Existe documentación de entrega, pero debe reflejar las correcciones y pruebas finales. | La guía coincide con la versión publicada y distingue funciones reales, guía preparada e integraciones bloqueadas. |
-| Media | Comprobar continuidad en uso real | Navegar y recargar durante una restauración pasó una prueba de navegador. Falta repetir el cierre/reapertura con una humanización real tras corregirla. | Un trabajo real sigue en el servidor y se recupera desde Historial al volver. Una falla de conexión no aparece como fallo del procesamiento. |
-
-## Dependencias externas y ampliaciones
-
-| Elemento | Qué falta | Alcance de la entrega |
+| Pendiente anterior | Qué se hizo | Cómo se comprobó |
 |---|---|---|
-| Gemini | Cuota disponible y generación real satisfactoria. La última prueba devolvió límite de cuota. | Integración opcional bloqueada; no anunciar generación disponible hasta validarla. |
-| OpenAI | Saldo de API y una respuesta real satisfactoria. La última prueba devolvió saldo agotado. | No está integrado al chat. La suscripción de la aplicación no resuelve el error observado de API. |
-| Enlace permanente | Alojamiento y configuración de dominio/servicios si se quiere independencia de esta laptop. | El enlace actual es temporal y necesita servidor encendido e internet. GitHub guarda el código; no aloja automáticamente Flask, PostgreSQL y el worker. |
-| Correo automático | Configurar proveedor de correo, credenciales y comprobar entrega. | Actualmente se prepara el mensaje en la aplicación del propietario. WhatsApp también requiere que la persona revise y envíe. No presentarlo como envío automático. |
-| Personalización sincronizada | Guardar preferencias por usuario en el servidor, si se necesita compartirlas entre dispositivos. | Actualmente avatar, tema, acento y densidad se guardan en este navegador. No bloquea la entrega con ese alcance declarado. |
+| Efecto mascarilla en la humanización | Solo se transfiere la textura de la IA, no su tono. La máscara es suave (sin parches), con protecciones graduales de ojos y boca y sin costuras en el borde | Prueba de regresión `test_sin_efecto_mascarilla_aunque_la_ia_cambie_el_tono`, con retrato sintético y cambio de tono |
+| Portada con dibujos | Nueva portada «Aurora». Muestra el antes/después **real** solo si existe `/demo/demo.json`; si no, capturas reales de la aplicación | Prueba e2e `inicio.spec.ts`, en escritorio y celular |
+| Diseño poco llamativo | Tema «Aurora»: fondo profundo, degradado vibrante, 4 acentos y modo claro u oscuro | Revisión visual a 1440 y 390 px; 9 recorridos e2e |
+| Pruebas fallaban sin el motor de IA | `test_pesos.py` se omite si falta `safetensors` | Instalación limpia con `-SinIA`: 91 pruebas recolectadas |
+| Motor ligero no reproducible | `scripts/preparar_motor_ligero.ps1`, con versión fijada y SHA-256 | Revisión del script y prueba de la edición del `.env`. La descarga y la ejecución se prueban en la laptop |
+| Ejemplo de portada | `tools/preparar_portada.py --job N`, que rechaza resultados de simulación | `test_portada.py` |
+| `modificar_codigo.py` en la raíz | Retirado del proyecto. No tenía relación con LUMIA | — |
 
-## Ya comprobado en la etapa anterior
+## 🔎 Comprobar en la laptop del proyecto (no se puede hacer en otra PC)
 
-- 92 pruebas backend, 6 pruebas frontend y 8 recorridos Playwright satisfactorios; compilación TypeScript/Vite correcta.
-- Restauración conservadora, reparación de daños pequeños marcados, comparación, descarga y conservación del original.
-- Invitaciones de un solo uso y 72 horas, correo destinatario restringido, datos precargados y contraseña elegida por la persona invitada.
-- Galería, álbumes, Estudio, historial, equipos, horario/horas y personalización de navegador conservados.
-- Migración `d4f6b8a2c0e1` aplicada con respaldo verificado; esquema sin diferencias en la comprobación realizada.
+| Pendiente | Cómo cerrarlo |
+|---|---|
+| Validar la corrección de la mascarilla con el retrato real (`lumia_10`) | Volver a humanizar ese retrato y compararlo con el deslizador. Si queda bien, guardar una captura en `docs/evidencias/` |
+| Naturalidad con varios retratos | Humanizar de 3 a 5 retratos generados por IA, con distintas poses y luz, y revisarlos con el deslizador (Parte F3 de la guía) |
+| Ejemplo real en la portada | `preparar_portada.py --job N` con la mejor humanización real y luego `npm run build` (Parte F5) |
+| Ejecución de `preparar_motor_ligero.ps1` en una instalación nueva | Seguir la Parte F2-B en la laptop o en otra PC sin NVIDIA |
 
-**Criterio de cierre:** completar y comprobar los pendientes de la entrega. Las funciones externas bloqueadas deben quedar claramente identificadas como opcionales. No declarar calidad aprobada, chatbot real ni servicio permanente sin evidencia.
+## ⚪ Dependen de servicios externos (opcionales; se declaran como tales)
+
+| Elemento | Situación |
+|---|---|
+| Gemini (generar imágenes) | La clave funciona, pero Google responde 429 por falta de cuota. La interfaz ya gestiona el consentimiento y el error |
+| Chatbot generativo | El **Asistente de edición** es una guía local, no un chatbot. Un chat real necesita un proveedor con cuota (Gemini u OpenAI) o un modelo local que compita por la RAM con la humanización |
+| Enlace permanente | El enlace de Cloudflare es temporal y depende de la laptop encendida. Uno permanente necesitaría alojamiento |
+| Correo automático | Las invitaciones se envían a mano, por correo o por WhatsApp. No hay un servidor de correo configurado |
+| Personalización entre dispositivos | Se guarda en el navegador |
+
+## 📄 Entrega académica
+
+- Actualizar el informe y las diapositivas con los módulos, el tema, el motor en CPU y las evidencias reales.
+- Anotar el **precio real** de la laptop (HP 15-fc0xxx, Ryzen 7 7730U, unos 16 GB) para los costos.

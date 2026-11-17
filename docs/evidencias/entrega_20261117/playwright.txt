@@ -1,0 +1,14 @@
+
+Running 9 tests using 1 worker
+
+  ✓  1 e2e\equipo.spec.ts:12:1 › equipo: crear, invitar y unirse con el enlace (RF-18) (1.9s)
+  ✓  2 e2e\flujo.spec.ts:3:1 › registro → carga → humanización → comparación → descarga (3.1s)
+  ✓  3 e2e\inicio.spec.ts:3:1 › portada: herramientas actuales, vista previa y sin desbordes en celular (563ms)
+  ✓  4 e2e\mejoras.spec.ts:13:1 › personalizacion persistente y restauracion continua al cambiar de pantalla (3.8s)
+  ✓  5 e2e\mejoras.spec.ts:43:1 › invitacion por correo y WhatsApp con registro propio (1.8s)
+  ✓  6 e2e\modulos.spec.ts:12:1 › galería → estudio (fondo) → seguir editando (desenfoque) (7.7s)
+  ✓  7 e2e\modulos.spec.ts:28:1 › horario y horas: horario, entrada y salida (843ms)
+  ✓  8 e2e\modulos.spec.ts:40:1 › generar con IA pide consentimiento y avisa si falta la clave (525ms)
+  ✓  9 e2e\presentacion.spec.ts:4:1 › interfaz de escritorio y móvil: módulos, menú y ausencia de desbordamiento (1.9s)
+
+  9 passed (23.5s)

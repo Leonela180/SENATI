@@ -210,74 +210,88 @@ cd C:\proyectos\SENATI
 
 ## PARTE F: Activar la IA real para humanizar (opcional)
 
-Elige la opción según tu laptop (ver la tabla del inicio). Antes de empezar, apaga LUMIA AI con `.\scripts\detener.ps1`.
+Elige **una** opción según tu laptop (ver la tabla del inicio). Antes de empezar, apaga LUMIA AI con `.\scripts\detener.ps1`.
 
-### F1. Instalar el motor de IA
+### F1. Instalar el motor de IA (las dos opciones)
 
 ```powershell
 .\scripts\instalar.ps1
 ```
 
-Esta vez va **sin** `-SinIA`. El script detecta solo tu laptop:
-
-- **Opción A, con NVIDIA:** instala PyTorch con CUDA (unos 2,5 GB).
-- **Opción B, sin NVIDIA (AMD Radeon o Intel):** instala PyTorch para el procesador.
-
-Al terminar, comprueba cuál quedó:
+Esta vez va **sin** `-SinIA`. Detecta sola tu laptop: con NVIDIA instala PyTorch con CUDA; sin NVIDIA, PyTorch para el procesador. Comprueba el resultado:
 
 ```powershell
 backend\.venv\Scripts\python.exe -c "import torch; print('PyTorch', torch.__version__, '| GPU NVIDIA:', torch.cuda.is_available())"
-backend\.venv\Scripts\pip.exe show torch diffusers transformers | Select-String "Name|Version"
 ```
 
-- **Opción A:** debe decir `GPU NVIDIA: True`. Si dice `False`, actualiza el controlador NVIDIA y repite F1.
-- **Opción B:** dirá `GPU NVIDIA: False`, **y es lo normal**: las Radeon e Intel no usan CUDA, así que la IA corre en el procesador.
+`GPU NVIDIA: False` en una laptop con **AMD Radeon o Intel es lo normal**.
 
-📌 **Anota las versiones** que muestra el segundo comando: van en el informe y en `docs/motor-ia.md`.
+### F2-B. Sin NVIDIA (AMD Radeon o Intel, ~16 GB de RAM): motor ligero — RECOMENDADO para tu HP
 
-### F2. Descargar el modelo (unos 2,5 GB, una sola vez)
+Un solo comando prepara todo. Descarga unos 5 GB:
 
-1. Abre https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5 y lee la licencia (CreativeML OpenRAIL-M). 📌 Anota la fecha.
-2. Descarga el modelo:
+1. el programa **stable-diffusion.cpp**, en la misma versión ya probada y **verificada con su huella SHA-256**;
+2. los pesos de **Stable Diffusion 1.5** y el **filtro de seguridad**;
+3. crea una **copia ligera Q4_0** del modelo, que usa menos RAM;
+4. activa el motor en tu `.env` y guarda antes una copia `.env.bak`.
+
+```powershell
+.\scripts\preparar_motor_ligero.ps1
+```
+
+Antes, abre https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5, lee la licencia (CreativeML OpenRAIL-M) y 📌 **anota la fecha** para el informe.
+
+Cuando termine, enciende LUMIA AI con `.\scripts\iniciar.ps1`. El aviso dirá **«IA local en CPU»**. Cada humanización tarda **unos minutos** (unos 156 s en la prueba con la HP Ryzen 7 de 16 GB). Cierra otros programas pesados mientras procesa.
+
+### F2-A. Con NVIDIA (6 GB de memoria de video o más): motor Diffusers
 
 ```powershell
 backend\.venv\Scripts\pip.exe install -U "huggingface_hub[cli]"
 backend\.venv\Scripts\hf.exe download stable-diffusion-v1-5/stable-diffusion-v1-5 --include "*.json" "*.txt" "*.fp16.safetensors" --local-dir .\models\stable-diffusion-v1-5
 ```
 
-Si dice que `hf.exe` no existe, usa `huggingface-cli.exe` con los mismos parámetros. Los mismos archivos sirven para las dos opciones: sin NVIDIA, el sistema los convierte solo.
+Si `hf.exe` no existe, usa `huggingface-cli.exe` con los mismos parámetros. Luego abre `notepad .env`, cambia `AI_ENGINE=mock` por **`AI_ENGINE=local`** y enciende con `.\scripts\iniciar.ps1`. Tarda segundos por imagen.
 
-### F3. Cambiar a IA real
-
-Abre el `.env` con `notepad .env`, cambia `AI_ENGINE=mock` por `AI_ENGINE=local`, guarda y luego enciende LUMIA AI:
+📌 Para el informe, anota las versiones:
 
 ```powershell
-.\scripts\iniciar.ps1
+backend\.venv\Scripts\pip.exe show torch diffusers transformers | Select-String "Name|Version"
 ```
 
-El aviso de simulación desaparece y el panel dice **Motor de IA: IA local**.
+### F3. Revisar la calidad (importante)
 
-| | Opción A (NVIDIA) | Opción B (sin NVIDIA) |
-|---|---|---|
-| Tiempo por imagen | Segundos | **Varios minutos** |
-| Tamaño de trabajo | 640 px | 512 px, para cuidar la RAM |
-| Consejo | — | Cierra otros programas mientras procesa. La pantalla de procesamiento muestra el avance y puedes salir; el resultado aparece en el historial |
+Humaniza 2 o 3 retratos **generados por IA** y compara con el deslizador:
+
+- **Piel, ojos y mandíbula:** sin parches ni cambios de tono. La corrección del «efecto mascarilla» ya está incluida.
+- **Si casi no cambia:** sube `AI_RESULT_BLEND` en el `.env`, por ejemplo de 0.35 a 0.45.
+- **Si cambia demasiado:** bájalo, por ejemplo a 0.25.
+- **La textura de la piel** se regula con `AI_DETAIL_INTENSITY` (entre 0 y 1).
+- **Después de cambiar algo**, reinicia con `detener.ps1` e `iniciar.ps1`.
 
 ### F4. Verificación final (evidencia para el informe)
 
-Guarda un retrato generado por IA, que tengas permiso de usar, como `docs\muestra_autorizada.png`, con LUMIA AI encendido. Luego ejecuta:
+Guarda un retrato generado por IA, que tengas permiso de usar, como `docs\muestra_autorizada.png`. Con LUMIA AI encendido, ejecuta:
 
 ```powershell
-.\scripts\verificar.ps1
+.\scriptserificar.ps1
 ```
 
-Tiene que terminar con **«VERIFICACIÓN COMPLETA»**. El registro queda en `docs\evidencias\verificar_*.txt`; es la evidencia de CP-10 y CP-14. Sin NVIDIA puede tardar varios minutos.
+Tiene que terminar con **«VERIFICACIÓN COMPLETA»**. El registro queda en `docs\evidenciaserificar_*.txt` y es la evidencia de CP-10 y CP-14.
 
-### F5. Ajustar la intensidad (opcional)
+### F5. Poner el ejemplo real en la portada
 
-- Si la persona cambia demasiado, baja `strength` en `backend\app\ai\prompts.py`.
-- Si casi no cambia, súbela, sin pasar de 0,40.
-- Después reinicia con `detener.ps1` e `iniciar.ps1`.
+Cuando tengas una humanización **real** que te guste:
+
+1. Ábrela desde el **Historial**. En la dirección del navegador verás su número, por ejemplo `/app/trabajos/12`.
+2. Ejecuta:
+
+```powershell
+cd backend
+.\.venv\Scripts\python.exe tools\preparar_portada.py --job 12
+cd ..rontend; npm run build; cd ..
+```
+
+La portada mostrará ese antes/después con su procedencia. **Solo acepta resultados de IA real**: los de simulación los rechaza. Usa únicamente retratos **generados por IA**, nunca fotos de personas reales.
 
 ---
 

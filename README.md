@@ -59,6 +59,7 @@ private_data/  originales y resultados (fuera de Git)
 - [Entrega práctica SENATI](docs/entrega-senati.md): cómo abrir, compartir, demostrar y comprobar el proyecto; límites actuales de Gemini y Humanizar.
 - [Auditoría local y plan de mejoras (16/11/2026)](docs/auditoria-2026-11-16.md): diferencias verificadas entre código, entorno y PostgreSQL; etapas y comprobaciones pendientes.
 
+- [docs/pendientes-entrega.md](docs/pendientes-entrega.md): qué está resuelto y qué falta.
 - [docs/estado.md](docs/estado.md): qué está implementado, qué está probado y qué falta.
 - [docs/LAPTOP_PASO_A_PASO.md](docs/LAPTOP_PASO_A_PASO.md): instalación y prueba de la IA real en la laptop.
 - [docs/desarrollo-local.md](docs/desarrollo-local.md): cómo trabajar con tres ventanas (API, worker, frontend).

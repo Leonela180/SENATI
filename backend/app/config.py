@@ -40,6 +40,8 @@ class Config:
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
     GEMINI_IMAGE_MODEL = os.getenv("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
     GEMINI_TIMEOUT = int(os.getenv("GEMINI_TIMEOUT", "90"))
+    GEMINI_CHAT_MODEL = os.getenv("GEMINI_CHAT_MODEL", "gemini-2.5-flash")
+    GEMINI_CHAT_TIMEOUT = int(os.getenv("GEMINI_CHAT_TIMEOUT", "30"))
 
     # Compartir por internet (scripts/compartir.ps1): confiar en las cabeceras del túnel para conocer la IP
     # real de cada visitante (límite de intentos por persona) y el https del enlace público.

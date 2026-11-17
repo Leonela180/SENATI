@@ -1,5 +1,5 @@
 import { Navigate, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { CalendarClock, History, Images, LayoutDashboard, LogOut, Menu, ShieldCheck, Sparkles, User, Users, Wand2, WandSparkles, X } from "lucide-react";
+import { CalendarClock, History, Images, LayoutDashboard, LogOut, Menu, ShieldCheck, Sparkles, User, Users, MessageCircle, Wand2, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { useLogout, useMe } from "@/features/auth/useAuth";
@@ -15,7 +15,7 @@ const SECTIONS: { title: string; items: NavItem[] }[] = [
   { title: "Imágenes", items: [
     { to: "/app/humanizar", label: "Humanizar", icon: Sparkles },
     { to: "/app/estudio", label: "Estudio de edición", icon: Wand2 },
-    { to: "/app/asistente", label: "Asistente de edición", icon: WandSparkles },
+    { to: "/app/asistente", label: "Chat asistente", icon: MessageCircle },
     { to: "/app/galeria", label: "Galería", icon: Images },
     { to: "/app/historial", label: "Historial", icon: History },
   ] },

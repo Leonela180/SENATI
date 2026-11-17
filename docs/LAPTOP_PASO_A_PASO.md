@@ -204,6 +204,8 @@ cd C:\proyectos\SENATI
    ```
 3. Guarda y reinicia: `.\scripts\detener.ps1` y luego `.\scripts\iniciar.ps1`.
 
+La **misma clave** activa el **Chat asistente** (menú de la izquierda). En el chat marca «Usar IA (Gemini) para conversar». Solo se envía el texto que escribes, nunca tus imágenes. Si Gemini no responde, el chat contesta con la guía local.
+
 **La clave es como una contraseña:** no la pegues en el chat ni la subas a GitHub. El `.env` ya está excluido de Git.
 
 ---

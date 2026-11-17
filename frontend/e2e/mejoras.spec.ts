@@ -25,7 +25,7 @@ test('personalizacion persistente y restauracion continua al cambiar de pantalla
   await page.screenshot({ path: path.resolve('../docs/evidencias/mejoras_20261116/personalizacion.png'), fullPage: true });
   await page.goto('/app/asistente');
   await page.getByRole('button', { name: 'Recuperar una foto antigua' }).click();
-  await page.getByRole('link', { name: 'Abrir herramienta' }).click();
+  await page.getByRole('link', { name: /Abrir herramienta/ }).click();
   await page.getByLabel(/Confirmo que tengo permiso/).check();
   await page.getByLabel('Seleccionar imagen').setInputFiles('e2e/fixtures/retrato_prueba.png');
   await expect(page.getByRole('tab', { name: 'Restaurar foto' })).toHaveAttribute('aria-selected', 'true');

@@ -28,7 +28,7 @@
 | Elemento | Situación |
 |---|---|
 | Gemini (generar imágenes) | La clave funciona, pero Google responde 429 por falta de cuota. La interfaz ya gestiona el consentimiento y el error |
-| Chatbot generativo | El **Asistente de edición** es una guía local, no un chatbot. Un chat real necesita un proveedor con cuota (Gemini u OpenAI) o un modelo local que compita por la RAM con la humanización |
+| Chat asistente con IA | **Implementado:** el chat conversa con Gemini (texto) si hay clave y consentimiento; si no hay cuota o clave, responde la guía local. Probado con respuestas simuladas; falta probarlo con tu clave real en la laptop |
 | Enlace permanente | El enlace de Cloudflare es temporal y depende de la laptop encendida. Uno permanente necesitaría alojamiento |
 | Correo automático | Las invitaciones se envían a mano, por correo o por WhatsApp. No hay un servidor de correo configurado |
 | Personalización entre dispositivos | Se guarda en el navegador |

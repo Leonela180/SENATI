@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, CalendarClock, Cpu, History as HistoryIcon, Images, Sparkles, Users, Wand2, WandSparkles } from "lucide-react";
+import { ArrowRight, CalendarClock, Cpu, History as HistoryIcon, Images, MessageCircle, Sparkles, Users, Wand2, WandSparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState, PageHeader, QueryError } from "@/components/PageHeader";
 import { JobCard } from "@/components/JobCard";
@@ -31,7 +31,7 @@ export default function Dashboard() {
   const MODULES = [
     { to: "/app/humanizar", icon: Sparkles, title: "Humanizar", text: "Piel, ojos, cabello y luz más naturales con IA local." },
     { to: "/app/estudio", icon: Wand2, title: "Estudio de edición", text: "Quitar lunares, cambiar fondo, desenfoque y calidad." },
-    { to: "/app/asistente", icon: WandSparkles, title: "Asistente de edición", text: "Encuentra un recorrido para restaurar y mejorar tus fotos." },
+    { to: "/app/asistente", icon: MessageCircle, title: "Chat asistente", text: "Cuéntale qué quieres mejorar y te guía a la herramienta." },
     { to: "/app/galeria", icon: Images, title: "Galería", text: "Sube, organiza en álbumes y procesa en lote." },
   ];
 

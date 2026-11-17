@@ -47,7 +47,9 @@ export default function AppLayout() {
   const sections = SECTIONS.map((s) => (s.title === "Cuenta" && me.role === "admin"
     ? { ...s, items: [...s.items, { to: "/app/admin", label: "Admin", icon: ShieldCheck }] } : s));
   const links = sections.flatMap((s) => s.items);
-  const currentPage = links.find((item) => item.end ? location.pathname === item.to : location.pathname.startsWith(item.to))?.label ?? "Detalle del trabajo";
+  const currentPage = links.find((item) => item.end ? location.pathname === item.to : location.pathname.startsWith(item.to))?.label
+    ?? (location.pathname.startsWith("/app/generar") ? "Generar con IA"
+      : location.pathname.startsWith("/app/trabajos") ? "Detalle del trabajo" : "LUMIA AI");
   const salir = () => logout.mutate(undefined, { onSuccess: () => nav("/") });
 
   return (

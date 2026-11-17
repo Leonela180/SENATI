@@ -1,0 +1,7 @@
+vitest — 17/11/2026 15:58
+
+ Test Files  2 passed (2)
+      Tests  6 passed (6)
+   Start at  15:58:45
+   Duration  3.28s (transform 127ms, setup 705ms, collect 497ms, tests 67ms, environment 3.76s, prepare 632ms)
+

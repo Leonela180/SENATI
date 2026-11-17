@@ -1,0 +1,17 @@
+playwright — 17/11/2026 16:04 — servidor E2E aislado
+
+Running 11 tests using 1 worker
+
+  ✓   1 e2e\chat.spec.ts:3:1 › chat asistente: responde con la guía local sin clave y lleva a la herramienta (1.2s)
+  ✓   2 e2e\equipo.spec.ts:12:1 › equipo: crear, invitar y unirse con el enlace (RF-18) (1.1s)
+  ✓   3 e2e\flujo.spec.ts:3:1 › registro → carga → humanización → comparación → descarga (2.9s)
+  ✓   4 e2e\inicio.spec.ts:3:1 › portada: herramientas actuales, vista previa y sin desbordes en celular (495ms)
+  ✓   5 e2e\mejoras.spec.ts:13:1 › personalizacion persistente y restauracion continua al cambiar de pantalla (3.8s)
+  ✓   6 e2e\mejoras.spec.ts:43:1 › invitacion por correo y WhatsApp con registro propio (1.1s)
+  ✓   7 e2e\modulos.spec.ts:12:1 › galería → estudio (fondo) → seguir editando (desenfoque) (5.6s)
+  ✓   8 e2e\modulos.spec.ts:28:1 › horario y horas: horario, entrada y salida (791ms)
+  ✓   9 e2e\modulos.spec.ts:40:1 › generar con IA pide consentimiento y avisa si falta la clave (469ms)
+  ✓  10 e2e\presentacion.spec.ts:4:1 › interfaz de escritorio y móvil: módulos, menú y ausencia de desbordamiento (1.6s)
+  ✓  11 e2e\textura.spec.ts:3:1 › estudio: textura de piel muestra sus controles y avisa claro si no hay rostro (3.0s)
+
+  11 passed (23.2s)

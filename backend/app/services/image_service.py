@@ -12,7 +12,7 @@ def image_json(image):
             "visibility": image.visibility, "album_id": image.album_id, "created_at": image.created_at.isoformat()}
 
 
-def create_image(user, file_storage, album_id=None) -> Image:
+def create_image(user, file_storage, album_id=None, source_type="ai_generated") -> Image:
     """CU03 pasos 1–2: valida, guarda el original en privado y registra la imagen (RF-06 a RF-08)."""
     info = validate_image(file_storage)                     # lanza UploadError si algo falla
     key = new_key(info["ext"])
@@ -20,7 +20,7 @@ def create_image(user, file_storage, album_id=None) -> Image:
     image = Image(owner_user_id=user.id, workspace_id=personal_workspace(user).id, original_storage_key=key,
                   original_filename=(secure_filename(file_storage.filename or "") or "imagen")[:255],
                   mime_type=info["mime"], byte_size=len(info["bytes"]),
-                  width=info["width"], height=info["height"], source_type="ai_generated", album_id=album_id)
+                  width=info["width"], height=info["height"], source_type=source_type, album_id=album_id)
     db.session.add(image)
     db.session.flush()
     audit(user.id, "image.upload", "image", image.id, mime=info["mime"], byte_size=len(info["bytes"]))

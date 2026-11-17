@@ -22,6 +22,7 @@ test("equipo: crear, invitar y unirse con el enlace (RF-18)", async ({ browser }
   const invitado = await (await browser.newContext()).newPage();
   await registrar(invitado, "Invitado");
   await invitado.goto(enlace);
+  await invitado.getByRole("button", { name: "Aceptar invitación" }).click();
   await expect(invitado.getByRole("heading", { name: "Equipo E2E" })).toBeVisible();
   await expect(invitado.getByText("Invitado", { exact: false }).first()).toBeVisible();
 });

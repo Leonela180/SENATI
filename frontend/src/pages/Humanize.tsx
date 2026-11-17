@@ -167,6 +167,14 @@ export default function Humanize() {
             <Button size="lg" asChild className="h-12 w-full rounded-xl text-base">
               <a href={`/api/v1/jobs/${done.id}/download`}><Download className="size-4" aria-hidden />Descargar resultado</a>
             </Button>
+            {done.parameters.facial_detail_applied === true && (
+              <p className="text-sm text-muted-foreground">Microtextura de piel ajustada conservando los rasgos.
+                {Number(done.parameters.eyes_enhanced) > 0 && " Reflejos existentes en los ojos realzados."}
+              </p>
+            )}
+            {done.parameters.facial_detail_applied === false && (
+              <p className="text-sm text-muted-foreground">No se detectó un rostro frontal con suficiente confianza para ajustar poros y reflejos. Se conserva la edición base de IA.</p>
+            )}
             <Button variant="outline" className="h-11 w-full rounded-xl" onClick={reset}>Humanizar otra imagen</Button>
             <Link to={`/app/trabajos/${done.id}`} className="block text-center text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
               Ver detalle y trazabilidad

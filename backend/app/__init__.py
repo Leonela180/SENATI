@@ -1,7 +1,7 @@
 import logging
 import time
 import click
-from flask import Flask, abort, jsonify, send_from_directory
+from flask import Flask, abort, jsonify, request, send_from_directory
 from flask_cors import CORS
 from flask_wtf.csrf import CSRFError
 from sqlalchemy import text
@@ -35,6 +35,35 @@ def create_app(config_object=Config, **overrides):
     for module in (auth, users, images, jobs, teams, admin, gallery, generations, hours):
         app.register_blueprint(module.bp, url_prefix="/api/v1")
 
+    @app.before_request
+    def validate_json():
+        if request.path.startswith("/api/") and request.is_json:
+            data = request.get_json(silent=True)
+            if not isinstance(data, dict):
+                abort(400, description="Envía un objeto JSON válido.")
+            for field in ("email", "display_name", "password", "current_password", "new_password",
+                          "name", "prompt", "token", "preset", "tool", "visibility", "status", "note"):
+                if field in data and data[field] is not None and not isinstance(data[field], str):
+                    abort(400, description="Revisa el formato de los datos enviados.")
+            for field in ("password", "current_password", "new_password"):
+                if isinstance(data.get(field), str) and len(data[field]) > 1024:
+                    abort(400, description="La contraseña supera el tamaño permitido.")
+
+    @app.after_request
+    def security_headers(response):
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; "
+            "object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+        )
+        if request.path.startswith("/api/"):
+            response.headers["Cache-Control"] = "no-store"
+        return response
+
     # ---------- Errores con formato uniforme y sin trazas internas (RF-12) ----------
     @app.errorhandler(CSRFError)
     def _csrf_error(e):
@@ -46,7 +75,8 @@ def create_app(config_object=Config, **overrides):
 
     @app.errorhandler(Exception)
     def _unexpected(e):
-        log.exception("Error no controlado")
+        db.session.rollback()
+        log.error("Error no controlado: %s", type(e).__name__)
         return jsonify(data=None, error={"code": "error_interno", "message": "Ocurrió un error. Inténtalo de nuevo."}), 500
 
     # ---------- Salud ----------
@@ -60,7 +90,8 @@ def create_app(config_object=Config, **overrides):
             "status": "ok",
             "engine": app.config["AI_ENGINE"],
             # Los presets se ofrecen solo con el motor real (skill §1.4)
-            "presets": list(PRESETS) if app.config["AI_ENGINE"] == "local" else [],
+            "presets": (["natural"] if app.config.get("AI_LOCAL_RUNTIME") == "cpp" else list(PRESETS)) if app.config["AI_ENGINE"] == "local" else [],
+            "runtime": app.config.get("AI_LOCAL_RUNTIME") if app.config["AI_ENGINE"] == "local" else "mock",
             "worker_seconds_since_beat": worker_age,
         }, error=None)
 

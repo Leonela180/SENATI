@@ -35,6 +35,8 @@ class TeamInvitation(db.Model):
     team_workspace_id: Mapped[int] = mapped_column(ForeignKey("workspaces.id"), nullable=False)
     created_by: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     token_hash: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
+    recipient_email: Mapped[str | None] = mapped_column(String(254))
+    recipient_name: Mapped[str | None] = mapped_column(String(120))
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
     used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)

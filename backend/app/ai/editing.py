@@ -19,7 +19,7 @@ from PIL import Image, ImageOps
 
 from .interface import EngineError, save_labeled
 
-TOOLS = ("quitar_lunar", "cambiar_fondo", "desenfoque", "mejorar_calidad", "ajustes")
+TOOLS = ("quitar_lunar", "cambiar_fondo", "desenfoque", "mejorar_calidad", "ajustes", "restaurar")
 MAX_SIDE_OUT = 4096                      # límite del escalado para no saturar 16 GB de RAM
 # u2net (general) recorta bien personas fotográficas y también imágenes generadas o ilustradas; 168 MB, ~0,3 s en CPU.
 SEGMENT_MODEL = os.getenv("LUMIA_SEGMENT_MODEL", "u2net")
@@ -117,6 +117,32 @@ def ajustar(img: Image.Image, brightness: float, contrast: float, saturation: fl
     return out.rotate(-rotate, expand=True) if rotate else out
 
 
+def restaurar(rgb: np.ndarray, strength: float, points: list[dict]) -> np.ndarray:
+    """Restauracion conservadora: no genera rostros ni inventa detalles perdidos."""
+    # Acota trabajo y memoria incluso con fotografias escaneadas grandes.
+    h, w = rgb.shape[:2]
+    factor = min(1.0, 1600 / max(h, w))
+    work = cv2.resize(rgb, (max(1, round(w * factor)), max(1, round(h * factor)))) if factor < 1 else rgb.copy()
+    if points:
+        mask = np.zeros(work.shape[:2], np.uint8)
+        for point in points:
+            cv2.circle(mask, (round(point['x'] * factor), round(point['y'] * factor)),
+                       max(1, round(point['r'] * factor)), 255, -1)
+        work = cv2.inpaint(work, mask, 3, cv2.INPAINT_TELEA)
+    clean = cv2.fastNlMeansDenoisingColored(work, None, 3, 3, 7, 21)
+    lab = cv2.cvtColor(clean, cv2.COLOR_RGB2LAB)
+    luminance = lab[..., 0]
+    lo, hi = np.percentile(luminance, (1, 99))
+    if hi - lo > 12:
+        lab[..., 0] = np.clip((luminance.astype(np.float32) - lo) * 255 / (hi - lo), 0, 255).astype(np.uint8)
+        lab[..., 0] = cv2.createCLAHE(clipLimit=1.3, tileGridSize=(8, 8)).apply(lab[..., 0])
+    corrected = cv2.cvtColor(lab, cv2.COLOR_LAB2RGB)
+    # Intensidad afecta tono/ruido; las reparaciones elegidas se conservan completas.
+    result = cv2.addWeighted(work, 1 - strength, corrected, strength, 0)
+    result = cv2.addWeighted(result, 1.2, cv2.GaussianBlur(result, (0, 0), 1), -0.2, 0)
+    return cv2.resize(result, (w, h), interpolation=cv2.INTER_LANCZOS4) if factor < 1 else result
+
+
 class EditingEngine:
     model_id = "lumia-editor"
     model_version = f"opencv-{cv2.__version__}"
@@ -129,7 +155,9 @@ class EditingEngine:
         info = dict(src.info)
         rgb = np.asarray(src.convert("RGB"))
         model_id, label = self.model_id, "editado con LUMIA AI (edición digital)"
-        if tool == "ajustes":
+        if tool == "restaurar":
+            out = Image.fromarray(restaurar(rgb, float(params["intensity"]), params["points"]))
+        elif tool == "ajustes":
             out = ajustar(Image.fromarray(rgb), float(params["brightness"]), float(params["contrast"]),
                           float(params["saturation"]), float(params["warmth"]), int(params["rotate"]))
         elif tool == "quitar_lunar":

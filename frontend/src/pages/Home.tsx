@@ -27,7 +27,7 @@ const PASOS = [
 ];
 
 const FAQ = [
-  { q: "¿Mi imagen sale de esta computadora?", a: "No. El procesamiento ocurre en la misma PC donde está instalado LUMIA AI. No se envía a servicios externos." },
+  { q: "¿Dónde se procesan mis imágenes?", a: "Las imágenes se guardan y editan en la computadora que aloja LUMIA AI. Si accedes desde otro dispositivo, se suben a esa computadora. Generar con IA envía tu descripción a Google (Gemini), con tu consentimiento." },
   { q: "¿El resultado deja de ser una imagen de IA?", a: "No. Sigue siendo una imagen sintética editada. Por eso se descarga rotulada «editado con IA» y conserva los metadatos de procedencia." },
   { q: "¿Cambia el rostro de la persona?", a: "La edición es de baja intensidad para conservar la identidad aparente, la pose, la ropa y el fondo. Si notas cambios, puedes volver a procesar o quedarte con el original." },
   { q: "¿Repara manos o cuerpos completos?", a: "No. LUMIA AI se centra en la apariencia de retratos: piel, ojos, cabello y luz. No corrige anatomía." },
@@ -61,7 +61,7 @@ export default function Home() {
               </Button>
             </div>
             <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2"><Lock className="size-4 text-brand-strong" aria-hidden />Procesamiento local</li>
+              <li className="flex items-center gap-2"><Lock className="size-4 text-brand-strong" aria-hidden />Edición en el servidor local</li>
               <li className="flex items-center gap-2"><BadgeCheck className="size-4 text-brand-strong" aria-hidden />Original intacto</li>
               <li className="flex items-center gap-2"><ShieldCheck className="size-4 text-brand-strong" aria-hidden />Rotulado «editado con IA»</li>
             </ul>
@@ -141,7 +141,7 @@ export default function Home() {
           <h2 className="mt-6 font-display text-3xl font-semibold">Privacidad por diseño</h2>
           <ul className="mt-6 space-y-3 text-sm text-muted-foreground">
             <li className="flex gap-3"><BadgeCheck className="mt-0.5 size-4 shrink-0 text-emerald-700" aria-hidden />Solo tú ves tus imágenes, salvo que compartas una con tu equipo.</li>
-            <li className="flex gap-3"><BadgeCheck className="mt-0.5 size-4 shrink-0 text-emerald-700" aria-hidden />Nada se envía a servicios externos: el modelo corre en esta PC.</li>
+            <li className="flex gap-3"><BadgeCheck className="mt-0.5 size-4 shrink-0 text-emerald-700" aria-hidden />La edición ocurre en la computadora que aloja la aplicación. Gemini recibe solo tu descripción, con consentimiento.</li>
             <li className="flex gap-3"><BadgeCheck className="mt-0.5 size-4 shrink-0 text-emerald-700" aria-hidden />El administrador técnico ve métricas agregadas, nunca tus fotos.</li>
             <li className="flex gap-3"><BadgeCheck className="mt-0.5 size-4 shrink-0 text-emerald-700" aria-hidden />Los resultados conservan los metadatos de procedencia y se rotulan.</li>
           </ul>

@@ -16,6 +16,7 @@ import type { Job, Tool } from "@/lib/types";
 
 type EditTool = Exclude<Tool, "humanizar">;
 const TOOLS: { id: EditTool; label: string; icon: typeof Eraser; help: string }[] = [
+  { id: "restaurar", label: "Restaurar foto", icon: RotateCcw, help: "Recupera tonos y contraste y reduce ruido. Marca rayas o manchas pequeñas para repararlas. No reconstruye rostros ni colorea fotos en blanco y negro." },
   { id: "quitar_lunar", label: "Quitar lunar", icon: Eraser, help: "Haz clic sobre cada lunar o mancha. Se rellena con la piel de alrededor." },
   { id: "cambiar_fondo", label: "Cambiar fondo", icon: Palette, help: "La IA recorta a la persona y cambia el fondo por un color, un desenfoque o transparencia." },
   { id: "desenfoque", label: "Desenfoque", icon: Droplets, help: "Desenfoque gaussiano de toda la imagen o solo del fondo (efecto retrato)." },
@@ -41,7 +42,8 @@ export default function Studio() {
   const createJob = useCreateJob();
   const saveResult = useSaveResult();
   const [declared, setDeclared] = useState(false);
-  const [tool, setTool] = useState<EditTool>("quitar_lunar");
+  const [tool, setTool] = useState<EditTool>(() => TOOLS.some(t => t.id === params.get("tool")) ? params.get("tool") as EditTool : "restaurar");
+  const [intensity, setIntensity] = useState(0.6);
   const [points, setPoints] = useState<{ x: number; y: number; r: number }[]>([]);
   const [brush, setBrush] = useState(12);
   const [bg, setBg] = useState({ mode: "color", color: "#f4efe8", radius: 14 });
@@ -64,14 +66,19 @@ export default function Studio() {
   }, [tool, adj, blur]);
 
   function addPoint(e: React.MouseEvent<HTMLImageElement>) {
-    if (tool !== "quitar_lunar" || !image || !imgRef.current || points.length >= 20) return;
+    if (!["quitar_lunar", "restaurar"].includes(tool) || !image || !imgRef.current || points.length >= 20) return;
     const rect = imgRef.current.getBoundingClientRect();
     const k = image.width / rect.width;
-    setPoints([...points, { x: Math.round((e.clientX - rect.left) * k), y: Math.round((e.clientY - rect.top) * k), r: Math.round(brush * k) }]);
+    setPoints([...points, {
+      x: Math.max(0, Math.min(image.width - 1, Math.round((e.clientX - rect.left) * k))),
+      y: Math.max(0, Math.min(image.height - 1, Math.round((e.clientY - rect.top) * k))),
+      r: Math.max(2, Math.min(80, Math.round(brush * k))),
+    }]);
   }
 
   function toolParams(): Record<string, unknown> {
     switch (tool) {
+      case "restaurar": return { points, intensity };
       case "quitar_lunar": return { points };
       case "cambiar_fondo": return bg;
       case "desenfoque": return blur;
@@ -97,7 +104,7 @@ export default function Studio() {
   if (!imageId) {
     return (
       <div className="space-y-8">
-        <PageHeader eyebrow="Estudio" title="Estudio de edición" description="Quita lunares, cambia el fondo, aplica desenfoque, mejora la calidad o ajusta el color. Todo corre en esta computadora." />
+        <PageHeader eyebrow="Estudio" title="Estudio de edición" description="Restaura fotos deterioradas, repara manchas, cambia el fondo y ajusta luz y color. Se procesa en la computadora que aloja LUMIA AI." />
         <div className="grid gap-8 lg:grid-cols-2">
           <section className="space-y-3">
             <h2 className="font-semibold">Subir una imagen nueva</h2>
@@ -107,7 +114,7 @@ export default function Studio() {
             }} />
             <div className="flex items-start gap-3 rounded-2xl bg-muted p-4">
               <Checkbox id="decl-studio" checked={declared} onCheckedChange={(v) => setDeclared(v === true)} className="mt-0.5" />
-              <Label htmlFor="decl-studio" className="text-sm font-normal leading-snug">Confirmo que la imagen es generada por IA y que tengo permiso para usarla</Label>
+              <Label htmlFor="decl-studio" className="text-sm font-normal leading-snug">Confirmo que tengo permiso para editar esta imagen y, si aparecen personas, su autorización.</Label>
             </div>
             {upload.error && <p role="alert" className="text-sm text-destructive">{(upload.error as Error).message}</p>}
           </section>
@@ -156,8 +163,8 @@ export default function Studio() {
               <div className="relative overflow-hidden rounded-3xl bg-muted shadow-xl ring-1 ring-black/5">
                 <img ref={imgRef} src={src} alt="Imagen a editar" onClick={addPoint} draggable={false}
                      style={{ filter: previewFilter, transform: tool === "ajustes" && adj.rotate ? `rotate(${adj.rotate}deg)` : undefined }}
-                     className={cn("block max-h-[68vh] w-auto max-w-full transition", tool === "quitar_lunar" && "cursor-crosshair")} />
-                {tool === "quitar_lunar" && image && imgRef.current && points.map((p, i) => {
+                     className={cn("block max-h-[68vh] w-auto max-w-full transition", ["quitar_lunar", "restaurar"].includes(tool) && "cursor-crosshair")} />
+                {["quitar_lunar", "restaurar"].includes(tool) && image && imgRef.current && points.map((p, i) => {
                   const k = imgRef.current!.getBoundingClientRect().width / image.width;
                   return <span key={i} aria-hidden className="pointer-events-none absolute rounded-full border-2 border-white bg-white/25 shadow"
                                style={{ left: p.x * k - p.r * k, top: p.y * k - p.r * k, width: p.r * 2 * k, height: p.r * 2 * k }} />;
@@ -175,7 +182,8 @@ export default function Studio() {
             <p className="mt-1 text-sm text-muted-foreground">{toolInfo.help}</p>
           </div>
 
-          {tool === "quitar_lunar" && (
+          {tool === "restaurar" && <div className="space-y-3"><Slider label="Recuperación de tonos" value={intensity} min={0.1} max={1} step={0.1} onChange={setIntensity} fmt={v => `${Math.round(v * 100)} %`} /><p className="text-xs text-muted-foreground">Empieza suave. El original permanece intacto y cada resultado se guarda por separado.</p></div>}
+          {["quitar_lunar", "restaurar"].includes(tool) && (
             <div className="space-y-4">
               <Slider label="Tamaño del pincel" value={brush} min={4} max={40} step={1} onChange={setBrush} fmt={(v) => `${v} px`} />
               <div className="flex items-center justify-between text-sm">

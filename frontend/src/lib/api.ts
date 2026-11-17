@@ -10,8 +10,12 @@ export const resetCsrf = () => { csrfToken = null; };
 async function getCsrf(): Promise<string> {
   if (!csrfToken) {
     const r = await fetch("/api/v1/auth/csrf", { credentials: "include" });
-    const j = (await r.json()) as Envelope<{ csrf_token: string }>;
-    csrfToken = j.data!.csrf_token;
+    let j: Envelope<{ csrf_token: string }> | null = null;
+    try { j = await r.json(); } catch { /* servidor no disponible o respuesta inválida */ }
+    if (!r.ok || j?.error || !j?.data?.csrf_token) {
+      throw new ApiError(r.status, j?.error?.code ?? "csrf", j?.error?.message ?? "No se pudo iniciar una sesión segura. Inténtalo de nuevo.");
+    }
+    csrfToken = j.data.csrf_token;
   }
   return csrfToken;
 }
@@ -31,5 +35,8 @@ export async function api<T>(path: string, opts: RequestInit = {}, retry = true)
   if (!r.ok || j?.error) {
     throw new ApiError(r.status, j?.error?.code ?? "error", j?.error?.message ?? "No se pudo conectar con el servidor.");
   }
-  return j!.data as T;
+  if (!j || typeof j !== "object" || !("data" in j)) {
+    throw new ApiError(r.status, "respuesta_invalida", "El servidor devolvió una respuesta inesperada. Inténtalo de nuevo.");
+  }
+  return j.data as T;
 }

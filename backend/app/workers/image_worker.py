@@ -3,6 +3,7 @@ import logging
 import signal
 import sys
 import time
+import threading
 from sqlalchemy import text
 from app import create_app
 from app.ai.editing import EditingEngine
@@ -41,19 +42,39 @@ def build_engine(app):
         log.warning("AI_ENGINE=%s: SIMULACIÓN, SIN IA REAL", app.config["AI_ENGINE"])
         return MockEngine()
     try:
+        if app.config.get("AI_LOCAL_RUNTIME") == "cpp":
+            from app.ai.lite_engine import LiteHumanizationEngine
+            from app.config import ROOT
+            return LiteHumanizationEngine(
+                app.config["AI_CPP_EXECUTABLE"], app.config["AI_CPP_MODEL_PATH"],
+                ROOT / "models/stable-diffusion-v1-5", app.config["PRIVATE_STORAGE_ROOT"] / "lite_jobs",
+                side=app.config["AI_LITE_WORK_SIDE"], blend=app.config["AI_RESULT_BLEND"],
+                detail_intensity=app.config["AI_DETAIL_INTENSITY"],
+            )
+        from app.ai.resources import require_memory
+        require_memory()
         from app.ai.local_engine import LocalHumanizationEngine
         engine = LocalHumanizationEngine(str(app.config["AI_MODEL_PATH"]), app.config["AI_MODEL_ID"])
         log.info("Motor local cargado: %s (%s) en %s", engine.model_id, engine.model_version, engine.device)
         return engine
-    except Exception:                                                        # noqa: BLE001
-        log.exception("No se pudo cargar el motor local")
-        db.session.add(ServiceIncident(service_name="worker", error_code="modelo_no_disponible"))
+    except Exception as error:                                               # noqa: BLE001
+        code = error.code if isinstance(error, EngineError) else "modelo_no_disponible"
+        log.error("No se pudo cargar el motor local: %s", code)
+        db.session.add(ServiceIncident(service_name="worker", error_code=code))
         db.session.commit()
         return None                                                          # los trabajos fallarán con código seguro
 
 
 def heartbeat(app):
     (app.config["PRIVATE_STORAGE_ROOT"] / "worker.heartbeat").write_text(utc_now().isoformat())
+
+
+def maintain_heartbeat(app, stop):
+    while not stop.wait(5):
+        try:
+            heartbeat(app)
+        except OSError:
+            log.warning("No se pudo actualizar el latido del worker")
 
 
 def process_one(app, engine) -> bool:
@@ -77,7 +98,9 @@ def process_one(app, engine) -> bool:
         job.result_storage_key = key
         job.model_id, job.model_version = meta.get("model_id"), meta.get("model_version")
         job.parameters = {**(job.parameters or {}),
-                          **{k: meta[k] for k in ("seconds", "vram_gb", "work_size", "device", "filtro_seguridad", "width", "height") if k in meta}}
+                          **{k: meta[k] for k in ("seconds", "vram_gb", "work_size", "device", "filtro_seguridad", "width", "height",
+                                                "strength", "steps", "guidance", "seed", "runtime", "blend", "ram_free_min_gib",
+                                                "facial_detail_applied", "eyes_enhanced", "pores_intensity", "facial_detail_method") if k in meta}}
         job.status, job.error_code, job.finished_at = "completed", None, utc_now()
         log.info("Trabajo %s completado en %s s", job.id, meta.get("seconds"))
     except Exception as e:                                                   # noqa: BLE001
@@ -106,17 +129,24 @@ def main():
     with app.app_context():
         db.session.execute(RECOVER_SQL)
         db.session.commit()
-        engine = build_engine(app)
-        log.info("Worker listo (motor: %s)", app.config["AI_ENGINE"])
-        while running:
-            heartbeat(app)
-            try:
-                if not process_one(app, engine):
-                    time.sleep(POLL_SECONDS)
-            except Exception:                                                # noqa: BLE001 (BD caída, etc.)
-                log.exception("Error del ciclo del worker; reintento en 5 s")
-                db.session.rollback()
-                time.sleep(5)
+        heartbeat(app)
+        stop_heartbeat = threading.Event()
+        beat_thread = threading.Thread(target=maintain_heartbeat, args=(app, stop_heartbeat), daemon=True)
+        beat_thread.start()
+        try:
+            engine = build_engine(app)
+            log.info("Worker listo (motor: %s)", app.config["AI_ENGINE"])
+            while running:
+                try:
+                    if not process_one(app, engine):
+                        time.sleep(POLL_SECONDS)
+                except Exception:                                            # noqa: BLE001 (BD caída, etc.)
+                    log.error("Error del ciclo del worker; reintento en 5 s")
+                    db.session.rollback()
+                    time.sleep(5)
+        finally:
+            stop_heartbeat.set()
+            beat_thread.join(timeout=1)
     sys.exit(0)
 
 

@@ -31,7 +31,7 @@ export default function PublicLayout() {
           <div className="space-y-3">
             <Logo />
             <p className="max-w-sm text-sm text-muted-foreground">
-              Humanización visual de retratos generados por IA, procesada en tu propia computadora. Los resultados se rotulan como editados con IA.
+              Crea con Gemini, edita y organiza tus imágenes. La humanización se procesa en la computadora que aloja LUMIA AI y sus resultados se rotulan como editados con IA.
             </p>
           </div>
           <div className="space-y-2 text-sm">

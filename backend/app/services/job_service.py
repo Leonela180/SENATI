@@ -7,6 +7,10 @@ from ..models import ProcessingJob, audit
 
 STATUS_ES = {"queued": "En cola", "processing": "Procesando", "completed": "Completado", "failed": "Error"}
 ERROR_ES = {
+    "filtro_no_disponible": "No se pudo comprobar el filtro de seguridad. No se publicó ningún resultado.",
+    "tiempo_agotado": "El procesamiento superó el tiempo máximo. Prueba una imagen más pequeña.",
+    "motor_ocupado": "El motor local está procesando otra imagen. Inténtalo de nuevo al terminar.",
+    "memoria_insuficiente": "No hay suficiente RAM disponible para el motor local. Cierra aplicaciones que no uses y vuelve a intentarlo.",
     "motor_error": "El motor de IA falló al procesar la imagen.",
     "modelo_no_disponible": "El modelo de IA no está instalado o no se pudo cargar.",
     "resultado_inexistente": "El resultado no se guardó correctamente.",
@@ -14,11 +18,12 @@ ERROR_ES = {
     "gpu_memoria": "La GPU se quedó sin memoria. Prueba con una imagen más pequeña.",
     "parametros_invalidos": "Los ajustes de la herramienta no son válidos.",
 }
-TOOL_ES = {"humanizar": "Humanización", "quitar_lunar": "Quitar lunar o mancha", "cambiar_fondo": "Cambiar fondo",
+TOOL_ES = {"restaurar": "Restaurar fotografía", "humanizar": "Humanización", "quitar_lunar": "Quitar lunar o mancha", "cambiar_fondo": "Cambiar fondo",
            "desenfoque": "Desenfoque gaussiano", "mejorar_calidad": "Mejorar calidad", "ajustes": "Ajustes de imagen"}
 PUBLIC_PARAMS = ("strength", "steps", "guidance", "seed", "work_size", "seconds", "vram_gb", "device", "filtro_seguridad",
                  "scale", "sharpen", "denoise", "radius", "scope", "mode", "color", "puntos", "width", "height",
-                 "brightness", "contrast", "saturation", "warmth", "rotate")
+                 "brightness", "contrast", "saturation", "warmth", "rotate", "runtime", "blend", "ram_free_min_gib",
+                 "facial_detail_applied", "eyes_enhanced", "pores_intensity", "facial_detail_method", "intensity")
 
 
 class ToolParamsError(ValueError):
@@ -38,9 +43,9 @@ def clean_tool_params(tool, params, image):
             raise ToolParamsError(key)
         return v
 
-    if tool == "quitar_lunar":
-        pts = p.get("points")
-        if not isinstance(pts, list) or not 1 <= len(pts) <= 20:
+    if tool in ("quitar_lunar", "restaurar"):
+        pts = p.get("points", [] if tool == "restaurar" else None)
+        if not isinstance(pts, list) or not (0 if tool == "restaurar" else 1) <= len(pts) <= 20:
             raise ToolParamsError("points")
         clean = []
         for q in pts:
@@ -51,7 +56,10 @@ def clean_tool_params(tool, params, image):
             if not (0 <= x < image.width and 0 <= y < image.height and 2 <= r <= 80):
                 raise ToolParamsError("points")
             clean.append({"x": x, "y": y, "r": r})
-        return {"points": clean, "puntos": len(clean)}
+        result = {"points": clean, "puntos": len(clean)}
+        if tool == "restaurar":
+            result["intensity"] = round(num("intensity", 0.1, 1, 0.6), 2)
+        return result
     if tool == "cambiar_fondo":
         mode = p.get("mode")
         if mode not in ("color", "desenfocado", "transparente"):
@@ -98,7 +106,7 @@ def create_job(user, image, preset, idem_key, tool="humanizar", tool_params=None
     if existing:
         return existing, False
     if tool == "humanizar":
-        if current_app.config["AI_ENGINE"] != "local" or preset not in PRESETS:
+        if current_app.config["AI_ENGINE"] != "local" or preset not in PRESETS or current_app.config.get("AI_LOCAL_RUNTIME") == "cpp":
             preset = "natural"
         params = dict(PRESETS[preset], seed=DEFAULT_SEED)    # RNF-10: parámetros y semilla registrados
     else:

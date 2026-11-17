@@ -1,5 +1,34 @@
 # Estado de LUMIA AI
 
+## Cierre de comprobacion de entrega
+
+- Nueva etapa: restauracion conservadora de fotos deterioradas, guia local de edicion, preferencias de apariencia/avatar y enlaces de invitacion dirigidos con correo/WhatsApp preparados.
+- 92 pruebas backend y 6 pruebas frontend pasan. TypeScript/Vite compila. Migracion `d4f6b8a2c0e1` aplicada con respaldo verificado; `alembic check` sin diferencias.
+- Ocho recorridos Playwright pasan en 31,5 s en base aislada: incluye preferencias persistentes, restauracion al cambiar de pantalla/recargar e invitacion dirigida con registro y aceptacion. El entorno E2E simula solo la humanizacion; las herramientas de edicion ejecutan sus algoritmos reales.
+- Las preferencias se guardan en el navegador. El asistente usa recorridos preparados, no un modelo de chat. El correo abre el cliente del propietario: no hay envio SMTP automatico.
+- Seguimiento de trabajos: consulta automatica del historial, tiempo desde la creacion del trabajo y recuperacion tras navegar/recargar. Una falla de consulta no se muestra como falla de procesamiento.
+
+- El enlace HTTPS responde con `status=ok`, motor `local`, runtime `cpp` y latido del worker de 3 segundos en la ultima consulta.
+- Se repitio la solicitud real de imagen a Gemini con la configuracion existente: sigue devolviendo `gemini_limite`. No se cambio de proveedor ni se activo facturacion.
+- El script `scripts/verificar.ps1` comprueba ahora el latido despues de las pruebas, detecta errores al consultar la revision y restaura la carpeta inicial incluso cuando falla.
+- La entrega completa con Gemini sigue pendiente de cuota disponible y de una generacion real satisfactoria; el porcentaje comunicado es una estimacion, no una garantia de ausencia de errores.
+
+## Comprobación local del 16/11/2026
+
+- Python 3.12.10 accesible fuera del aislamiento de ejecución y dependencias del editor instaladas.
+- PostgreSQL 17.12 actualizado a `c3e5a7f1b9d2`, con respaldo previo verificado y sin diferencias en `alembic check`.
+- 85 pruebas backend y 6 pruebas unitarias frontend pasan; compilación TypeScript/Vite correcta.
+- Seis recorridos de navegador en base separada pasan: equipos, circuito de humanización mock, edición real de fondo, horas, consentimiento Gemini y vistas móvil/escritorio.
+- Enlace HTTPS temporal activo; cookie Secure y protección CSRF comprobadas.
+- Gemini: modelo accesible con la clave configurada. Generación real bloqueada por cuota de Google (429); no se puede dar por validada.
+- Humanización real activada tras validación: `AI_ENGINE=local`, `AI_LOCAL_RUNTIME=cpp`, perfil natural, lado máximo de trabajo de 320 px y mezcla de IA 0,35. Los filtros locales se ejecutan antes y después en procesos separados.
+- Prueba pública real: 156,08 s, original intacto, microtextura aplicada y dos zonas oculares realzadas, descarga rotulada y ningún error JavaScript. El latido del worker no superó 5 s de antigüedad durante el trabajo. Mínimo observado de RAM disponible: 1,59 GiB.
+- Los prototipos privados de piel/ojos sirvieron de referencia para un ajuste genérico con detección automática. Las máscaras calibradas a una sola foto no se reutilizan indiscriminadamente.
+- La validación técnica y visual de un retrato no sustituye una evaluación con varios retratos/revisores ni garantiza idéntica calidad con cualquier imagen.
+- Guía breve: [entrega-senati.md](entrega-senati.md). Evidencias: `docs/evidencias/mejoras_20261116/`.
+
+Los apartados siguientes conservan las evidencias históricas de desarrollo y no sustituyen esta comprobación local.
+
 > **Actualización del 14/11/2026: módulos nuevos.**
 > - **Estudio de edición:** quitar lunar, cambiar fondo, desenfoque gaussiano, mejorar calidad y ajustes.
 > - **Galería:** álbumes, subida múltiple y procesamiento por lotes.

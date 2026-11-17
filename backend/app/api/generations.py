@@ -14,7 +14,7 @@ bp = Blueprint("generations", __name__)
 ERRORS = {
     "gemini_no_configurado": ("La generación no está configurada: falta GEMINI_API_KEY en el archivo .env.", 503),
     "gemini_clave": ("La clave de Gemini no es válida o no tiene permiso.", 502),
-    "gemini_limite": ("Se alcanzó el límite de uso de Gemini. Inténtalo más tarde.", 429),
+    "gemini_limite": ("Google indica que no hay cuota disponible para generar imágenes. El administrador debe revisar la cuota o facturación de Gemini. Puedes seguir usando el Estudio y la galería.", 429),
     "gemini_red": ("No se pudo conectar con Gemini. Revisa tu conexión a internet.", 502),
     "gemini_solicitud": ("Gemini rechazó la solicitud. Cambia la descripción.", 400),
     "gemini_sin_imagen": ("Gemini no devolvió una imagen (puede haberla bloqueado por sus políticas).", 422),

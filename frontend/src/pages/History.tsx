@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, History as HistoryIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { EmptyState, PageHeader } from "@/components/PageHeader";
+import { EmptyState, PageHeader, QueryError } from "@/components/PageHeader";
 import { JobCard } from "@/components/JobCard";
 import { useJobs } from "@/features/jobs/useJobs";
 import { useWorkspaces } from "@/features/teams/useTeams";
@@ -13,7 +13,7 @@ export default function History() {
   const [ws, setWs] = useState<number | undefined>(undefined);
   const { data: workspaces } = useWorkspaces();
   const team = workspaces?.find((w) => w.kind === "team");
-  const { data, isLoading } = useJobs(page, ws);
+  const { data, isLoading, isError, isFetching, refetch } = useJobs(page, ws);
   const tabs = [{ id: undefined, label: "Mis trabajos" }, ...(team ? [{ id: team.id, label: `Compartidos en ${team.name}` }] : [])];
 
   return (
@@ -32,7 +32,7 @@ export default function History() {
                     </div>
                   )} />
 
-      {isLoading ? (
+      {isError ? <QueryError onRetry={() => { void refetch(); }} retrying={isFetching} /> : isLoading ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => <div key={i} className="aspect-[4/5] animate-pulse rounded-2xl bg-muted" />)}
         </div>

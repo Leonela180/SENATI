@@ -1,4 +1,5 @@
 ﻿# Levanta la API (waitress) y el worker, y abre el navegador (modo demostración).
+param([switch]$NoAbrir, [switch]$Compartir)
 $ErrorActionPreference = "Stop"
 $root = Split-Path $PSScriptRoot -Parent
 $py = "$root\backend\.venv\Scripts\python.exe"
@@ -8,6 +9,11 @@ if (-not (Test-Path $py)) { Write-Error "Falta el entorno de Python: ejecuta scr
 $envs = @{}
 Get-Content "$root\.env" | Where-Object { $_ -match "^\s*([A-Z_]+)=(.*)$" } | ForEach-Object { $envs[$Matches[1]] = $Matches[2].Trim() }
 foreach ($k in "SECRET_KEY", "DATABASE_URL") { if (-not $envs[$k]) { Write-Error "Falta $k en .env" } }
+if ($Compartir) {
+    $env:TRUST_PROXY = '1'
+    $env:APP_ENV = 'production'
+    $envs['TRUST_PROXY'] = '1'
+}
 if ($envs["AI_ENGINE"] -eq "local" -and -not (Test-Path (Join-Path $root $envs["AI_MODEL_PATH"]))) {
     Write-Error "AI_ENGINE=local pero no están los pesos en $($envs['AI_MODEL_PATH'])"
 }
@@ -19,6 +25,8 @@ if (Test-Path "$PSScriptRoot\.pids") { Write-Error "LUMIA AI ya parece estar en 
 if ($LASTEXITCODE -ne 0) { Write-Error "No se pudo conectar con PostgreSQL. Revisa el servicio y DATABASE_URL." }
 
 $pids = @()
+$logs = Join-Path $root 'private_data\logs'
+New-Item -ItemType Directory -Force $logs | Out-Null
 $waitressArgs = @("-m", "waitress", "--listen=127.0.0.1:5000")
 if ($envs["TRUST_PROXY"] -eq "1") {
     # Modo compartir (scripts\compartir.ps1): Waitress acepta las cabeceras del túnel local de Cloudflare
@@ -26,11 +34,13 @@ if ($envs["TRUST_PROXY"] -eq "1") {
 }
 $waitressArgs += "wsgi:app"
 $api = Start-Process $py -ArgumentList $waitressArgs `
-       -WorkingDirectory "$root\backend" -PassThru -WindowStyle Minimized
+       -WorkingDirectory "$root\backend" -PassThru -WindowStyle Hidden `
+       -RedirectStandardOutput "$logs\api.out.log" -RedirectStandardError "$logs\api.err.log"
 $pids += $api.Id
 $n = [int]($envs["AI_WORKER_CONCURRENCY"]); if ($n -lt 1) { $n = 1 }
 for ($i = 1; $i -le $n; $i++) {
-    $w = Start-Process $py -ArgumentList "-m", "app.workers.image_worker" -WorkingDirectory "$root\backend" -PassThru -WindowStyle Minimized
+    $w = Start-Process $py -ArgumentList "-m", "app.workers.image_worker" -WorkingDirectory "$root\backend" -PassThru -WindowStyle Hidden `
+         -RedirectStandardOutput "$logs\worker_$i.out.log" -RedirectStandardError "$logs\worker_$i.err.log"
     $pids += $w.Id
 }
 $pids | Set-Content "$PSScriptRoot\.pids"
@@ -39,6 +49,6 @@ $ok = $false
 for ($i = 0; $i -lt 30; $i++) {
     try { Invoke-RestMethod http://127.0.0.1:5000/api/v1/health -TimeoutSec 2 | Out-Null; $ok = $true; break } catch { Start-Sleep 1 }
 }
-if (-not $ok) { Write-Error "La API no respondió en 30 s. Revisa la ventana minimizada de la API." }
-Start-Process "http://localhost:5000"
+if (-not $ok) { Write-Error "La API no respondió en 30 s. Revisa private_data\logs." }
+if (-not $NoAbrir -and -not $Compartir) { Start-Process "http://localhost:5000" }
 Write-Host "LUMIA AI en marcha (procesos: $($pids -join ', ')). Para cerrar: scripts\detener.ps1" -ForegroundColor Green

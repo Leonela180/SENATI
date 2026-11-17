@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import { CheckCircle2, Clock, Copy, Link2, Users, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, Copy, Link2, Mail, MessageCircle, Users, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +19,8 @@ export default function Team() {
   const [name, setName] = useState("");
   const [days, setDays] = useState(30);
   const [link, setLink] = useState("");
+  const [recipient, setRecipient] = useState({ email: "", display_name: "" });
+  const [invitedEmail, setInvitedEmail] = useState("");
   const create = useCreateTeam();
   const accept = useAcceptInvite();
   const invite = useInvite();
@@ -127,17 +129,28 @@ export default function Team() {
           </ul>
           {isOwner && (
             <div className="space-y-2 border-t pt-5">
-              <Button variant="outline" className="w-full rounded-xl" onClick={() => invite.mutate(team.id, { onSuccess: (d) => setLink(window.location.origin + d.link) })}>
+              <Label htmlFor="invite-name">Nombre de la persona (opcional)</Label>
+              <Input id="invite-name" maxLength={120} value={recipient.display_name} onChange={e => setRecipient({ ...recipient, display_name: e.target.value })} />
+              <Label htmlFor="invite-email">Correo de la persona (opcional)</Label>
+              <Input id="invite-email" type="email" maxLength={254} placeholder="persona@correo.com" value={recipient.email} onChange={e => setRecipient({ ...recipient, email: e.target.value })} />
+              <p className="text-xs text-muted-foreground">Si indicas un correo, solo una cuenta con ese correo podrá aceptar. La persona crea su propia contraseña.</p>
+              <Button variant="outline" disabled={invite.isPending || (!!recipient.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(recipient.email.trim()))} className="w-full rounded-xl" onClick={() => invite.mutate({ teamId: team.id, ...recipient }, { onSuccess: (d) => { setLink(window.location.origin + d.link); setInvitedEmail(recipient.email.trim()); } })}>
                 <Link2 className="size-4" aria-hidden />Generar invitación
               </Button>
+              {invite.error && <p role="alert" className="text-sm text-destructive">{(invite.error as Error).message}</p>}
               {link && (
                 <div className="space-y-1">
                   <div className="flex gap-2">
                     <Input readOnly value={link} aria-label="Enlace de invitación" onFocus={(e) => e.target.select()} />
                     <Button size="icon" variant="secondary" aria-label="Copiar enlace"
-                            onClick={() => navigator.clipboard?.writeText(link).then(() => toast.success("Enlace copiado"))}><Copy className="size-4" /></Button>
+                            onClick={async () => { try { await navigator.clipboard.writeText(link); toast.success("Enlace copiado"); } catch { toast.error("Selecciona y copia el enlace manualmente."); } }}><Copy className="size-4" /></Button>
                   </div>
                   <p className="text-xs text-muted-foreground">Un solo uso, vence en 72 horas. Cópialo ahora: no se vuelve a mostrar.</p>
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    <Button asChild size="sm" variant="outline"><a href={`mailto:${encodeURIComponent(invitedEmail)}?subject=${encodeURIComponent(`Invitación a ${team.name} en LUMIA`)}&body=${encodeURIComponent(`Te invito a mi equipo en LUMIA AI. Abre este enlace para crear tu cuenta con tu propia contraseña o iniciar sesión. Vence en 72 horas y sirve una vez:\n${link}`)}`}><Mail className="size-4" aria-hidden />Preparar correo</a></Button>
+                    <Button asChild size="sm" variant="outline"><a target="_blank" rel="noopener noreferrer" href={`https://wa.me/?text=${encodeURIComponent(`Te invito a ${team.name} en LUMIA AI. Crea tu cuenta o inicia sesión con este enlace de un solo uso (72 horas): ${link}`)}`}><MessageCircle className="size-4" aria-hidden />WhatsApp</a></Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Se abre tu aplicación para revisar y enviar el mensaje. LUMIA no envía correos automáticamente.</p>
                 </div>
               )}
             </div>

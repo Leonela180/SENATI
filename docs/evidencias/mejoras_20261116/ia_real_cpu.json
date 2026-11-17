@@ -1,0 +1,28 @@
+{
+  "status": "completed",
+  "model": "stable-diffusion-v1-5:sd15-q4_0",
+  "parameters": {
+    "blend": 0.35,
+    "device": "cpu",
+    "eyes_enhanced": 2,
+    "facial_detail_applied": true,
+    "facial_detail_method": "OpenCV: microtexture and existing reflections",
+    "filtro_seguridad": true,
+    "guidance": 6,
+    "pores_intensity": 0.65,
+    "ram_free_min_gib": 1.59,
+    "runtime": "cpp",
+    "seconds": 156.08,
+    "seed": 1234,
+    "steps": 30,
+    "strength": 0.3,
+    "vram_gb": 0,
+    "work_size": [
+      320,
+      320
+    ]
+  },
+  "max_heartbeat_seconds": 5,
+  "download_labeled": true,
+  "javascript_errors": 0
+}

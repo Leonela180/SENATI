@@ -16,11 +16,14 @@ import Studio from "@/pages/Studio";
 import Gallery from "@/pages/Gallery";
 import Generate from "@/pages/Generate";
 import Hours from "@/pages/Hours";
+import Assistant from "@/pages/Assistant";
+import Invitation from "@/pages/Invitation";
 
 export const router = createBrowserRouter([
   { element: <PublicLayout />, children: [{ path: "/", element: <Home /> }] },
   { path: "/login", element: <Login /> },
   { path: "/registro", element: <Register /> },
+  { path: "/invitacion", element: <Invitation /> },
   {
     path: "/app",
     element: <AppLayout />,
@@ -30,6 +33,7 @@ export const router = createBrowserRouter([
       { path: "estudio", element: <Studio /> },
       { path: "galeria", element: <Gallery /> },
       { path: "generar", element: <Generate /> },
+      { path: "asistente", element: <Assistant /> },
       { path: "horas", element: <Hours /> },
       { path: "historial", element: <History /> },
       { path: "trabajos/:id", element: <JobDetail /> },

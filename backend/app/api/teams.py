@@ -1,7 +1,8 @@
 from flask import Blueprint, g, request
 from . import fail, ok
-from ..extensions import db
-from ..models import TeamMembership, User
+from ..extensions import db, limiter, utc_now
+from ..models import TeamMembership, TeamInvitation, User, Workspace
+from ..services.team_service import _hash
 from ..services.permission_service import get_team_membership_or_404, login_required
 from ..services.team_service import (TeamError, accept_invitation, create_invitation, create_team,
                                      remove_member, team_stats)
@@ -40,12 +41,34 @@ def members(team_id):
 @bp.post("/teams/<int:team_id>/invitations")
 @login_required
 def invite(team_id):
+    import re
+    data = request.get_json(silent=True) or {}
+    email = data.get("email") or ""
+    name = data.get("display_name") or ""
+    if not isinstance(email, str) or not isinstance(name, str):
+        return fail("datos_invalidos", "Revisa el nombre y correo de la persona invitada.", 400)
+    email, name = email.strip().lower(), name.strip()
+    if len(email) > 254 or len(name) > 120 or (email and not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email)):
+        return fail("datos_invalidos", "Revisa el nombre y correo de la persona invitada.", 400)
     try:
-        data = create_invitation(g.user, team_id)
+        data = create_invitation(g.user, team_id, email or None, name or None)
     except TeamError as e:
         return _team_error(e)
     db.session.commit()
     return ok(data, 201)
+
+
+@bp.post("/invitations/preview")
+@limiter.limit("30/hour")
+def preview():
+    token = (request.get_json(silent=True) or {}).get("token")
+    if not isinstance(token, str) or len(token) > 100:
+        return fail("invitacion_invalida", "Invitación no disponible.", 404)
+    inv = db.session.query(TeamInvitation).filter_by(token_hash=_hash(token)).first()
+    if not inv or inv.used_at or inv.expires_at < utc_now():
+        return fail("invitacion_invalida", "Invitación vencida, utilizada o no disponible.", 404)
+    team = db.session.get(Workspace, inv.team_workspace_id)
+    return ok({"team_name": team.name, "email": inv.recipient_email, "display_name": inv.recipient_name})
 
 
 @bp.post("/invitations/accept")

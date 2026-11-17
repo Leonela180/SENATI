@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, CalendarClock, Cpu, History as HistoryIcon, Images, Sparkles, Users, Wand2, WandSparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { EmptyState, PageHeader } from "@/components/PageHeader";
+import { EmptyState, PageHeader, QueryError } from "@/components/PageHeader";
 import { JobCard } from "@/components/JobCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useMe } from "@/features/auth/useAuth";
@@ -21,7 +21,7 @@ function Stat({ icon: Icon, label, children }: { icon: typeof Images; label: str
 export default function Dashboard() {
   const { data: me } = useMe();
   const { data: health } = useHealth();
-  const { data: jobs } = useJobs(1);
+  const { data: jobs, isLoading: loadingJobs, isError: jobsError, isFetching, refetch } = useJobs(1);
   const { data: workspaces } = useWorkspaces();
   const team = workspaces?.find((w) => w.kind === "team");
   const last = jobs?.items[0];
@@ -31,18 +31,33 @@ export default function Dashboard() {
   const MODULES = [
     { to: "/app/humanizar", icon: Sparkles, title: "Humanizar", text: "Piel, ojos, cabello y luz más naturales con IA local." },
     { to: "/app/estudio", icon: Wand2, title: "Estudio de edición", text: "Quitar lunares, cambiar fondo, desenfoque y calidad." },
-    { to: "/app/generar", icon: WandSparkles, title: "Generar con IA", text: "Crea imágenes nuevas describiéndolas (Gemini)." },
+    { to: "/app/asistente", icon: WandSparkles, title: "Asistente de edición", text: "Encuentra un recorrido para restaurar y mejorar tus fotos." },
     { to: "/app/galeria", icon: Images, title: "Galería", text: "Sube, organiza en álbumes y procesa en lote." },
   ];
 
   return (
     <div className="space-y-10">
       <PageHeader eyebrow="Panel" title={`Hola, ${firstName}`}
-                  description="Aquí ves tus últimos trabajos y el estado del motor."
-                  action={<Button size="lg" asChild className="rounded-full px-6"><Link to="/app/humanizar"><Sparkles className="size-4" aria-hidden />Humanizar una imagen</Link></Button>} />
+                  description="Un espacio para crear, editar y organizar tus imágenes."
+                  action={<Button variant="outline" asChild className="rounded-full px-6"><Link to="/app/galeria"><Images className="size-4" aria-hidden />Mi galería</Link></Button>} />
+
+      <section className="relative overflow-hidden rounded-3xl border bg-secondary/60 p-6 md:p-9" aria-labelledby="crear-titulo">
+        <div aria-hidden className="pointer-events-none absolute -right-16 -top-24 size-80 rounded-full bg-brand-soft/70 blur-3xl" />
+        <div className="relative flex flex-wrap items-center justify-between gap-6">
+          <div className="max-w-lg space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-strong">De la idea al detalle</p>
+            <h2 id="crear-titulo" className="font-display text-3xl font-semibold leading-tight md:text-4xl">Dale forma a tu próxima imagen.</h2>
+            <p className="text-sm leading-relaxed text-muted-foreground">Recupera una foto deteriorada o prepara un retrato con la guía del asistente. Tus originales se conservan para comparar cada cambio.</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Button size="lg" asChild className="rounded-xl"><Link to="/app/asistente"><WandSparkles className="size-4" aria-hidden />Elegir mi recorrido</Link></Button>
+            <Button size="lg" variant="outline" asChild className="rounded-xl bg-card"><Link to="/app/estudio"><Wand2 className="size-4" aria-hidden />Abrir Estudio</Link></Button>
+          </div>
+        </div>
+      </section>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat icon={Images} label="Trabajos realizados">{jobs?.total ?? 0}</Stat>
+        <Stat icon={Images} label="Trabajos registrados">{jobs?.total ?? "—"}</Stat>
         <Stat icon={HistoryIcon} label="Último trabajo">{last ? <StatusBadge status={last.status} /> : "—"}</Stat>
         <Stat icon={Cpu} label="Motor de IA">{health ? (health.engine === "local" ? "IA local" : "Simulación") : "—"}</Stat>
         <Stat icon={Users} label="Equipo">{team?.name ?? "Sin equipo"}</Stat>
@@ -77,7 +92,11 @@ export default function Dashboard() {
             </Link>
           )}
         </div>
-        {jobs?.items.length ? (
+        {jobsError ? <QueryError onRetry={() => { void refetch(); }} retrying={isFetching} /> : loadingJobs ? (
+          <div role="status" aria-label="Cargando trabajos" className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => <div key={i} className="aspect-[4/5] animate-pulse rounded-2xl bg-muted" />)}
+          </div>
+        ) : jobs?.items.length ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {jobs.items.slice(0, 4).map((j) => <JobCard key={j.id} job={j} />)}
           </div>

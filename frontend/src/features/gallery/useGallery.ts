@@ -24,7 +24,7 @@ export function useUploadToGallery() {
     mutationFn: (b: { file: File; albumId?: number | null }) => {
       const fd = new FormData();
       fd.append("file", b.file);
-      fd.append("declaracion_ia", "true");
+      fd.append("permiso_edicion", "true");
       if (b.albumId) fd.append("album_id", String(b.albumId));
       return api<ImageInfo>("/images", { method: "POST", body: fd });
     },

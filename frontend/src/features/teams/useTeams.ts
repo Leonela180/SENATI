@@ -21,7 +21,7 @@ export function useCreateTeam() {
 }
 
 export const useInvite = () =>
-  useMutation({ mutationFn: (teamId: number) => api<{ link: string; expires_at: string }>(`/teams/${teamId}/invitations`, { method: "POST" }) });
+  useMutation({ mutationFn: (data: { teamId: number; email?: string; display_name?: string }) => api<{ link: string; expires_at: string }>(`/teams/${data.teamId}/invitations`, { method: "POST", body: JSON.stringify(data) }) });
 
 export function useAcceptInvite() {
   const inv = useInvalidateTeam();

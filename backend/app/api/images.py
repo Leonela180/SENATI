@@ -13,7 +13,7 @@ bp = Blueprint("images", __name__)
 @bp.post("/images")
 @login_required
 def upload():
-    if request.form.get("declaracion_ia") != "true":                                   # RF-07, CP-06
+    if request.form.get("permiso_edicion") != "true" and request.form.get("declaracion_ia") != "true":
         return fail("sin_declaracion", "Confirma que la imagen es generada por IA y que tienes permiso de uso.", 400)
     file = request.files.get("file")
     if not file:
@@ -25,7 +25,8 @@ def upload():
         if not album or album.owner_user_id != g.user.id:
             return fail("no_encontrado", "Álbum no encontrado.", 404)
     try:
-        image = create_image(g.user, file, album_id=album_id)
+        image = create_image(g.user, file, album_id=album_id,
+                             source_type="user_upload" if request.form.get("permiso_edicion") == "true" else "ai_generated")
     except UploadError as e:
         return fail(e.code, e.message, 400)                                             # CP-05
     db.session.commit()

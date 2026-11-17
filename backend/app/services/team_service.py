@@ -31,7 +31,7 @@ def create_team(user, name):
     return team
 
 
-def create_invitation(user, team_id):
+def create_invitation(user, team_id, email=None, name=None):
     m = membership_of(user)
     if not m or m.team_workspace_id != team_id:
         raise TeamError("no_encontrado", "No encontrado.", 404)
@@ -39,11 +39,12 @@ def create_invitation(user, team_id):
         raise TeamError("solo_propietario", "Solo el propietario puede invitar.", 403)
     token = secrets.token_urlsafe(32)                                               # se muestra una sola vez
     inv = TeamInvitation(team_workspace_id=team_id, created_by=user.id, token_hash=_hash(token),
+                         recipient_email=email, recipient_name=name,
                          expires_at=utc_now() + timedelta(hours=INVITATION_HOURS))
     db.session.add(inv)
     db.session.flush()
     audit(user.id, "team.invite", "team_invitation", inv.id)                        # nunca se guarda el token
-    return {"link": f"/app/equipo?token={token}", "expires_at": inv.expires_at.isoformat()}
+    return {"link": f"/invitacion?token={token}", "expires_at": inv.expires_at.isoformat()}
 
 
 def accept_invitation(user, token):
@@ -51,6 +52,8 @@ def accept_invitation(user, token):
                              .with_for_update()).scalar_one_or_none()
     if not inv or inv.used_at is not None or inv.expires_at < utc_now():
         raise TeamError("invitacion_invalida", "La invitación no es válida, ya se usó o venció.", 400)  # CU05 3a
+    if inv.recipient_email and user.email.lower() != inv.recipient_email.lower():
+        raise TeamError("correo_invitacion", "Inicia sesión con el correo al que se dirigió la invitación.", 403)
     team = db.session.get(Workspace, inv.team_workspace_id)
     if not team or team.kind != "team":                                             # validación transaccional
         raise TeamError("invitacion_invalida", "La invitación no es válida.", 400)

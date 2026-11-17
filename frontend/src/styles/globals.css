@@ -145,6 +145,50 @@
 
 :focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 
+/* Acentos curados: evitan colores arbitrarios con texto ilegible. */
+:root { --accent-hue: 48; }
+:root[data-accent="ocean"] { --accent-hue: 245; }
+:root[data-accent="forest"] { --accent-hue: 155; }
+:root[data-accent="violet"] { --accent-hue: 300; }
+:root[data-accent] {
+  --primary: oklch(0.36 0.09 var(--accent-hue));
+  --primary-foreground: oklch(0.99 0 0);
+  --brand: oklch(0.55 0.1 var(--accent-hue));
+  --brand-strong: oklch(0.42 0.09 var(--accent-hue));
+  --brand-soft: oklch(0.94 0.025 var(--accent-hue));
+  --ring: oklch(0.55 0.1 var(--accent-hue));
+}
+:root.dark[data-accent] {
+  --primary: oklch(0.79 0.08 var(--accent-hue));
+  --primary-foreground: oklch(0.2 0.02 var(--accent-hue));
+  --brand-strong: oklch(0.83 0.07 var(--accent-hue));
+  --brand-soft: oklch(0.29 0.035 var(--accent-hue));
+}
+:root[data-compact="true"] .lumia-sidebar nav a { padding-block: 0.35rem; }
+:root[data-compact="true"] .lumia-sidebar nav { gap: 0.9rem; }
+input[type="range"] { accent-color: var(--brand-strong); }
+
+.lumia-sidebar {
+  --sidebar: oklch(0.245 0.024 45);
+  --foreground: oklch(0.97 0.01 75);
+  --muted-foreground: oklch(0.78 0.018 65);
+  --primary: oklch(0.94 0.027 75);
+  --primary-foreground: oklch(0.245 0.024 45);
+  --card: oklch(0.29 0.024 45);
+  --border: oklch(0.38 0.02 45);
+  --sidebar-accent: oklch(0.33 0.025 45);
+  --brand-soft: oklch(0.36 0.04 50);
+  --brand-strong: oklch(0.84 0.07 65);
+  --muted: oklch(0.33 0.025 45);
+}
+
+/* Mantiene el foco visible sobre el comparador transparente. */
+figure:has(input[type="range"]:focus-visible) {
+  outline: 2px solid var(--brand-strong);
+  outline-offset: 6px;
+  border-radius: var(--radius-2xl);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }

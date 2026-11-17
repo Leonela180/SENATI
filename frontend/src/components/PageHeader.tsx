@@ -1,4 +1,22 @@
 import type { ReactNode } from "react";
+import { AlertCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+export function QueryError({ onRetry, retrying = false }: { onRetry: () => void; retrying?: boolean }) {
+  return (
+    <div role="alert" className="flex flex-wrap items-center gap-4 rounded-2xl border border-destructive/25 bg-card p-5">
+      <AlertCircle className="size-5 shrink-0 text-destructive" aria-hidden />
+      <div className="min-w-0 flex-1">
+        <p className="font-medium">No pudimos cargar esta información</p>
+        <p className="mt-1 text-sm text-muted-foreground">Comprueba tu conexión e inténtalo de nuevo.</p>
+      </div>
+      <Button variant="outline" onClick={onRetry} disabled={retrying}>
+        <RefreshCw className={retrying ? "size-4 animate-spin" : "size-4"} aria-hidden />
+        {retrying ? "Reintentando…" : "Reintentar"}
+      </Button>
+    </div>
+  );
+}
 
 export function PageHeader({ title, description, action, eyebrow }: { title: ReactNode; description?: ReactNode; action?: ReactNode; eyebrow?: string }) {
   return (

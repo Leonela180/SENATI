@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { EmptyState, PageHeader } from "@/components/PageHeader";
+import { EmptyState, PageHeader, QueryError } from "@/components/PageHeader";
 import { useAlbums, useCreateAlbum, useDeleteAlbum, useDeleteImage, useImages, useMoveImage, useUploadToGallery } from "@/features/gallery/useGallery";
 import { useCreateJob } from "@/features/jobs/useJobs";
 import { cn } from "@/lib/utils";
@@ -28,9 +28,10 @@ export default function Gallery() {
   const [declared, setDeclared] = useState(false);
   const [newAlbum, setNewAlbum] = useState("");
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const [batchBusy, setBatchBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const { data: albums } = useAlbums();
-  const { data, isLoading } = useImages(album, q, page);
+  const { data, isLoading, isError, isFetching, refetch } = useImages(album, q, page);
   const uploadImg = useUploadToGallery();
   const createAlbum = useCreateAlbum();
   const deleteAlbum = useDeleteAlbum();
@@ -43,6 +44,7 @@ export default function Gallery() {
     if (!files?.length) return;
     if (!declared) { toast.error("Marca la confirmación de que las imágenes son generadas por IA."); return; }
     const list = Array.from(files).slice(0, 20);
+    if (files.length > 20) toast.info("Se subirán las primeras 20 imágenes. Puedes subir las demás después.");
     setProgress({ done: 0, total: list.length });
     let ok = 0;
     for (const [i, f] of list.entries()) {
@@ -56,23 +58,48 @@ export default function Gallery() {
   }
 
   async function runBatch(idx: number) {
+    if (batchBusy) return;
+    setBatchBusy(true);
     const b = BATCH[idx];
     let ok = 0;
+    const failed: number[] = [];
     for (const id of selected) {
       try { await createJob.mutateAsync({ image_id: id, preset: "natural", key: crypto.randomUUID(), tool: b.tool, params: b.params }); ok++; }
-      catch (e) { toast.error((e as Error).message); }
+      catch (e) { failed.push(id); toast.error((e as Error).message); }
     }
-    toast.success(`${ok} trabajos de «${b.label}» en cola. Míralos en el historial.`);
-    setSelected([]);
+    if (ok) toast.success(`${ok} trabajos de «${b.label}» en cola. Míralos en el historial.`);
+    setSelected(failed);
+    setBatchBusy(false);
   }
 
   async function deleteSelected() {
+    if (batchBusy) return;
     if (!window.confirm(`¿Borrar ${selected.length} ${selected.length === 1 ? "imagen" : "imágenes"} y sus resultados? No se puede deshacer.`)) return;
-    for (const id of selected) await del.mutateAsync(id).catch(() => null);
-    setSelected([]);
+    setBatchBusy(true);
+    const failed: number[] = [];
+    for (const id of selected) {
+      try { await del.mutateAsync(id); }
+      catch (e) { failed.push(id); toast.error((e as Error).message); }
+    }
+    if (selected.length > failed.length) toast.success(`${selected.length - failed.length} imágenes borradas.`);
+    setSelected(failed);
+    setBatchBusy(false);
   }
 
-  const toggle = (id: number) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
+  async function moveSelected(value: string) {
+    if (batchBusy || !value) return;
+    setBatchBusy(true);
+    const failed: number[] = [];
+    for (const id of selected) {
+      try { await move.mutateAsync({ id, albumId: value === "none" ? null : Number(value) }); }
+      catch (e) { failed.push(id); toast.error((e as Error).message); }
+    }
+    if (selected.length > failed.length) toast.success("Imágenes movidas al álbum.");
+    setSelected(failed);
+    setBatchBusy(false);
+  }
+
+  const toggle = (id: number) => { if (!batchBusy) setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id])); };
   const albumBtn = (value: string, label: string, count?: number) => (
     <button key={value} onClick={() => { setAlbum(value); setPage(1); setSelected([]); }}
             className={cn("flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition",
@@ -121,13 +148,13 @@ export default function Gallery() {
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative min-w-56 flex-1">
               <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-              <Input value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} placeholder="Buscar por nombre" className="pl-9" aria-label="Buscar imágenes" />
+              <Input value={q} onChange={(e) => { setQ(e.target.value); setPage(1); setSelected([]); }} placeholder="Buscar por nombre" className="pl-9" aria-label="Buscar imágenes" disabled={batchBusy} />
             </div>
             {data && <span className="text-sm text-muted-foreground">{data.total} {data.total === 1 ? "imagen" : "imágenes"}</span>}
           </div>
 
           {selected.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2 rounded-2xl border bg-secondary/60 p-3">
+            <fieldset disabled={batchBusy} aria-busy={batchBusy} className="flex min-w-0 flex-wrap items-center gap-2 rounded-2xl border bg-secondary/60 p-3">
               <span className="flex items-center gap-2 text-sm font-medium"><CheckSquare className="size-4" aria-hidden />{selected.length} seleccionadas</span>
               <span className="mx-1 h-5 w-px bg-border" aria-hidden />
               <Layers className="size-4 text-muted-foreground" aria-hidden />
@@ -135,17 +162,17 @@ export default function Gallery() {
                 <Button key={b.tool} size="sm" variant="outline" className="rounded-full bg-card" disabled={createJob.isPending} onClick={() => runBatch(i)}>{b.label}</Button>
               ))}
               <select aria-label="Mover a álbum" className="rounded-full border bg-card px-3 py-1.5 text-sm" value=""
-                      onChange={(e) => { const v = e.target.value; Promise.all(selected.map((id) => move.mutateAsync({ id, albumId: v === "none" ? null : Number(v) }))).then(() => setSelected([])); }}>
+                      onChange={(e) => { void moveSelected(e.target.value); }}>
                 <option value="" disabled>Mover a…</option>
                 <option value="none">Sin álbum</option>
                 {albums?.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
               </select>
               <Button size="sm" variant="ghost" className="text-red-700" onClick={deleteSelected}><Trash2 className="size-4" aria-hidden />Borrar</Button>
               <Button size="sm" variant="ghost" onClick={() => setSelected([])}>Cancelar</Button>
-            </div>
+            </fieldset>
           )}
 
-          {isLoading ? (
+          {isError ? <QueryError onRetry={() => { void refetch(); }} retrying={isFetching} /> : isLoading ? (
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
               {Array.from({ length: 8 }).map((_, i) => <div key={i} className="aspect-square animate-pulse rounded-2xl bg-muted" />)}
             </div>

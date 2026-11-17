@@ -26,6 +26,12 @@ class Config:
     AI_ENGINE = os.getenv("AI_ENGINE", "mock")                 # local | mock
     AI_MODEL_ID = os.getenv("AI_MODEL_ID", "")
     AI_MODEL_PATH = _path("AI_MODEL_PATH", "./models/no-configurado")
+    AI_LOCAL_RUNTIME = os.getenv("AI_LOCAL_RUNTIME", "diffusers")  # diffusers | cpp
+    AI_CPP_MODEL_PATH = _path("AI_CPP_MODEL_PATH", "./models/sd15-q4_0.gguf")
+    AI_CPP_EXECUTABLE = _path("AI_CPP_EXECUTABLE", "./private_data/tools/stable-diffusion.cpp/sd-cli.exe")
+    AI_LITE_WORK_SIDE = int(os.getenv("AI_LITE_WORK_SIDE", "320"))
+    AI_RESULT_BLEND = float(os.getenv("AI_RESULT_BLEND", "0.35"))
+    AI_DETAIL_INTENSITY = float(os.getenv("AI_DETAIL_INTENSITY", "0.65"))
     AI_WORKER_CONCURRENCY = int(os.getenv("AI_WORKER_CONCURRENCY", "1"))
     AI_MAX_ATTEMPTS = 3                                        # reintentos limitados (RNF-08)
     FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")

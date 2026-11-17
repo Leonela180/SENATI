@@ -1,5 +1,6 @@
 ﻿# Health check, BD autenticada, migraciones, pruebas mínimas e inferencia real (skill §11, CP-14).
 $ErrorActionPreference = "Stop"
+$initialLocation = Get-Location
 $root = Split-Path $PSScriptRoot -Parent
 $py = "$root\backend\.venv\Scripts\python.exe"
 $muestra = "$root\docs\muestra_autorizada.png"
@@ -14,6 +15,7 @@ try {
     Write-Host "2/5 Conexión autenticada y migraciones" -ForegroundColor Cyan
     Push-Location "$root\backend"
     & .\.venv\Scripts\alembic.exe current
+    if ($LASTEXITCODE -ne 0) { throw "No se pudo consultar la revision de la base de datos." }
     & .\.venv\Scripts\alembic.exe check
     if ($LASTEXITCODE -ne 0) { throw "El esquema no coincide con los modelos." }
 
@@ -23,6 +25,7 @@ try {
     Pop-Location
 
     Write-Host "4/5 Worker activo" -ForegroundColor Cyan
+    $h = (Invoke-RestMethod http://127.0.0.1:5000/api/v1/health).data
     if ($null -eq $h.worker_seconds_since_beat -or $h.worker_seconds_since_beat -gt 30) { throw "El worker no está en marcha." }
     "Worker: OK"
 
@@ -36,6 +39,7 @@ try {
     Write-Host "VERIFICACIÓN FALLIDA: $_" -ForegroundColor Red
     exit 1
 } finally {
+    Set-Location $initialLocation
     Stop-Transcript | Out-Null
     Write-Host "Registro guardado en $log"
 }

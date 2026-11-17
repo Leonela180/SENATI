@@ -7,6 +7,7 @@ from diffusers import StableDiffusionImg2ImgPipeline
 from PIL import Image, ImageOps
 from .interface import EngineError, HumanizationEngine, save_labeled
 from .prompts import DEFAULT_SEED, NEGATIVE, POSITIVE, PRESETS, WORK_SIDE
+from .resources import require_memory
 
 log = logging.getLogger("lumia.engine")
 CPU_WORK_SIDE = 512                                              # sin GPU (laptop con Radeon/16 GB): imagen de trabajo más pequeña
@@ -14,6 +15,7 @@ CPU_WORK_SIDE = 512                                              # sin GPU (lapt
 
 class LocalHumanizationEngine(HumanizationEngine):
     def __init__(self, model_path: str, model_id: str):
+        require_memory()
         self.model_id = model_id or "stable-diffusion-v1-5"
         self.model_version = f"diffusers-{diffusers.__version__}"
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -24,22 +26,17 @@ class LocalHumanizationEngine(HumanizationEngine):
                 single = dict(config=os.path.join(os.path.dirname(model_path), "stable-diffusion-v1-5"),
                               original_config=os.path.join(os.path.dirname(model_path), "v1-inference.yaml"),
                               torch_dtype=dtype, local_files_only=True)
-                try:                                              # el filtro de seguridad va activo (informe 4.5)
-                    self.pipe = StableDiffusionImg2ImgPipeline.from_single_file(model_path, **single)
-                except Exception:                                 # sin pesos del filtro: se carga sin él y queda registrado
-                    self.pipe = StableDiffusionImg2ImgPipeline.from_single_file(model_path, safety_checker=None, **single)
-                if getattr(self.pipe, "safety_checker", None) is None:
-                    self.safety_checker_active = False
+                self.pipe = StableDiffusionImg2ImgPipeline.from_single_file(model_path, **single)
             else:
                 base = dict(torch_dtype=dtype, use_safetensors=True, local_files_only=True)
                 try:                                              # la guía descarga solo los pesos fp16; en CPU se convierten a fp32
                     self.pipe = StableDiffusionImg2ImgPipeline.from_pretrained(model_path, variant="fp16", **base)
                 except Exception:
                     self.pipe = StableDiffusionImg2ImgPipeline.from_pretrained(model_path, **base)
+            if getattr(self.pipe, "safety_checker", None) is None:
+                raise EngineError("modelo_no_disponible")
         except Exception as e:                                    # pesos ausentes o dañados (CP-09)
             raise EngineError("modelo_no_disponible") from e
-        if not self.safety_checker_active:
-            log.warning("Filtro de seguridad del modelo NO disponible: se registra en cada trabajo")
         self.pipe = self.pipe.to(self.device)
         if not hasattr(torch.nn.functional, "scaled_dot_product_attention"):
             self.pipe.enable_attention_slicing()

@@ -4,11 +4,16 @@ import pytest
 from PIL import Image as PILImage
 from app import create_app
 from app.extensions import db
+from sqlalchemy.engine import make_url
 
 
 def url_bd_pruebas():
-    # base separada (paso 3); TEST_DATABASE_URL permite usar otra
-    return os.environ.get("TEST_DATABASE_URL") or os.environ["DATABASE_URL"].rsplit("/", 1)[0] + "/lumia_test"
+    # Nunca permitir que drop_all alcance la base de la aplicación.
+    production = make_url(os.environ["DATABASE_URL"])
+    target = make_url(os.environ.get("TEST_DATABASE_URL") or production.set(database="lumia_test"))
+    if target.database == production.database or not (target.database or "").endswith("_test"):
+        raise RuntimeError("La base de pruebas debe ser distinta de la real y terminar en _test.")
+    return target.render_as_string(hide_password=False)
 
 
 @pytest.fixture()

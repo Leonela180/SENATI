@@ -20,10 +20,14 @@ Primero compila el frontend con `npm run build` en `frontend/`. Después basta c
 ```powershell
 cd backend; .\.venv\Scripts\pytest.exe -v        # usa la base lumia_test (nunca la real)
 cd frontend; npm test                            # Vitest
-cd frontend; npx playwright install chromium; npm run e2e    # con la app levantada en :5000
+cd frontend; npx playwright install chromium --no-shell
+# Después de pytest: iniciar API/worker aislados en :5001 y ejecutar Playwright
+cd ../backend; .\.venv\Scripts\python.exe tools/servidor_pruebas.py inicializar
+.\.venv\Scripts\python.exe tools/probar_navegador.py
 ```
 
 - Para usar otra base de pruebas, define `TEST_DATABASE_URL`.
+- Debe terminar en `_test` y ser distinta de la base real. Pytest borra/recrea sus tablas; no ejecutarlo al mismo tiempo que los e2e.
 - El registro está limitado a 10 cuentas por hora desde la misma PC (RNF-01). Si repites mucho los e2e, reinicia la API.
 
 ## Migraciones

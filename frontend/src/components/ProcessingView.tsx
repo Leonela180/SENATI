@@ -3,15 +3,18 @@ import { Check, Loader2 } from "lucide-react";
 import { useJob } from "@/features/jobs/useJobs";
 import { cn } from "@/lib/utils";
 import type { Job } from "@/lib/types";
+import { QueryError } from "@/components/PageHeader";
+import { Link } from "react-router-dom";
 
 /** Vista de procesamiento: la imagen con un barrido suave y la línea de tiempo del trabajo (RF-11). */
 export function ProcessingView({ jobId, preview, onDone }: { jobId: number; preview?: string; onDone?: (j: Job) => void }) {
-  const { data } = useJob(jobId);
-  const [seconds, setSeconds] = useState(0);
+  const { data, isError, isFetching, refetch } = useJob(jobId);
+  const [now, setNow] = useState(Date.now());
+  const seconds = data ? Math.max(0, Math.floor((now - new Date(data.created_at).getTime()) / 1000)) : 0;
   const status = data?.status ?? "queued";
 
   useEffect(() => {
-    const t = setInterval(() => setSeconds((s) => s + 1), 1000);
+    const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
   useEffect(() => {
@@ -21,9 +24,11 @@ export function ProcessingView({ jobId, preview, onDone }: { jobId: number; prev
   const steps = [
     { key: "upload", label: "Imagen recibida", done: true, active: false },
     { key: "queued", label: "En cola", done: status !== "queued", active: status === "queued" },
-    { key: "processing", label: "Procesando en tu PC", done: status === "completed" || status === "failed", active: status === "processing" },
+    { key: "processing", label: "Procesando en el servidor", done: status === "completed" || status === "failed", active: status === "processing" },
     { key: "done", label: "Listo para comparar", done: status === "completed", active: false },
   ];
+
+  if (isError) return <div className="space-y-3"><p className="text-sm text-muted-foreground">No pudimos consultar el estado. Esto no cancela el trabajo ni significa que haya fallado. Volveremos a consultar automáticamente.</p><QueryError onRetry={() => { void refetch(); }} retrying={isFetching} /><Link className="text-sm underline" to="/app/historial">Ver mis trabajos</Link></div>;
 
   return (
     <div className="grid items-center gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,18rem)]" aria-live="polite">
@@ -55,7 +60,7 @@ export function ProcessingView({ jobId, preview, onDone }: { jobId: number; prev
           ))}
         </ol>
         <p className="rounded-2xl bg-muted p-3 text-xs text-muted-foreground">
-          Puedes salir de esta pantalla: el trabajo sigue en tu historial y te mostrará el resultado al terminar.
+          Puedes cambiar de sección o cerrar esta pestaña. El servidor sigue trabajando mientras permanezca encendido. <Link to={`/app/trabajos/${jobId}`} className="font-medium underline">Abrir seguimiento del trabajo</Link> o recuperarlo desde el historial.
         </p>
       </div>
     </div>

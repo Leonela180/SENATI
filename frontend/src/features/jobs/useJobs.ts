@@ -2,12 +2,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type { Health, Job, JobPage, Tool } from "@/lib/types";
 
-export const useHealth = () => useQuery({ queryKey: ["health"], queryFn: () => api<Health>("/health"), staleTime: 30_000 });
+export const useHealth = () => useQuery({ queryKey: ["health"], queryFn: () => api<Health>("/health"), staleTime: 30_000, refetchInterval: 30_000 });
 
 export const useJobs = (page: number, workspaceId?: number) =>
   useQuery({
     queryKey: ["jobs", page, workspaceId ?? "mine"],
     queryFn: () => api<JobPage>(`/jobs?page=${page}${workspaceId ? `&workspace_id=${workspaceId}` : ""}`),
+    refetchInterval: (q) => q.state.data?.items.some(job => job.status === "queued" || job.status === "processing") ? 3000 : false,
+    refetchOnWindowFocus: true,
   });
 
 export const useJob = (id: number) =>
@@ -16,8 +18,9 @@ export const useJob = (id: number) =>
     queryFn: () => api<Job>(`/jobs/${id}`),
     refetchInterval: (q) => {
       const s = q.state.data?.status;
-      return s === "queued" || s === "processing" ? 2000 : false;      // consulta hasta un estado final
+      return !s || s === "queued" || s === "processing" ? 2000 : false;
     },
+    refetchOnWindowFocus: true,
   });
 
 export function useCreateJob() {

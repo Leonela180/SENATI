@@ -1,6 +1,7 @@
 """Galería (álbumes, mover, borrar) y generación con Gemini (con consentimiento y sin red en las pruebas)."""
 import base64
 import io
+import pytest
 
 from PIL import Image as PILImage
 
@@ -103,7 +104,7 @@ def test_cliente_gemini_lee_la_imagen_de_la_respuesta(monkeypatch):
     class Resp:
         def __enter__(self): return self
         def __exit__(self, *a): return False
-        def read(self): return json.dumps(payload).encode()
+        def read(self, *args): return json.dumps(payload).encode()
     captured = {}
 
     def fake_urlopen(req, timeout):
@@ -112,3 +113,17 @@ def test_cliente_gemini_lee_la_imagen_de_la_respuesta(monkeypatch):
     monkeypatch.setattr(gemini_service.urllib.request, "urlopen", fake_urlopen)
     data, _ = gemini_service.generate_image("hola mundo", "k-123", "gemini-2.5-flash-image")
     assert data == b"PNGDATA" and captured["key"] == "k-123"
+
+
+@pytest.mark.parametrize("payload", [b"no-json", b"[]", b'{"candidates":[{"content":{"parts":[{"inlineData":{"data":"###"}}]}}]}'])
+def test_respuesta_invalida_de_gemini_se_traduce_a_error_seguro(monkeypatch, payload):
+    from app.services import gemini_service
+
+    class Resp:
+        def __enter__(self): return self
+        def __exit__(self, *args): return False
+        def read(self, *args): return payload
+
+    monkeypatch.setattr(gemini_service.urllib.request, "urlopen", lambda *args, **kwargs: Resp())
+    with pytest.raises(GeminiError, match="gemini_servicio"):
+        gemini_service.generate_image("prompt de prueba", "clave-que-no-debe-salir", "gemini-2.5-flash-image")

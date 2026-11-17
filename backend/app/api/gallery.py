@@ -1,6 +1,7 @@
 """Galería: álbumes, listado, mover y borrar imágenes propias."""
 from flask import Blueprint, g, request
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from . import fail, ok
 from ..extensions import db
 from ..models import Album, Image, ProcessingJob, audit
@@ -57,7 +58,11 @@ def rename_album(album_id):
     if not (1 <= len(name) <= 80):
         return fail("nombre_invalido", "El nombre del álbum debe tener entre 1 y 80 caracteres.", 400)
     album.name = name
-    db.session.commit()
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        return fail("ya_existe", "Ya tienes un álbum con ese nombre.", 409)
     return ok({"id": album.id, "name": album.name})
 
 
@@ -125,6 +130,8 @@ def remove_image(image_id):
     image = get_image_or_404(image_id)
     if image.owner_user_id != g.user.id:
         return fail("no_encontrado", "No encontrado.", 404)
+    if db.session.query(ProcessingJob).filter_by(image_id=image.id, status="processing").first():
+        return fail("imagen_en_proceso", "Espera a que termine el procesamiento antes de borrar la imagen.", 409)
     files = delete_image(g.user, image)
     db.session.commit()
     for f in files:                                   # los archivos se borran después de confirmar en la BD

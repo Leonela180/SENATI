@@ -4,19 +4,20 @@ import { AlertTriangle, CloudUpload, ImagePlus, Loader2, Sparkles, Wand2 } from 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { PageHeader } from "@/components/PageHeader";
+import { PageHeader, QueryError } from "@/components/PageHeader";
 import { useAlbums } from "@/features/gallery/useGallery";
 import { useGenerate, useGenerationStatus, useGenerations } from "@/features/generations/useGenerations";
 import { fecha } from "@/components/JobCard";
 
 const IDEAS = [
-  "Retrato fotográfico de una mujer joven en un café, luz natural de ventana, fondo desenfocado",
-  "Retrato de un hombre adulto en una oficina moderna, iluminación suave de estudio",
-  "Persona mayor sonriendo en un parque al atardecer, estilo fotografía documental",
+  { title: "Retrato editorial", prompt: "Retrato fotográfico de una persona adulta en un café, plano medio, luz natural de ventana, piel con textura natural, fondo desenfocado, colores cálidos, sin texto ni logotipos." },
+  { title: "Fotografía de producto", prompt: "Fotografía de una botella de perfume de vidrio sobre una base de piedra beige, iluminación suave de estudio, sombras delicadas, composición minimalista, tonos marfil y cobre, sin texto." },
+  { title: "Retrato profesional", prompt: "Retrato profesional de una persona adulta en una oficina moderna, encuadre de hombros, expresión natural, iluminación suave, fondo neutro desenfocado, apariencia fotográfica, sin texto." },
+  { title: "Escena al atardecer", prompt: "Una persona adulta caminando por un parque al atardecer, fotografía documental, luz dorada, colores naturales, vegetación detallada, composición horizontal, sin texto ni logotipos." },
 ];
 
 export default function Generate() {
-  const { data: status } = useGenerationStatus();
+  const { data: status, isError: statusError, isFetching: checkingStatus, refetch: checkStatus } = useGenerationStatus();
   const { data: history } = useGenerations();
   const { data: albums } = useAlbums();
   const gen = useGenerate();
@@ -33,14 +34,15 @@ export default function Generate() {
       {status && !status.configured && (
         <div role="status" className="flex gap-3 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
           <AlertTriangle className="size-5 shrink-0" aria-hidden />
-          <p><strong>Falta configurar Gemini.</strong> Agrega tu clave en el archivo <code>.env</code> con la línea <code>GEMINI_API_KEY=tu_clave</code> y reinicia LUMIA AI. La clave nunca se sube a GitHub.</p>
+          <p><strong>Falta configurar Gemini.</strong> La generación está pendiente de activación por el administrador. Puedes seguir utilizando la galería y las herramientas del Estudio.</p>
         </div>
       )}
+      {statusError && <QueryError onRetry={() => { void checkStatus(); }} retrying={checkingStatus} />}
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <section className="space-y-5 rounded-3xl border bg-card p-6 shadow-sm">
           <div className="space-y-2">
-            <Label htmlFor="prompt">Descripción</Label>
+            <Label htmlFor="prompt">Tu prompt · ¿Qué quieres crear?</Label>
             <textarea id="prompt" value={prompt} onChange={(e) => setPrompt(e.target.value)} maxLength={1000} rows={5}
                       placeholder="Ej.: retrato fotográfico de una persona en un estudio, luz suave…"
                       className="w-full resize-y rounded-xl border bg-background p-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" />
@@ -49,7 +51,7 @@ export default function Generate() {
           <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground">Ideas para empezar</p>
             <div className="flex flex-wrap gap-2">
-              {IDEAS.map((i) => <button key={i} onClick={() => setPrompt(i)} className="rounded-full border px-3 py-1 text-left text-xs hover:bg-muted">{i.slice(0, 48)}…</button>)}
+              {IDEAS.map((idea) => <button key={idea.title} onClick={() => setPrompt(idea.prompt)} title={idea.prompt} className="rounded-full border px-3 py-2 text-left text-xs transition hover:border-brand hover:bg-brand-soft/40">{idea.title}</button>)}
             </div>
           </div>
           <label className="block space-y-1 text-sm">
@@ -61,13 +63,13 @@ export default function Generate() {
           </label>
           <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50/60 p-4">
             <Checkbox id="consent" checked={consent} onCheckedChange={(v) => setConsent(v === true)} className="mt-0.5" />
-            <Label htmlFor="consent" className="text-sm font-normal leading-snug">
-              <span className="flex items-center gap-1 font-medium"><CloudUpload className="size-4" aria-hidden />Servicio externo</span>
-              Entiendo que la descripción se envía a Google (Gemini) para generar la imagen. Es la única función de LUMIA AI que usa internet.
+            <Label htmlFor="consent" className="block text-sm font-normal leading-relaxed">
+              <span className="mb-1 flex items-center gap-2 font-medium"><CloudUpload className="size-4" aria-hidden />Servicio externo</span>
+              Entiendo que esta descripción se envía a Google (Gemini) para generar la imagen. La generación está sujeta a la cuota disponible del servicio.
             </Label>
           </div>
           {gen.error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{(gen.error as Error).message}</p>}
-          <Button size="lg" className="h-12 w-full rounded-xl text-base" disabled={!consent || prompt.trim().length < 5 || gen.isPending || status?.configured === false}
+          <Button size="lg" className="h-12 w-full rounded-xl text-base" disabled={!consent || prompt.trim().length < 5 || gen.isPending || !status?.configured || statusError}
                   onClick={() => gen.mutate({ prompt: prompt.trim(), albumId })}>
             {gen.isPending ? <><Loader2 className="size-4 animate-spin" aria-hidden />Generando… (puede tardar unos segundos)</> : <><Sparkles className="size-4" aria-hidden />Generar imagen</>}
           </Button>

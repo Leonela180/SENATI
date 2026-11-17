@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import { ProcessingView } from "@/components/ProcessingView";
 import { StatusBadge } from "@/components/StatusBadge";
-import { EmptyState } from "@/components/PageHeader";
+import { EmptyState, QueryError } from "@/components/PageHeader";
+import { ApiError } from "@/lib/api";
 import { fecha, presetLabel } from "@/components/JobCard";
 import { useCreateJob, useJob } from "@/features/jobs/useJobs";
 import { useSetVisibility } from "@/features/images/useImages";
@@ -19,12 +20,13 @@ const PARAM_LABEL: Record<string, string> = {
 export default function JobDetail() {
   const id = Number(useParams().id);
   const nav = useNavigate();
-  const { data: job, isError } = useJob(id);
+  const { data: job, isError, error, isFetching, refetch } = useJob(id);
   const retry = useCreateJob();
   const share = useSetVisibility();
   const { data: workspaces } = useWorkspaces();
   const inTeam = workspaces?.some((w) => w.kind === "team");
 
+  if (isError && !(error instanceof ApiError && error.status === 404)) return <div className="space-y-3"><p className="text-sm text-muted-foreground">No se pudo consultar el estado. El trabajo continúa en el servidor; este aviso no indica que haya fallado.</p><QueryError onRetry={() => { void refetch(); }} retrying={isFetching} /></div>;
   if (isError) return (
     <EmptyState icon={<AlertTriangle className="size-6" />} title="No encontrado"
                 action={<Button asChild variant="outline" className="mt-2 rounded-full"><Link to="/app/historial">Volver al historial</Link></Button>}>

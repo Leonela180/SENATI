@@ -8,9 +8,10 @@ import { useRegister } from "@/features/auth/useAuth";
 
 export default function Register() {
   const nav = useNavigate();
-  const from = (useLocation().state as { from?: string } | null)?.from ?? "/app";
+  const invitation = useLocation().state as { from?: string; email?: string; display_name?: string } | null;
+  const from = invitation?.from ?? "/app";
   const reg = useRegister();
-  const [f, setF] = useState({ display_name: "", email: "", password: "" });
+  const [f, setF] = useState({ display_name: invitation?.display_name || "", email: invitation?.email || "", password: "" });
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value });
   const corta = f.password.length > 0 && f.password.length < 12;
 

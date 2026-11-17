@@ -1,6 +1,10 @@
 # LUMIA AI
 
-Aplicación web local que aumenta el **realismo visual** de retratos de personas generados por IA (piel, ojos, cabello y luz) con un modelo image-to-image que corre en la propia computadora. El original nunca se modifica, el resultado se rotula «editado con IA» y las imágenes no salen de la PC.
+Entrega SENATI: incluye humanizacion local, Estudio con restauracion conservadora de fotos, guia de edicion sin API, personalizacion de apariencia y avatar, y equipos con invitaciones dirigidas compartibles por correo/WhatsApp. Consulta [la guia de demostracion](docs/entrega-senati.md) para conocer el alcance y los requisitos reales.
+
+Aplicación web para crear, editar y organizar imágenes generadas por IA. Incluye humanización de retratos con un motor local, Estudio de edición, galería, equipos y control de horas. Los originales se conservan en la computadora que aloja la aplicación; si accedes desde otro dispositivo, las imágenes se suben a esa computadora. La generación con Gemini envía tu descripción a Google con consentimiento.
+
+**Entrega actual en esta laptop:** humanización real con `AI_ENGINE=local`, motor CPU optimizado, microtextura de piel y realce de reflejos existentes en los ojos. El circuito público de subida, procesamiento, comparación y descarga está comprobado. Gemini está integrado, pero su generación sigue bloqueada por la cuota de Google. Consulta la [guía práctica SENATI](docs/entrega-senati.md).
 
 Proyecto de Innovación SENATI «Mejora de piel con IA».
 
@@ -51,6 +55,9 @@ private_data/  originales y resultados (fuera de Git)
 ```
 
 ## Documentación
+
+- [Entrega práctica SENATI](docs/entrega-senati.md): cómo abrir, compartir, demostrar y comprobar el proyecto; límites actuales de Gemini y Humanizar.
+- [Auditoría local y plan de mejoras (16/11/2026)](docs/auditoria-2026-11-16.md): diferencias verificadas entre código, entorno y PostgreSQL; etapas y comprobaciones pendientes.
 
 - [docs/estado.md](docs/estado.md): qué está implementado, qué está probado y qué falta.
 - [docs/LAPTOP_PASO_A_PASO.md](docs/LAPTOP_PASO_A_PASO.md): instalación y prueba de la IA real en la laptop.

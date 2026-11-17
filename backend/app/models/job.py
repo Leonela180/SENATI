@@ -31,7 +31,7 @@ class ProcessingJob(db.Model):
     __table_args__ = (
         CheckConstraint("status IN ('queued','processing','completed','failed')", name="ck_jobs_status"),
         CheckConstraint("attempt_count >= 0", name="ck_jobs_attempt_count"),
-        CheckConstraint("tool IN ('humanizar','quitar_lunar','cambiar_fondo','desenfoque','mejorar_calidad','ajustes','restaurar')",
+        CheckConstraint("tool IN ('humanizar','quitar_lunar','cambiar_fondo','desenfoque','mejorar_calidad','ajustes','restaurar','textura_piel')",
                         name="ck_jobs_tool"),
         # RNF-07: completed solo con archivo de resultado registrado
         CheckConstraint("status <> 'completed' OR result_storage_key IS NOT NULL", name="ck_jobs_completed_result"),

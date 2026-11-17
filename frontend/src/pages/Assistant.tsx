@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { api } from "@/lib/api";
 
 const RECIPES = [
+  { name: "Quitar el aspecto de plástico", words: /plastic|artificial|piel lisa|muy lis|muneca|poros|textura/, tool: "textura_piel", steps: ["Abre el retrato en Textura de piel realista. Empieza con intensidad al 60–70 %.", "Compara con el deslizador: los poros deben verse de cerca, no desde lejos.", "Si quieres más naturalidad, después usa Humanizar o activa las pecas suaves."], limit: "Es un filtro digital: agrega textura a la piel detectada; no cambia la forma del rostro ni corrige la iluminación." },
   { name: "Recuperar una foto antigua", words: /antigu|vieja|restaur|rayad|deterior|descolor|recuerdo/, tool: "restaurar", steps: ["Abre la foto en Restaurar foto. Empieza con recuperación de tonos al 40–60 %.", "Marca solo las rayas o manchas pequeñas. Ajusta el pincel para no tocar ojos ni contornos.", "Compara el resultado y guarda una copia antes de seguir editando."], limit: "La restauración corrige tonos y daños pequeños; no recupera información inexistente ni colorea automáticamente." },
   { name: "Preparar un retrato profesional", words: /fondo|profesional|cv|curricul|recort|transparent/, tool: "cambiar_fondo", steps: ["Selecciona Cambiar fondo y elige un color neutro o transparencia.", "Revisa los bordes del cabello y los hombros antes de descargar.", "Guarda el resultado y aplica Ajustes si necesitas corregir la luz."], limit: "Los cabellos finos y fondos complejos pueden necesitar otra fotografía." },
   { name: "Reparar una mancha localizada", words: /lunar|mancha|grano|borrar|quitar/, tool: "quitar_lunar", steps: ["Elige Quitar lunar y marca el centro de la mancha.", "Usa un pincel apenas mayor que la zona; evita cubrir rasgos completos.", "Aplica y compara la textura con la piel de alrededor."], limit: "El relleno utiliza píxeles vecinos. No es apropiado para eliminar objetos grandes." },
@@ -27,6 +28,7 @@ const TOOL_LINKS: Record<string, { label: string; to: string }> = {
   desenfoque: { label: "Desenfoque", to: "/app/estudio?tool=desenfoque" },
   mejorar_calidad: { label: "Mejorar calidad", to: "/app/estudio?tool=mejorar_calidad" },
   ajustes: { label: "Ajustes", to: "/app/estudio?tool=ajustes" },
+  textura_piel: { label: "Textura de piel", to: "/app/estudio?tool=textura_piel" },
 };
 const SUGERENCIAS = ["Mi foto antigua tiene rayas y está opaca", "Quiero un fondo blanco para mi CV", "Tengo un lunar en la mejilla", "Mi retrato de IA se ve muy plástico"];
 const CONSENT_KEY = "lumia-chat-consentimiento";

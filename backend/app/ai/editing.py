@@ -6,6 +6,7 @@
 - desenfoque       → desenfoque gaussiano de toda la imagen o solo del fondo (efecto retrato).
 - mejorar_calidad  → reducción de ruido, escalado ×2 (Lanczos), contraste local suave (CLAHE) y nitidez.
 - ajustes          → brillo, contraste, saturación, calidez y rotación.
+- textura_piel     → poros, grano fino y micro-brillos sobre la piel «de plástico» (ver skin_texture.py).
 
 Todas guardan PNG con los metadatos de procedencia y un rótulo de edición (RF-16).
 """
@@ -19,7 +20,7 @@ from PIL import Image, ImageOps
 
 from .interface import EngineError, save_labeled
 
-TOOLS = ("quitar_lunar", "cambiar_fondo", "desenfoque", "mejorar_calidad", "ajustes", "restaurar")
+TOOLS = ("quitar_lunar", "cambiar_fondo", "desenfoque", "mejorar_calidad", "ajustes", "restaurar", "textura_piel")
 MAX_SIDE_OUT = 4096                      # límite del escalado para no saturar 16 GB de RAM
 # u2net (general) recorta bien personas fotográficas y también imágenes generadas o ilustradas; 168 MB, ~0,3 s en CPU.
 SEGMENT_MODEL = os.getenv("LUMIA_SEGMENT_MODEL", "u2net")
@@ -155,7 +156,12 @@ class EditingEngine:
         info = dict(src.info)
         rgb = np.asarray(src.convert("RGB"))
         model_id, label = self.model_id, "editado con LUMIA AI (edición digital)"
-        if tool == "restaurar":
+        extra = {}
+        if tool == "textura_piel":
+            from .skin_texture import textura_piel
+            arr, extra = textura_piel(rgb, float(params["intensity"]), bool(params.get("pecas", False)))
+            out = Image.fromarray(arr)
+        elif tool == "restaurar":
             out = Image.fromarray(restaurar(rgb, float(params["intensity"]), params["points"]))
         elif tool == "ajustes":
             out = ajustar(Image.fromarray(rgb), float(params["brightness"]), float(params["contrast"]),
@@ -175,4 +181,4 @@ class EditingEngine:
                 out = cambiar_fondo(rgb, params["mode"], params.get("color", "#ffffff"), float(params.get("radius", 12)), alpha)
         save_labeled(out, output_path, info, label=label)
         return {"model_id": model_id, "model_version": self.model_version, "tool": tool,
-                "seconds": round(time.perf_counter() - t0, 2), "width": out.width, "height": out.height}
+                "seconds": round(time.perf_counter() - t0, 2), "width": out.width, "height": out.height, **extra}

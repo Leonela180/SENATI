@@ -65,13 +65,14 @@ CHAT_SYSTEM = (
     "retratos generados por IA), restaurar (fotos antiguas: ruido, tonos, rayas pequeñas), quitar_lunar "
     "(lunares o manchas pequeñas), cambiar_fondo (color, desenfocado o transparente), desenfoque (gaussiano, "
     "de todo o solo del fondo), mejorar_calidad (doble resolución, nitidez, menos ruido), ajustes (brillo, "
-    "contraste, saturación, calidez, rotación), galeria (subir y organizar en álbumes), generar (crear imágenes "
+    "contraste, saturación, calidez, rotación), textura_piel (poros y grano natural cuando la piel se ve lisa "
+    "o de plástico; es un filtro digital rápido), galeria (subir y organizar en álbumes), generar (crear imágenes "
     "desde texto). No puedes ver las imágenes del usuario: si hace falta, pide que las describa. Nunca ayudes a "
     "suplantar identidades, quitar marcas de edición con IA ni hacer pasar una imagen sintética por la foto de "
     "una persona real. Si recomiendas una herramienta, termina con una línea exacta: HERRAMIENTA: <identificador>."
 )
 CHAT_TOOLS = {"humanizar", "restaurar", "quitar_lunar", "cambiar_fondo", "desenfoque", "mejorar_calidad",
-              "ajustes", "galeria", "generar"}
+              "ajustes", "textura_piel", "galeria", "generar"}
 
 
 def chat(messages: list[dict], api_key: str, model: str, timeout: int = 30) -> tuple[str, str | None]:

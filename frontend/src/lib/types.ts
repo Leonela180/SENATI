@@ -13,7 +13,7 @@ export type ImageInfo = {
   album_id?: number | null; created_at?: string; last_job_id?: number | null;
 };
 export type ImagePage = { items: ImageInfo[]; page: number; pages: number; total: number };
-export type Tool = "humanizar" | "quitar_lunar" | "cambiar_fondo" | "desenfoque" | "mejorar_calidad" | "ajustes" | "restaurar";
+export type Tool = "humanizar" | "quitar_lunar" | "cambiar_fondo" | "desenfoque" | "mejorar_calidad" | "ajustes" | "restaurar" | "textura_piel";
 export type Album = { id: number; name: string; count: number; created_at: string };
 export type Generation = {
   id: number; prompt: string; model: string; status: "completed" | "failed"; image_id: number | null;

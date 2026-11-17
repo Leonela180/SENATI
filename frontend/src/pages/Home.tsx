@@ -13,7 +13,7 @@ type Demo = { before: string; after: string; caption: string };
 type Ejemplo = { tool: string; title: string; text: string; before: string; after: string; caption: string };
 
 const HERRAMIENTAS = [
-  { icon: Sparkles, t: "Humanización con IA", d: "Piel con microtextura y ojos con reflejos coherentes en retratos generados por IA." },
+  { icon: Sparkles, t: "Humanización y textura de piel", d: "Quita el aspecto «de plástico»: poros, grano fino y ojos con reflejos coherentes en retratos de IA." },
   { icon: RotateCcw, t: "Restauración de fotos", d: "Reduce el ruido, recupera tonos y repara rayas o manchas pequeñas que marques." },
   { icon: Eraser, t: "Quitar lunares y manchas", d: "Haz clic sobre la zona y se rellena con la piel de alrededor." },
   { icon: Palette, t: "Cambiar el fondo", d: "La IA recorta a la persona: fondo de color, desenfocado o transparente." },

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import { Crop, Droplets, Eraser, ImagePlus, Palette, RotateCcw, RotateCw, SlidersHorizontal, Sparkles, Wand2 } from "lucide-react";
+import { Crop, Droplets, Eraser, Fingerprint, ImagePlus, Palette, RotateCcw, RotateCw, SlidersHorizontal, Sparkles, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,7 @@ import type { Job, Tool } from "@/lib/types";
 
 type EditTool = Exclude<Tool, "humanizar">;
 const TOOLS: { id: EditTool; label: string; icon: typeof Eraser; help: string }[] = [
+  { id: "textura_piel", label: "Textura de piel", icon: Fingerprint, help: "Quita el aspecto «de plástico»: agrega poros, grano fino y pequeños brillos solo en la piel. Ojos, boca, cejas y lunares no se tocan." },
   { id: "restaurar", label: "Restaurar foto", icon: RotateCcw, help: "Recupera tonos y contraste y reduce ruido. Marca rayas o manchas pequeñas para repararlas. No reconstruye rostros ni colorea fotos en blanco y negro." },
   { id: "quitar_lunar", label: "Quitar lunar", icon: Eraser, help: "Haz clic sobre cada lunar o mancha. Se rellena con la piel de alrededor." },
   { id: "cambiar_fondo", label: "Cambiar fondo", icon: Palette, help: "La IA recorta a la persona y cambia el fondo por un color, un desenfoque o transparencia." },
@@ -50,6 +51,7 @@ export default function Studio() {
   const [blur, setBlur] = useState({ radius: 6, scope: "fondo" });
   const [quality, setQuality] = useState({ scale: 2, sharpen: 0.6, denoise: true });
   const [adj, setAdj] = useState({ brightness: 1, contrast: 1, saturation: 1, warmth: 0, rotate: 0 });
+  const [skin, setSkin] = useState({ intensity: 0.7, pecas: false });
   const [jobId, setJobId] = useState<number | null>(null);
   const [done, setDone] = useState<Job | null>(null);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -78,6 +80,7 @@ export default function Studio() {
 
   function toolParams(): Record<string, unknown> {
     switch (tool) {
+      case "textura_piel": return skin;
       case "restaurar": return { points, intensity };
       case "quitar_lunar": return { points };
       case "cambiar_fondo": return bg;
@@ -193,6 +196,14 @@ export default function Studio() {
                   <Button size="sm" variant="ghost" disabled={!points.length} onClick={() => setPoints([])}>Limpiar</Button>
                 </span>
               </div>
+            </div>
+          )}
+
+          {tool === "textura_piel" && (
+            <div className="space-y-4">
+              <Slider label="Intensidad de la textura" value={skin.intensity} min={0.2} max={1} step={0.05} onChange={(v) => setSkin({ ...skin, intensity: v })} fmt={(v) => `${Math.round(v * 100)} %`} />
+              <label className="flex items-center gap-2 text-sm"><Checkbox checked={skin.pecas} onCheckedChange={(v) => setSkin({ ...skin, pecas: v === true })} />Agregar pecas suaves</label>
+              <p className="text-xs text-muted-foreground">Funciona con retratos donde la cara se ve de frente. Mira el resultado de cerca con el deslizador: los poros son finos, como en una foto real.</p>
             </div>
           )}
 

@@ -77,6 +77,10 @@ def maintain_heartbeat(app, stop):
             log.warning("No se pudo actualizar el latido del worker")
 
 
+# Errores causados por la imagen (no por el servicio): fallan al primer intento y no son incidentes.
+USER_ERRORS = {"sin_rostro"}
+
+
 def process_one(app, engine) -> bool:
     row = db.session.execute(CLAIM_SQL).first()
     db.session.commit()
@@ -100,7 +104,8 @@ def process_one(app, engine) -> bool:
         job.parameters = {**(job.parameters or {}),
                           **{k: meta[k] for k in ("seconds", "vram_gb", "work_size", "device", "filtro_seguridad", "width", "height",
                                                 "strength", "steps", "guidance", "seed", "runtime", "blend", "ram_free_min_gib",
-                                                "facial_detail_applied", "eyes_enhanced", "pores_intensity", "facial_detail_method") if k in meta}}
+                                                "facial_detail_applied", "eyes_enhanced", "pores_intensity", "facial_detail_method",
+                                                "rostro_detectado", "ojos_protegidos", "cobertura_piel") if k in meta}}
         job.status, job.error_code, job.finished_at = "completed", None, utc_now()
         log.info("Trabajo %s completado en %s s", job.id, meta.get("seconds"))
     except Exception as e:                                                   # noqa: BLE001
@@ -108,7 +113,9 @@ def process_one(app, engine) -> bool:
         log.error("Trabajo %s falló (intento %s): %s", job.id, job.attempt_count, code)
         dst.unlink(missing_ok=True)
         job.error_code = code
-        if job.attempt_count < app.config["AI_MAX_ATTEMPTS"]:
+        if code in USER_ERRORS:                                              # la imagen no sirve: reintentar no ayuda
+            job.status, job.finished_at = "failed", utc_now()
+        elif job.attempt_count < app.config["AI_MAX_ATTEMPTS"]:
             job.status = "queued"                                            # CU03 flujo 4a: se reencola
         else:
             job.status, job.finished_at = "failed", utc_now()                # CU03 flujo 4b

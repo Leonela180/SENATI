@@ -15,4 +15,8 @@ test("registro → carga → humanización → comparación → descarga", async
   await page.getByRole("button", { name: "Humanizar imagen" }).click();
   await expect(page.getByRole("link", { name: "Descargar resultado" })).toBeVisible({ timeout: 240_000 });
   await expect(page.getByRole("slider", { name: "Comparar antes y después" })).toBeVisible();
+  // Atajo: el resultado pasa al Estudio con «Textura de piel» ya elegida
+  await page.getByRole("button", { name: "Agregar textura de piel" }).click();
+  await expect(page).toHaveURL(/\/app\/estudio\?image=\d+&tool=textura_piel$/);
+  await expect(page.getByRole("tab", { name: "Textura de piel" })).toHaveAttribute("aria-selected", "true");
 });

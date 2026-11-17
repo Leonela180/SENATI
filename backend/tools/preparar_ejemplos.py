@@ -11,6 +11,7 @@ El nombre de cada archivo indica la herramienta que se le aplica:
     calidad*.jpg     → Mejorar calidad (doble resolución + nitidez)
     restaurar*.jpg   → Restaurar foto (ruido y tonos)
     ajustes*.jpg     → Luz y color
+    piel*.jpg        → Textura de piel realista
 Escribe frontend/public/demo/ej_*.webp y ejemplos.json. No se retoca nada a mano.
 """
 import argparse
@@ -34,6 +35,8 @@ HERRAMIENTAS = [
      "Duplica la resolución, reduce el ruido y recupera nitidez en los bordes."),
     ("restaurar", "restaurar", {"intensity": 0.8, "points": []}, "Restaurar foto",
      "Reduce el ruido y recupera los tonos apagados sin inventar detalles."),
+    ("piel", "textura_piel", {"intensity": 0.75, "pecas": False}, "Textura de piel realista",
+     "Devuelve poros, grano fino y pequeños brillos a la piel lisa «de plástico» de los retratos de IA."),
     ("ajustes", "ajustes", {"brightness": 1.08, "contrast": 1.06, "saturation": 1.08, "warmth": 0.3, "rotate": 0},
      "Luz y color", "Ajusta brillo, contraste, saturación y calidez con controles simples."),
 ]
@@ -80,7 +83,7 @@ def main():
     from app.config import ROOT
     items = build(args.carpeta, ROOT / "frontend" / "public" / "demo")
     if not items:
-        raise SystemExit("No encontré imágenes con nombres fondo*, desenfoque*, calidad*, restaurar* o ajustes*.")
+        raise SystemExit("No encontré imágenes con nombres fondo*, desenfoque*, calidad*, restaurar*, piel* o ajustes*.")
     for it in items:
         print("✓", it["title"], "→", it["after"])
     print("Ahora compila la web:  cd ..\\frontend; npm run build")

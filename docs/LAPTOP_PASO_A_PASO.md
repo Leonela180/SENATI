@@ -270,6 +270,21 @@ Humaniza 2 o 3 retratos **generados por IA** y compara con el deslizador:
 - **La textura de la piel** se regula con `AI_DETAIL_INTENSITY` (entre 0 y 1).
 - **Después de cambiar algo**, reinicia con `detener.ps1` e `iniciar.ps1`.
 
+**Modo más notorio (prueba esto si el cambio no se nota).** Cambia estas tres líneas en tu `.env` (si no existen, agrégalas al final):
+
+```
+AI_LITE_WORK_SIDE=448
+AI_RESULT_BLEND=0.5
+AI_DETAIL_INTENSITY=0.85
+```
+
+- `AI_LITE_WORK_SIDE`: la IA mira la cara con más detalle (448 px en vez de 320). Cada imagen tarda más: calcula entre **4 y 6 minutos** en tu HP en vez de 2,5. Si se queda sin memoria, vuelve a 384.
+- `AI_RESULT_BLEND`: cuánto del resultado de la IA se mezcla (0.5 = mitad y mitad).
+- `AI_DETAIL_INTENSITY`: poros y reflejos de los ojos más marcados.
+- Compara el mismo retrato con los valores de antes y con los nuevos. Si el rostro **cambia de forma** o ya no se parece, baja `AI_RESULT_BLEND` a 0.4.
+
+**Lo más rápido para que se note: «Textura de piel» en el Estudio.** Abre el retrato en el **Estudio → Textura de piel**, empieza con 70 % y compara de cerca con el deslizador. Tarda 1 o 2 segundos y no necesita el motor de IA. Puedes usarla sola o **después** de Humanizar: Humanizar → «Seguir editando este resultado» → Textura de piel. Si el retrato no muestra la cara de frente, la herramienta avisa que no encontró un rostro.
+
 ### F4. Verificación final (evidencia para el informe)
 
 Guarda un retrato generado por IA, que tengas permiso de usar, como `docs\muestra_autorizada.png`. Con LUMIA AI encendido, ejecuta:

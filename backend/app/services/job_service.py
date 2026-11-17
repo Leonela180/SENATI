@@ -17,13 +17,16 @@ ERROR_ES = {
     "contenido_bloqueado": "El filtro de seguridad del modelo bloqueó el resultado.",
     "gpu_memoria": "La GPU se quedó sin memoria. Prueba con una imagen más pequeña.",
     "parametros_invalidos": "Los ajustes de la herramienta no son válidos.",
+    "sin_rostro": "No se encontró un rostro de frente en la imagen. Prueba con un retrato donde la cara se vea completa.",
 }
 TOOL_ES = {"restaurar": "Restaurar fotografía", "humanizar": "Humanización", "quitar_lunar": "Quitar lunar o mancha", "cambiar_fondo": "Cambiar fondo",
-           "desenfoque": "Desenfoque gaussiano", "mejorar_calidad": "Mejorar calidad", "ajustes": "Ajustes de imagen"}
+           "desenfoque": "Desenfoque gaussiano", "mejorar_calidad": "Mejorar calidad", "ajustes": "Ajustes de imagen",
+           "textura_piel": "Textura de piel realista"}
 PUBLIC_PARAMS = ("strength", "steps", "guidance", "seed", "work_size", "seconds", "vram_gb", "device", "filtro_seguridad",
                  "scale", "sharpen", "denoise", "radius", "scope", "mode", "color", "puntos", "width", "height",
                  "brightness", "contrast", "saturation", "warmth", "rotate", "runtime", "blend", "ram_free_min_gib",
-                 "facial_detail_applied", "eyes_enhanced", "pores_intensity", "facial_detail_method", "intensity")
+                 "facial_detail_applied", "eyes_enhanced", "pores_intensity", "facial_detail_method", "intensity",
+                 "pecas", "rostro_detectado", "ojos_protegidos", "cobertura_piel")
 
 
 class ToolParamsError(ValueError):
@@ -60,6 +63,8 @@ def clean_tool_params(tool, params, image):
         if tool == "restaurar":
             result["intensity"] = round(num("intensity", 0.1, 1, 0.6), 2)
         return result
+    if tool == "textura_piel":
+        return {"intensity": round(num("intensity", 0.1, 1, 0.7), 2), "pecas": p.get("pecas", False) is True}
     if tool == "cambiar_fondo":
         mode = p.get("mode")
         if mode not in ("color", "desenfocado", "transparente"):

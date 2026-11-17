@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { AlertTriangle, Download, RotateCcw, Sparkles } from "lucide-react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { AlertTriangle, Download, Fingerprint, RotateCcw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -11,7 +11,7 @@ import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 import { presetLabel } from "@/components/JobCard";
 import { useUploadImage } from "@/features/images/useImages";
 import { useCreateJob, useHealth } from "@/features/jobs/useJobs";
-import { useImage } from "@/features/gallery/useGallery";
+import { useImage, useSaveResult } from "@/features/gallery/useGallery";
 import { cn } from "@/lib/utils";
 import type { ImageInfo, Job } from "@/lib/types";
 
@@ -43,6 +43,8 @@ export default function Humanize() {
   const createJob = useCreateJob();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
+  const navigate = useNavigate();
+  const saveResult = useSaveResult();
   const [declared, setDeclared] = useState(false);
   const [preset, setPreset] = useState("natural");
   const [image, setImage] = useState<ImageInfo | null>(null);   // ya subida: no se vuelve a subir al reintentar
@@ -175,7 +177,11 @@ export default function Humanize() {
             {done.parameters.facial_detail_applied === false && (
               <p className="text-sm text-muted-foreground">No se detectó un rostro frontal con suficiente confianza para ajustar poros y reflejos. Se conserva la edición base de IA.</p>
             )}
-            <Button variant="outline" className="h-11 w-full rounded-xl" onClick={reset}>Humanizar otra imagen</Button>
+            <Button variant="outline" className="h-11 w-full rounded-xl" disabled={saveResult.isPending}
+                    onClick={() => saveResult.mutate(done.id, { onSuccess: (img) => navigate(`/app/estudio?image=${img.id}&tool=textura_piel`) })}>
+              <Fingerprint className="size-4" aria-hidden />Agregar textura de piel
+            </Button>
+            <Button variant="ghost" className="h-11 w-full rounded-xl" onClick={reset}>Humanizar otra imagen</Button>
             <Link to={`/app/trabajos/${done.id}`} className="block text-center text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
               Ver detalle y trazabilidad
             </Link>

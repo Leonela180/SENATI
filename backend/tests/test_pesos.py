@@ -1,6 +1,9 @@
 import numpy as np
 import pytest
-from safetensors.numpy import load_file, save_file
+
+# safetensors llega con el motor de IA (instalar.ps1 sin -SinIA); sin él, estas pruebas se omiten
+safetensors_numpy = pytest.importorskip("safetensors.numpy", reason="Motor de IA no instalado (-SinIA)")
+load_file, save_file = safetensors_numpy.load_file, safetensors_numpy.save_file
 from app.ai import weights
 
 

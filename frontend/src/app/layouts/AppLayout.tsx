@@ -28,7 +28,7 @@ const SECTIONS: { title: string; items: NavItem[] }[] = [
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   cn("flex shrink-0 items-center gap-3 rounded-xl px-3 py-2 text-sm transition",
-     isActive ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground");
+     isActive ? "bg-brand-gradient text-white glow font-medium" : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground");
 
 export default function AppLayout() {
   const { data: me, isLoading, isError, error, isFetching, refetch } = useMe();
@@ -56,7 +56,7 @@ export default function AppLayout() {
 
       {/* Barra lateral (escritorio) */}
       <aside className="lumia-sidebar sticky top-0 hidden h-screen flex-col border-r bg-sidebar p-5 text-foreground lg:flex">
-        <div className="px-2 pt-2"><Logo to="/app" light /><p className="mt-3 text-xs text-muted-foreground">Tu estudio de imágenes con IA</p></div>
+        <div className="px-2 pt-2"><Logo to="/app" /><p className="mt-3 text-xs text-muted-foreground">Tu estudio de imágenes con IA</p></div>
         <nav className="mt-8 flex flex-1 flex-col gap-5 overflow-y-auto" aria-label="Principal">
           {sections.map((s) => (
             <div key={s.title || "inicio"} className="space-y-1">
@@ -80,7 +80,7 @@ export default function AppLayout() {
       </aside>
 
       <div className="min-w-0">
-        <header className="hidden items-center justify-between gap-4 border-b bg-card/80 px-8 py-4 lg:flex">
+        <header className="glass sticky top-0 z-30 hidden items-center justify-between gap-4 border-b px-8 py-4 lg:flex">
           <p className="text-sm text-muted-foreground">Mi espacio <span className="mx-3 text-border" aria-hidden>/</span><span className="font-medium text-foreground">{currentPage}</span></p>
           <span className="inline-flex items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-xs text-muted-foreground">
             <span className={cn("size-2 rounded-full", healthError ? "bg-red-600" : health ? "bg-emerald-600" : "bg-amber-500")} aria-hidden />
@@ -88,7 +88,7 @@ export default function AppLayout() {
           </span>
         </header>
         {/* Barra superior (celular y tablet) */}
-        <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur lg:hidden">
+        <header className="glass sticky top-0 z-30 border-b lg:hidden">
           <div className="flex items-center justify-between px-4 py-3">
             <Logo to="/app" />
             <div className="flex items-center gap-1">
@@ -106,7 +106,7 @@ export default function AppLayout() {
         </header>
 
         {health?.engine === "mock" && (
-          <div role="status" className="border-b border-amber-300 bg-amber-50 px-4 py-2 text-center text-xs text-amber-900 md:text-sm">
+          <div role="status" className="border-b border-amber-500/30 bg-amber-500/10 px-4 py-2 text-center text-xs text-amber-700 dark:text-amber-300 md:text-sm dark:text-amber-300">
             <strong>Humanización en simulación:</strong> sus resultados no son IA real. El Estudio y Gemini funcionan de forma independiente.
           </div>
         )}
@@ -115,7 +115,7 @@ export default function AppLayout() {
             <strong>IA local en CPU:</strong> procesa una imagen a la vez y puede tardar unos minutos. Puedes seguir el avance en el historial.
           </div>
         )}
-        <main id="contenido" className="mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-10">
+        <main id="contenido" className="relative mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-10">
           {logout.error && <p role="alert" className="mb-6 rounded-xl border border-destructive/25 bg-card p-4 text-sm text-destructive">No se pudo cerrar la sesión. Inténtalo de nuevo.</p>}
           <Outlet />
         </main>

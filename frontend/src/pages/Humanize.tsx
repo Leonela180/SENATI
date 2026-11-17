@@ -115,7 +115,7 @@ export default function Humanize() {
                     <label key={p} className={cn("flex cursor-pointer items-center justify-between rounded-2xl border px-4 py-3 text-sm transition",
                       preset === p ? "border-primary bg-secondary" : "hover:bg-muted")}>
                       <span><span className="font-medium">{presetLabel(p)}</span><span className="block text-xs text-muted-foreground">{PRESET_HINT[p]}</span></span>
-                      <input type="radio" name="preset" value={p} checked={preset === p} onChange={() => { setPreset(p); setKey(""); }} className="accent-[oklch(0.27_0.03_40)]" />
+                      <input type="radio" name="preset" value={p} checked={preset === p} onChange={() => { setPreset(p); setKey(""); }} className="accent-[var(--g2)]" />
                     </label>
                   ))}
                 </fieldset>
@@ -128,7 +128,7 @@ export default function Humanize() {
                 </Label>
               </div>
 
-              {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{error}</p>}
+              {error && <p role="alert" className="rounded-xl bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">{error}</p>}
               <Button size="lg" className="h-12 w-full rounded-xl text-base" disabled={!declared || busy} onClick={humanize}>
                 <Sparkles className="size-4" aria-hidden />{busy ? "Enviando…" : "Humanizar imagen"}
               </Button>
@@ -141,10 +141,10 @@ export default function Humanize() {
       {/* ---------- Paso 2: procesamiento ---------- */}
       {jobId && done?.status !== "completed" && (
         done?.status === "failed" ? (
-          <div className="mx-auto max-w-lg space-y-4 rounded-3xl border border-red-200 bg-red-50 p-8 text-center" role="alert">
-            <AlertTriangle className="mx-auto size-8 text-red-700" aria-hidden />
-            <p className="font-display text-2xl font-semibold text-red-900">No se pudo procesar la imagen</p>
-            <p className="text-sm text-red-800">{done.error_message ?? "Ocurrió un error en el motor."}</p>
+          <div className="mx-auto max-w-lg space-y-4 rounded-3xl border border-red-500/30 bg-red-500/10 p-8 text-center" role="alert">
+            <AlertTriangle className="mx-auto size-8 text-red-700 dark:text-red-300" aria-hidden />
+            <p className="font-display text-2xl font-semibold text-red-700 dark:text-red-300">No se pudo procesar la imagen</p>
+            <p className="text-sm text-red-700 dark:text-red-300">{done.error_message ?? "Ocurrió un error en el motor."}</p>
             <div className="flex justify-center gap-3">
               <Button onClick={retry} className="rounded-full"><RotateCcw className="size-4" aria-hidden />Reintentar</Button>
               <Button variant="outline" onClick={reset} className="rounded-full">Usar otra imagen</Button>

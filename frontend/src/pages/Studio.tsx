@@ -28,7 +28,7 @@ function Slider({ label, value, min, max, step, onChange, fmt }: { label: string
   return (
     <label className="block space-y-1.5 text-sm">
       <span className="flex justify-between"><span className="font-medium">{label}</span><span className="text-muted-foreground">{fmt ? fmt(value) : value}</span></span>
-      <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="w-full accent-[oklch(0.47_0.1_42)]" />
+      <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="w-full accent-[var(--g2)]" />
     </label>
   );
 }
@@ -173,7 +173,7 @@ export default function Studio() {
               {previewFilter && <figcaption className="text-center text-xs text-muted-foreground">Vista previa aproximada; el resultado final lo calcula el servidor.</figcaption>}
             </figure>
           )}
-          {done?.status === "failed" && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-800">{done.error_message}</p>}
+          {done?.status === "failed" && <p role="alert" className="mt-4 rounded-xl bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">{done.error_message}</p>}
         </div>
 
         <aside className="space-y-5 rounded-3xl border bg-card p-6 shadow-sm lg:self-start">

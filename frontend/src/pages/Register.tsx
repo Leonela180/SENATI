@@ -29,7 +29,7 @@ export default function Register() {
           <p id="pw-help" className={corta ? "text-xs text-amber-800" : "text-xs text-muted-foreground"}>
             {corta ? `Faltan ${12 - f.password.length} caracteres.` : "Usa una frase larga que recuerdes con facilidad."}
           </p></div>
-        {reg.error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{(reg.error as Error).message}</p>}
+        {reg.error && <p role="alert" className="rounded-xl bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">{(reg.error as Error).message}</p>}
         <Button type="submit" className="h-11 w-full rounded-xl" disabled={reg.isPending}>{reg.isPending ? "Creando…" : "Crear cuenta"}</Button>
       </form>
     </AuthLayout>

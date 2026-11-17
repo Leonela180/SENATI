@@ -5,7 +5,6 @@ import { Logo } from "@/components/brand/Logo";
 const NAV = [
   { href: "/#herramientas", label: "Herramientas" },
   { href: "/#como-funciona", label: "Cómo funciona" },
-  { href: "/#que-mejora", label: "Qué mejora" },
   { href: "/#privacidad", label: "Privacidad" },
   { href: "/#preguntas", label: "Preguntas" },
 ];
@@ -14,7 +13,7 @@ export default function PublicLayout() {
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       <a href="#contenido" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-background focus:p-2">Saltar al contenido</a>
-      <header className="sticky top-0 z-40 border-b border-transparent bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/70">
+      <header className="glass sticky top-0 z-40 border-b">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-4 py-4 md:px-6">
           <Logo />
           <nav className="hidden items-center gap-7 text-sm text-muted-foreground lg:flex" aria-label="Secciones">
@@ -27,7 +26,7 @@ export default function PublicLayout() {
         </div>
       </header>
       <main id="contenido"><Outlet /></main>
-      <footer className="border-t bg-secondary/40">
+      <footer className="border-t bg-card/40">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 md:grid-cols-[2fr_1fr_1fr] md:px-6">
           <div className="space-y-3">
             <Logo />

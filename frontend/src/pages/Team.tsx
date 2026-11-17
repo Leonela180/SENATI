@@ -38,7 +38,7 @@ export default function Team() {
     return (
       <div className="space-y-8">
         <PageHeader eyebrow="Equipo" title="Trabaja en equipo" description="Comparte imágenes elegidas con tu equipo y ve estadísticas agregadas del trabajo de todos." />
-        {accept.error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{(accept.error as Error).message}</p>}
+        {accept.error && <p role="alert" className="rounded-xl bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">{(accept.error as Error).message}</p>}
         <div className="grid gap-6 md:grid-cols-2">
           <form className="space-y-4 rounded-3xl border bg-card p-6 shadow-sm md:p-8" onSubmit={(e) => { e.preventDefault(); create.mutate(name); }}>
             <span className="grid size-10 place-items-center rounded-2xl bg-brand-soft text-brand-strong"><Users className="size-5" aria-hidden /></span>

@@ -79,7 +79,7 @@ export default function Dashboard() {
         <div className="min-w-40"><p className="text-xs text-muted-foreground">Mi semana</p>
           <p className="font-semibold">{hours ? `${hours.worked} h trabajadas de ${hours.expected_to_date} h esperadas` : "—"}</p></div>
         <div className="min-w-32"><p className="text-xs text-muted-foreground">Por recuperar</p>
-          <p className={hours && hours.to_recover > 0 ? "font-semibold text-red-700" : "font-semibold text-emerald-700"}>{hours ? (hours.to_recover > 0 ? `${hours.to_recover} h` : "Nada") : "—"}</p></div>
+          <p className={hours && hours.to_recover > 0 ? "font-semibold text-red-700 dark:text-red-300" : "font-semibold text-emerald-700 dark:text-emerald-400"}>{hours ? (hours.to_recover > 0 ? `${hours.to_recover} h` : "Nada") : "—"}</p></div>
         <span className="ml-auto rounded-full bg-secondary px-3 py-1 text-sm">{clock?.open_entry ? "🟢 En jornada" : "Marcar entrada →"}</span>
       </Link>
 

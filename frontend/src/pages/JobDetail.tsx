@@ -52,7 +52,7 @@ export default function JobDetail() {
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="min-w-0 truncate font-display text-3xl font-semibold tracking-tight md:text-4xl">{job.image_filename}</h1>
           <StatusBadge status={job.status} />
-          {job.model_id === "mock" && <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs text-amber-900">Simulación, sin IA real</span>}
+          {job.model_id === "mock" && <span className="rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs text-amber-700 dark:text-amber-300">Simulación, sin IA real</span>}
         </div>
       </div>
 
@@ -61,10 +61,10 @@ export default function JobDetail() {
           {job.status === "completed" ? (
             <BeforeAfterSlider before={`/api/v1/images/${job.image_id}/content`} after={`/api/v1/jobs/${job.id}/download?inline=1`} />
           ) : (
-            <div className="space-y-3 rounded-3xl border border-red-200 bg-red-50 p-8" role="alert">
-              <AlertTriangle className="size-7 text-red-700" aria-hidden />
-              <p className="font-display text-2xl font-semibold text-red-900">El procesamiento falló</p>
-              <p className="text-sm text-red-800">{job.error_message}</p>
+            <div className="space-y-3 rounded-3xl border border-red-500/30 bg-red-500/10 p-8" role="alert">
+              <AlertTriangle className="size-7 text-red-700 dark:text-red-300" aria-hidden />
+              <p className="font-display text-2xl font-semibold text-red-700 dark:text-red-300">El procesamiento falló</p>
+              <p className="text-sm text-red-700 dark:text-red-300">{job.error_message}</p>
             </div>
           )}
 

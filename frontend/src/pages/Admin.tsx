@@ -19,7 +19,7 @@ function Health({ icon: Icon, label, ok, value }: { icon: typeof Server; label: 
 export default function Admin() {
   const { data, error } = useOverview();
   const resolve = useResolveIncident();
-  if (error) return <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-800">{(error as Error).message}</p>;
+  if (error) return <p role="alert" className="rounded-xl bg-red-500/10 p-4 text-red-700 dark:text-red-300">{(error as Error).message}</p>;
   if (!data) return <div className="h-96 animate-pulse rounded-3xl bg-muted" aria-label="Cargando" />;
   const j = data.jobs_by_status;
   const total = Math.max(1, j.queued + j.processing + j.completed + j.failed);

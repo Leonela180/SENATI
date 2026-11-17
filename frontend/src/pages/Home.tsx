@@ -1,211 +1,193 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight, BadgeCheck, Cpu, Download, Eye, FileCheck2, Lock, MonitorSmartphone, ScanFace, ShieldCheck, Sparkles,
-  SunMedium, Upload, Users, Wand2, X,
+  ArrowRight, BadgeCheck, CalendarClock, Download, Eraser, FileCheck2, Images, Lock, MessageCircle, Palette,
+  RotateCcw, ShieldCheck, Sparkles, Upload, Users, Wand2, X, Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 
-const SINTOMAS = [
-  { t: "Piel de cera", d: "Superficies lisas y brillantes, sin poros ni variaciones de tono." },
-  { t: "Mirada sin vida", d: "Ojos sin reflejos coherentes ni detalle en el iris." },
-  { t: "Luz imposible", d: "Sombras que no coinciden con ninguna fuente de luz." },
-];
+/** Ejemplo real de la portada, preparado con backend/tools/preparar_portada.py (si no existe, se muestran capturas de la app). */
+type Demo = { before: string; after: string; caption: string };
 
-const MEJORAS = [
-  { kind: "piel" as const, icon: ScanFace, t: "Piel con microtextura", d: "Poros y variaciones sutiles de tono, sin embellecer ni cambiar el color de piel." },
-  { kind: "ojos" as const, icon: Eye, t: "Ojos coherentes", d: "Reflejos y detalle del iris que hacen creíble la mirada." },
-  { kind: "cabello" as const, icon: Wand2, t: "Edición conservadora", d: "Una mezcla de baja intensidad limita los cambios. Compara siempre los contornos y el cabello." },
-  { kind: "luz" as const, icon: SunMedium, t: "Tonos naturales", d: "Ajustes moderados para mantener un aspecto fotográfico. Cada retrato puede responder de forma diferente." },
+const HERRAMIENTAS = [
+  { icon: Sparkles, t: "Humanización con IA", d: "Piel con microtextura y ojos con reflejos coherentes en retratos generados por IA." },
+  { icon: RotateCcw, t: "Restauración de fotos", d: "Reduce el ruido, recupera tonos y repara rayas o manchas pequeñas que marques." },
+  { icon: Eraser, t: "Quitar lunares y manchas", d: "Haz clic sobre la zona y se rellena con la piel de alrededor." },
+  { icon: Palette, t: "Cambiar el fondo", d: "La IA recorta a la persona: fondo de color, desenfocado o transparente." },
+  { icon: Wand2, t: "Calidad y ajustes", d: "Doble resolución, nitidez, desenfoque gaussiano, luz, color y rotación." },
+  { icon: Images, t: "Galería y lotes", d: "Sube varias imágenes, ordénalas en álbumes y procésalas todas a la vez." },
+  { icon: MessageCircle, t: "Asistente de edición", d: "Cuéntale qué quieres lograr y te guía paso a paso a la herramienta indicada." },
+  { icon: Users, t: "Equipos e invitaciones", d: "Invita por enlace, correo o WhatsApp y comparte solo lo que elijas." },
+  { icon: CalendarClock, t: "Horario y horas", d: "Marca entrada y salida, mira tus horas por recuperar y exporta el reporte." },
 ];
 
 const PASOS = [
-  { icon: Upload, t: "Sube tu retrato", d: "Un retrato de persona generado por IA en JPG, PNG o WebP de hasta 10 MB." },
-  { icon: FileCheck2, t: "Declara su origen", d: "Confirmas que la imagen es sintética y que tienes permiso para usarla." },
-  { icon: Cpu, t: "El servidor trabaja", d: "La imagen se procesa en segundo plano. Puedes cambiar de pantalla y volver desde el historial." },
-  { icon: Download, t: "Compara y descarga", d: "Deslizas entre el antes y el después y descargas el resultado rotulado." },
+  { icon: Upload, t: "Sube", d: "JPG, PNG o WebP de hasta 10 MB." },
+  { icon: FileCheck2, t: "Confirma", d: "Declaras que es una imagen generada por IA y que puedes usarla." },
+  { icon: Zap, t: "Procesa", d: "El servidor trabaja en segundo plano; puedes seguir navegando." },
+  { icon: Download, t: "Compara y descarga", d: "Desliza entre antes y después y descarga el resultado rotulado." },
 ];
 
 const FAQ = [
-  { q: "¿Puedo restaurar una fotografía antigua?", a: "Sí, en el Estudio puedes reducir ruido, recuperar tonos y reparar manchas o rayas pequeñas marcadas por ti. No reconstruye información perdida ni colorea automáticamente. Confirma que tienes permiso para editar la foto." },
-  { q: "¿El asistente necesita una API de pago?", a: "No. El asistente de edición es una guía local de recorridos preparados que recomienda herramientas. No es un modelo de chat y no analiza tus imágenes." },
-  { q: "¿Qué pasa si cierro la pestaña?", a: "El trabajo continúa mientras el servidor permanezca encendido. Puedes consultar su estado y descargar el resultado desde Historial cuando vuelvas a iniciar sesión." },
-  { q: "¿Dónde se procesan mis imágenes?", a: "Las imágenes se guardan y editan en la computadora que aloja LUMIA AI. Si accedes desde otro dispositivo, se suben a esa computadora. Generar con IA envía tu descripción a Google (Gemini), con tu consentimiento." },
-  { q: "¿El resultado deja de ser una imagen de IA?", a: "No. Sigue siendo una imagen sintética editada. Por eso se descarga rotulada «editado con IA» y conserva los metadatos de procedencia." },
-  { q: "¿Cambia el rostro de la persona?", a: "La edición es de baja intensidad para conservar la identidad aparente, la pose, la ropa y el fondo. Si notas cambios, puedes volver a procesar o quedarte con el original." },
-  { q: "¿Repara manos o cuerpos completos?", a: "No. LUMIA AI se centra en la apariencia de retratos: piel, ojos, cabello y luz. No corrige anatomía." },
-  { q: "¿Puedo trabajar en equipo?", a: "Sí. Puedes crear un equipo, invitar por enlace y compartir solo las imágenes que elijas. El equipo ve estadísticas agregadas." },
+  { q: "¿Dónde se procesan mis imágenes?", a: "En la computadora que aloja LUMIA AI. Si entras desde otro dispositivo, la imagen se sube a esa computadora. Solo «Generar con IA» envía tu descripción a Google (Gemini), con tu consentimiento." },
+  { q: "¿El resultado deja de ser una imagen de IA?", a: "No. Sigue siendo una imagen sintética editada: se descarga rotulada «editado con IA» y conserva sus metadatos de procedencia." },
+  { q: "¿Cambia el rostro de la persona?", a: "La edición es de baja intensidad para conservar la identidad, la pose, la ropa y el fondo. Siempre puedes comparar y quedarte con el original." },
+  { q: "¿Puedo restaurar una fotografía antigua?", a: "Sí: reduce ruido, recupera tonos y repara daños pequeños que marques. No reconstruye información perdida ni colorea automáticamente." },
+  { q: "¿Qué pasa si cierro la pestaña?", a: "El trabajo sigue en el servidor. Cuando vuelvas, lo encuentras en el Historial." },
+  { q: "¿Necesito una tarjeta gráfica?", a: "No. El Estudio funciona en el procesador de cualquier laptop. La humanización con IA es más rápida con NVIDIA, pero también funciona sin ella." },
 ];
 
+function useDemo() {
+  const [demo, setDemo] = useState<Demo | null>(null);
+  useEffect(() => {
+    fetch("/demo/demo.json").then((r) => (r.ok ? r.json() : null)).then((d) => { if (d?.before && d?.after) setDemo(d); }).catch(() => null);
+  }, []);
+  return demo;
+}
+
+/** Marco de navegador con una captura real de la aplicación. */
+function AppShot({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
+  return (
+    <div className={`overflow-hidden rounded-2xl border bg-card shadow-2xl shadow-black/40 ${className}`}>
+      <div className="flex items-center gap-1.5 border-b px-3 py-2">
+        <span className="size-2.5 rounded-full bg-red-400/80" /><span className="size-2.5 rounded-full bg-amber-400/80" /><span className="size-2.5 rounded-full bg-emerald-400/80" />
+        <span className="ml-3 truncate text-[11px] text-muted-foreground">localhost:5000</span>
+      </div>
+      <img src={src} alt={alt} loading="lazy" className="block w-full" />
+    </div>
+  );
+}
+
 export default function Home() {
+  const demo = useDemo();
   return (
     <>
       {/* ---------- Portada ---------- */}
       <section className="relative overflow-hidden">
-        <div aria-hidden className="absolute top-[-10rem] right-[-12rem] size-[38rem] rounded-full bg-[oklch(0.9_0.05_60/0.6)] blur-3xl" />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-4 pt-12 pb-20 md:px-6 lg:grid-cols-[1.1fr_1fr] lg:pt-20 lg:pb-28">
+        <div aria-hidden className="aurora absolute inset-0" />
+        <div aria-hidden className="grid-lines absolute inset-0" />
+        <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-4 pt-14 pb-24 md:px-6 lg:grid-cols-[1.05fr_1fr] lg:pt-24 lg:pb-32">
           <div className="space-y-8">
-            <p className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-xs font-medium text-brand-strong">
-              <Sparkles className="size-3.5" aria-hidden /> Humanización visual con IA local
+            <p className="glass inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-medium">
+              <span className="bg-brand-gradient grid size-5 place-items-center rounded-full text-white"><Sparkles className="size-3" aria-hidden /></span>
+              Estudio de imágenes con IA local
             </p>
-            <h1 className="font-display text-5xl leading-[1.05] font-semibold tracking-tight text-balance md:text-6xl">
-              Del retrato generado a una apariencia <span className="text-brand-strong italic">fotográfica</span>
+            <h1 className="font-display text-5xl leading-[1.02] font-bold text-balance md:text-7xl">
+              Tus retratos de IA, <span className="text-gradient shine">más reales.</span>
             </h1>
-            <p className="max-w-xl text-lg text-muted-foreground">
-              Humaniza retratos sintéticos, restaura fotos deterioradas y prepara tus imágenes en un solo estudio.
-              Compara cada cambio, conserva el original y trabaja con tu equipo.
+            <p className="max-w-xl text-lg text-muted-foreground md:text-xl">
+              Humaniza, restaura y edita en un solo lugar. Piel natural, ojos con vida y fondos perfectos,
+              conservando siempre tu original.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Button size="lg" asChild className="h-12 rounded-full px-7 text-base">
+              <Button size="lg" asChild className="h-13 rounded-full px-8 text-base">
                 <Link to="/registro">Empezar gratis <ArrowRight className="size-4" aria-hidden /></Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="h-12 rounded-full px-7 text-base">
-                <a href="#como-funciona">Ver cómo funciona</a>
+              <Button size="lg" variant="outline" asChild className="glass h-13 rounded-full px-8 text-base">
+                <a href="#herramientas">Ver herramientas</a>
               </Button>
             </div>
-            <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2"><Lock className="size-4 text-brand-strong" aria-hidden />Edición en el servidor local</li>
-              <li className="flex items-center gap-2"><BadgeCheck className="size-4 text-brand-strong" aria-hidden />Original intacto</li>
-              <li className="flex items-center gap-2"><ShieldCheck className="size-4 text-brand-strong" aria-hidden />Rotulado «editado con IA»</li>
-            </ul>
+            <dl className="grid max-w-lg grid-cols-3 gap-4 pt-2">
+              {[["9", "herramientas"], ["100 %", "en tu PC"], ["S/ 0", "en licencias"]].map(([n, l]) => (
+                <div key={l}><dt className="sr-only">{l}</dt><dd className="font-display text-3xl font-bold text-gradient">{n}</dd><p className="text-xs text-muted-foreground">{l}</p></div>
+              ))}
+            </dl>
           </div>
-          <div className="mx-auto w-full max-w-md space-y-4">
-            <BeforeAfterSlider before="/demo/retrato-generado.webp" after="/demo/retrato-humanizado.webp" beforeLabel="Generado con IA" afterLabel="Humanizado en LUMIA" />
-            <p className="text-center text-xs leading-relaxed text-muted-foreground">Retrato fotográfico sintético de muestra. Izquierda: generado con IA. Derecha: el mismo archivo procesado por LUMIA. No es una fotografía de una persona real.</p>
-          </div>
-        </div>
-      </section>
 
-      <section id="herramientas" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-20 md:px-6">
-        <div className="max-w-2xl space-y-4"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-strong">Un estudio completo</p><h2 className="font-display text-4xl font-semibold tracking-tight">De la primera foto a tu entrega final</h2><p className="text-muted-foreground">Herramientas para editar, organizar y colaborar. La edición local funciona sin saldo de API externa.</p></div>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[
-            ["01", "Humanización local", "Retratos sintéticos con microtextura y realce de reflejos existentes en los ojos. Comparación y descarga rotulada."],
-            ["02", "Restauración de fotos", "Reduce ruido y recupera tonos. Marca rayas o manchas pequeñas para repararlas sin sobrescribir el original."],
-            ["03", "Estudio de edición", "Quitar lunares, cambiar o quitar fondo, desenfoque gaussiano, nitidez, resolución, luz, color y rotación."],
-            ["04", "Asistente de edición", "Una guía de objetivos y pasos concretos que abre la herramienta indicada. Sin llamadas a servicios de chat."],
-            ["05", "Galería y álbumes", "Carga varias imágenes, organiza tus archivos y guarda resultados para continuar editándolos."],
-            ["06", "Trabajos en segundo plano", "Sigue utilizando la web mientras se procesa una imagen. Recupera el resultado desde el historial."],
-            ["07", "Equipos e invitaciones", "Invita por enlace, prepara un correo o compártelo por WhatsApp. Cada persona crea su propia contraseña."],
-            ["08", "Tu espacio, tu estilo", "Avatares de iniciales o iconos, cuatro acentos, tema claro/oscuro/sistema y navegación compacta en este navegador."],
-            ["09", "Horario y seguimiento", "Configura tu horario, registra entrada y salida, consulta horas y exporta el resumen del equipo a CSV."],
-          ].map(([number, title, description]) => <article key={number} className="space-y-3 rounded-3xl border bg-card p-6 shadow-sm"><span className="text-xs font-semibold tracking-widest text-brand-strong">{number}</span><h3 className="text-lg font-semibold">{title}</h3><p className="text-sm leading-relaxed text-muted-foreground">{description}</p></article>)}
-        </div>
-        <p className="mt-6 text-xs text-muted-foreground">Integración opcional: generación de imágenes con Gemini, disponible cuando el proyecto de Google tenga cuota. No se incluye como servicio activo sin validar esa cuota.</p>
-      </section>
-
-      {/* ---------- El problema ---------- */}
-      <section className="border-y bg-secondary/50">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-20 md:px-6 lg:grid-cols-[1fr_1.4fr]">
-          <div className="space-y-4">
-            <p className="text-xs font-semibold tracking-[0.18em] text-brand-strong uppercase">El problema</p>
-            <h2 className="font-display text-4xl font-semibold tracking-tight text-balance">Los retratos sintéticos delatan su origen</h2>
-            <p className="text-muted-foreground">
-              Quien crea imágenes con IA suele regenerar muchas veces o retocar a mano para que un rostro no se vea artificial.
-              LUMIA AI reduce ese trabajo con una sola edición controlada.
-            </p>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            {SINTOMAS.map((s, i) => (
-              <div key={s.t} className="rounded-3xl border bg-card p-6 shadow-sm">
-                <p className="font-display text-3xl text-brand">0{i + 1}</p>
-                <p className="mt-3 font-semibold">{s.t}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{s.d}</p>
+          <div className="relative mx-auto w-full max-w-lg">
+            <div aria-hidden className="bg-brand-gradient absolute -inset-6 rounded-[2.5rem] opacity-30 blur-3xl" />
+            {demo ? (
+              <div className="relative space-y-3">
+                <BeforeAfterSlider before={demo.before} after={demo.after} beforeLabel="Generado con IA" afterLabel="Humanizado en LUMIA" />
+                <p className="text-center text-xs text-muted-foreground">{demo.caption}</p>
               </div>
-            ))}
+            ) : (
+              <div className="relative pb-10">
+                <AppShot src="/showcase/estudio.webp" alt="Estudio de edición de LUMIA AI" className="float-slow" />
+                <AppShot src="/showcase/panel.webp" alt="Panel de LUMIA AI" className="absolute -bottom-2 -left-8 hidden w-1/2 sm:block" />
+              </div>
+            )}
           </div>
         </div>
       </section>
 
-      {/* ---------- Qué mejora ---------- */}
-      <section id="que-mejora" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-24 md:px-6">
+      {/* ---------- Herramientas ---------- */}
+      <section id="herramientas" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-24 md:px-6">
         <div className="mx-auto max-w-2xl space-y-4 text-center">
-          <p className="text-xs font-semibold tracking-[0.18em] text-brand-strong uppercase">Qué mejora</p>
-          <h2 className="font-display text-4xl font-semibold tracking-tight text-balance">Cuatro detalles que hacen creíble un rostro</h2>
-          <p className="text-muted-foreground">Acercamientos del resultado de muestra procesado por LUMIA. El comparador superior conserva el original para revisar las diferencias reales.</p>
+          <p className="text-xs font-semibold tracking-[0.2em] text-brand-strong uppercase">Todo en un estudio</p>
+          <h2 className="font-display text-4xl font-bold text-balance md:text-5xl">Lo que puedes hacer con <span className="text-gradient">LUMIA</span></h2>
+          <p className="text-muted-foreground">Herramientas reales que funcionan en tu computadora, sin pagar por servicios externos.</p>
         </div>
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {MEJORAS.map(({ kind, icon: Icon, t, d }) => (
-            <article key={t} className="flex flex-col gap-4 rounded-3xl border bg-card p-5 shadow-sm">
-              <img src="/demo/retrato-humanizado.webp" alt={`Detalle del retrato de muestra: ${t}`} loading="lazy" className="h-40 w-full rounded-2xl object-cover" style={{ objectPosition: ({ piel: "50% 50%", ojos: "50% 34%", cabello: "20% 20%", luz: "50% 60%" })[kind] }} />
-              <div className="flex items-center gap-2">
-                <span className="grid size-8 place-items-center rounded-xl bg-brand-soft text-brand-strong"><Icon className="size-4" aria-hidden /></span>
-                <h3 className="font-semibold">{t}</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">{d}</p>
+        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {HERRAMIENTAS.map(({ icon: Icon, t, d }) => (
+            <article key={t} className="group relative rounded-3xl border bg-card p-6 transition duration-300 hover:-translate-y-1 hover:glow">
+              <span className="bg-brand-gradient grid size-12 place-items-center rounded-2xl text-white shadow-lg transition group-hover:scale-110"><Icon className="size-6" aria-hidden /></span>
+              <h3 className="mt-5 text-lg font-semibold">{t}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{d}</p>
             </article>
           ))}
         </div>
+        <p className="mt-6 text-center text-xs text-muted-foreground">Opcional: «Generar con IA» usa Gemini de Google y requiere una clave con cuota disponible.</p>
       </section>
 
       {/* ---------- Cómo funciona ---------- */}
-      <section id="como-funciona" className="scroll-mt-24 bg-primary text-primary-foreground">
-        <div className="mx-auto max-w-6xl px-4 py-24 md:px-6">
+      <section id="como-funciona" className="relative scroll-mt-24 overflow-hidden border-y">
+        <div aria-hidden className="aurora absolute inset-0 opacity-60" />
+        <div className="relative mx-auto max-w-6xl px-4 py-24 md:px-6">
           <div className="max-w-2xl space-y-4">
-            <p className="text-xs font-semibold tracking-[0.18em] text-[oklch(0.85_0.08_65)] uppercase">Cómo funciona</p>
-            <h2 className="font-display text-4xl font-semibold tracking-tight text-balance">De tu archivo a la comparación, en cuatro pasos</h2>
+            <p className="text-xs font-semibold tracking-[0.2em] text-brand-strong uppercase">Cómo funciona</p>
+            <h2 className="font-display text-4xl font-bold text-balance md:text-5xl">Cuatro pasos. Cero complicaciones.</h2>
           </div>
-          <ol className="mt-14 grid gap-6 md:grid-cols-4">
+          <ol className="mt-14 grid gap-5 md:grid-cols-4">
             {PASOS.map(({ icon: Icon, t, d }, i) => (
-              <li key={t} className="relative rounded-3xl bg-white/[0.06] p-6 ring-1 ring-white/10">
-                <span className="absolute top-6 right-6 font-display text-4xl text-white/15">{i + 1}</span>
-                <span className="grid size-11 place-items-center rounded-2xl bg-[oklch(0.6_0.11_48)] text-white"><Icon className="size-5" aria-hidden /></span>
-                <p className="mt-6 font-semibold">{t}</p>
-                <p className="mt-2 text-sm text-primary-foreground/75">{d}</p>
+              <li key={t} className="glass relative rounded-3xl border p-6">
+                <span className="font-display absolute top-5 right-6 text-5xl font-bold text-gradient opacity-40">{i + 1}</span>
+                <span className="grid size-11 place-items-center rounded-2xl border bg-background"><Icon className="size-5 text-brand-strong" aria-hidden /></span>
+                <p className="mt-6 text-lg font-semibold">{t}</p>
+                <p className="mt-1.5 text-sm text-muted-foreground">{d}</p>
               </li>
             ))}
           </ol>
         </div>
       </section>
 
-      {/* ---------- Privacidad y límites ---------- */}
-      <section id="privacidad" className="mx-auto grid max-w-6xl scroll-mt-24 gap-8 px-4 py-24 md:px-6 lg:grid-cols-2">
-        <div className="rounded-3xl border bg-card p-8 shadow-sm">
-          <span className="grid size-11 place-items-center rounded-2xl bg-brand-soft text-brand-strong"><Lock className="size-5" aria-hidden /></span>
-          <h2 className="mt-6 font-display text-3xl font-semibold">Privacidad por diseño</h2>
+      {/* ---------- Privacidad ---------- */}
+      <section id="privacidad" className="mx-auto grid max-w-6xl scroll-mt-24 gap-6 px-4 py-24 md:px-6 lg:grid-cols-2">
+        <div className="ring-gradient rounded-3xl p-8">
+          <span className="bg-brand-gradient grid size-12 place-items-center rounded-2xl text-white"><Lock className="size-6" aria-hidden /></span>
+          <h2 className="font-display mt-6 text-3xl font-bold">Privacidad por diseño</h2>
           <ul className="mt-6 space-y-3 text-sm text-muted-foreground">
-            <li className="flex gap-3"><BadgeCheck className="mt-0.5 size-4 shrink-0 text-emerald-700" aria-hidden />Solo tú ves tus imágenes, salvo que compartas una con tu equipo.</li>
-            <li className="flex gap-3"><BadgeCheck className="mt-0.5 size-4 shrink-0 text-emerald-700" aria-hidden />La edición ocurre en la computadora que aloja la aplicación. Gemini recibe solo tu descripción, con consentimiento.</li>
-            <li className="flex gap-3"><BadgeCheck className="mt-0.5 size-4 shrink-0 text-emerald-700" aria-hidden />El administrador técnico ve métricas agregadas, nunca tus fotos.</li>
-            <li className="flex gap-3"><BadgeCheck className="mt-0.5 size-4 shrink-0 text-emerald-700" aria-hidden />Los resultados conservan los metadatos de procedencia y se rotulan.</li>
+            {["Solo tú ves tus imágenes, salvo que compartas una con tu equipo.",
+              "La edición ocurre en la computadora que aloja LUMIA AI.",
+              "El administrador ve métricas, nunca tus fotos.",
+              "Cada resultado se rotula «editado con IA» y conserva su procedencia."].map((x) => (
+              <li key={x} className="flex gap-3"><BadgeCheck className="mt-0.5 size-4 shrink-0 text-emerald-500" aria-hidden />{x}</li>
+            ))}
           </ul>
         </div>
-        <div className="rounded-3xl border bg-secondary/50 p-8">
-          <span className="grid size-11 place-items-center rounded-2xl bg-card text-foreground"><ShieldCheck className="size-5" aria-hidden /></span>
-          <h2 className="mt-6 font-display text-3xl font-semibold">Lo que LUMIA AI no hace</h2>
+        <div className="rounded-3xl border bg-card p-8">
+          <span className="grid size-12 place-items-center rounded-2xl border bg-background"><ShieldCheck className="size-6" aria-hidden /></span>
+          <h2 className="font-display mt-6 text-3xl font-bold">Uso responsable</h2>
           <ul className="mt-6 space-y-3 text-sm text-muted-foreground">
-            <li className="flex gap-3"><X className="mt-0.5 size-4 shrink-0 text-red-700" aria-hidden />No convierte una imagen sintética en la foto de una persona real.</li>
-            <li className="flex gap-3"><X className="mt-0.5 size-4 shrink-0 text-red-700" aria-hidden />No borra metadatos de procedencia ni oculta que hubo edición con IA.</li>
-            <li className="flex gap-3"><X className="mt-0.5 size-4 shrink-0 text-red-700" aria-hidden />No ofrece suplantación de identidad ni cambia el rostro de nadie.</li>
-            <li className="flex gap-3"><X className="mt-0.5 size-4 shrink-0 text-red-700" aria-hidden />No garantiza reparar manos ni anatomía.</li>
+            {["No convierte una imagen sintética en la foto de una persona real.",
+              "No borra metadatos ni oculta que hubo edición con IA.",
+              "No ofrece suplantación de identidad.",
+              "No promete reparar manos ni anatomía."].map((x) => (
+              <li key={x} className="flex gap-3"><X className="mt-0.5 size-4 shrink-0 text-red-500" aria-hidden />{x}</li>
+            ))}
           </ul>
-        </div>
-      </section>
-
-      {/* ---------- Para equipos ---------- */}
-      <section className="border-y bg-secondary/40">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-20 md:px-6 lg:grid-cols-3">
-          {[
-            { icon: Users, t: "Equipos con invitación", d: "Un enlace de un solo uso que vence en 72 horas." },
-            { icon: FileCheck2, t: "Compartir con intención", d: "Solo se comparte lo que tú eliges, imagen por imagen." },
-            { icon: MonitorSmartphone, t: "En escritorio y celular", d: "La interfaz se adapta a la pantalla y se maneja con teclado." },
-          ].map(({ icon: Icon, t, d }) => (
-            <div key={t} className="flex gap-4">
-              <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-card text-brand-strong shadow-sm"><Icon className="size-5" aria-hidden /></span>
-              <div><p className="font-semibold">{t}</p><p className="mt-1 text-sm text-muted-foreground">{d}</p></div>
-            </div>
-          ))}
         </div>
       </section>
 
       {/* ---------- Preguntas ---------- */}
-      <section id="preguntas" className="mx-auto max-w-3xl scroll-mt-24 px-4 py-24 md:px-6">
-        <h2 className="text-center font-display text-4xl font-semibold tracking-tight">Preguntas frecuentes</h2>
+      <section id="preguntas" className="mx-auto max-w-3xl scroll-mt-24 px-4 pb-24 md:px-6">
+        <h2 className="font-display text-center text-4xl font-bold">Preguntas frecuentes</h2>
         <div className="mt-10 divide-y rounded-3xl border bg-card">
           {FAQ.map((f) => (
             <details key={f.q} className="group p-6 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
-                {f.q}<span className="text-xl text-muted-foreground transition group-open:rotate-45" aria-hidden>+</span>
+                {f.q}<span className="text-gradient text-2xl transition group-open:rotate-45" aria-hidden>+</span>
               </summary>
               <p className="mt-3 text-sm text-muted-foreground">{f.a}</p>
             </details>
@@ -215,12 +197,12 @@ export default function Home() {
 
       {/* ---------- Llamado final ---------- */}
       <section className="px-4 pb-24 md:px-6">
-        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[2rem] bg-primary px-8 py-16 text-center text-primary-foreground">
-          <div aria-hidden className="absolute -top-24 left-1/2 size-[30rem] -translate-x-1/2 rounded-full bg-[oklch(0.6_0.11_48/0.35)] blur-3xl" />
-          <h2 className="relative font-display text-4xl font-semibold tracking-tight text-balance">Prueba LUMIA AI con tu primer retrato</h2>
-          <p className="relative mx-auto mt-4 max-w-xl text-primary-foreground/80">Crea tu cuenta, sube una imagen generada por IA y compara el resultado en minutos.</p>
-          <Button size="lg" variant="secondary" asChild className="relative mt-8 h-12 rounded-full px-8 text-base">
-            <Link to="/registro">Crear mi cuenta</Link>
+        <div className="bg-brand-gradient relative mx-auto max-w-6xl overflow-hidden rounded-[2rem] px-8 py-16 text-center text-white">
+          <div aria-hidden className="grid-lines absolute inset-0 opacity-40" />
+          <h2 className="font-display relative text-4xl font-bold text-balance md:text-5xl">Haz que tus imágenes se vean reales</h2>
+          <p className="relative mx-auto mt-4 max-w-xl text-white/85">Crea tu cuenta y prueba el estudio completo en minutos.</p>
+          <Button size="lg" variant="secondary" asChild className="relative mt-8 h-13 rounded-full bg-white px-8 text-base text-neutral-900 hover:bg-white/90">
+            <Link to="/registro">Crear mi cuenta gratis <ArrowRight className="size-4" aria-hidden /></Link>
           </Button>
         </div>
       </section>

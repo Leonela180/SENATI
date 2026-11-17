@@ -32,7 +32,7 @@ export default function Generate() {
                   description="Describe la imagen que necesitas. Se genera con Gemini de Google y se guarda en tu galería, lista para editar o humanizar." />
 
       {status && !status.configured && (
-        <div role="status" className="flex gap-3 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <div role="status" className="flex gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-700 dark:text-amber-300">
           <AlertTriangle className="size-5 shrink-0" aria-hidden />
           <p><strong>Falta configurar Gemini.</strong> La generación está pendiente de activación por el administrador. Puedes seguir utilizando la galería y las herramientas del Estudio.</p>
         </div>
@@ -61,14 +61,14 @@ export default function Generate() {
               {albums?.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
             </select>
           </label>
-          <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50/60 p-4">
+          <div className="flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4">
             <Checkbox id="consent" checked={consent} onCheckedChange={(v) => setConsent(v === true)} className="mt-0.5" />
             <Label htmlFor="consent" className="block text-sm font-normal leading-relaxed">
               <span className="mb-1 flex items-center gap-2 font-medium"><CloudUpload className="size-4" aria-hidden />Servicio externo</span>
               Entiendo que esta descripción se envía a Google (Gemini) para generar la imagen. La generación está sujeta a la cuota disponible del servicio.
             </Label>
           </div>
-          {gen.error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{(gen.error as Error).message}</p>}
+          {gen.error && <p role="alert" className="rounded-xl bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">{(gen.error as Error).message}</p>}
           <Button size="lg" className="h-12 w-full rounded-xl text-base" disabled={!consent || prompt.trim().length < 5 || gen.isPending || !status?.configured || statusError}
                   onClick={() => gen.mutate({ prompt: prompt.trim(), albumId })}>
             {gen.isPending ? <><Loader2 className="size-4 animate-spin" aria-hidden />Generando… (puede tardar unos segundos)</> : <><Sparkles className="size-4" aria-hidden />Generar imagen</>}

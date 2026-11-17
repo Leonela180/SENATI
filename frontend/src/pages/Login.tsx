@@ -21,7 +21,7 @@ export default function Login() {
           <Input id="email" type="email" autoComplete="email" required className="h-11" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
         <div className="space-y-2"><Label htmlFor="password">Contraseña</Label>
           <Input id="password" type="password" autoComplete="current-password" required className="h-11" value={password} onChange={(e) => setPassword(e.target.value)} /></div>
-        {login.error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{(login.error as Error).message}</p>}
+        {login.error && <p role="alert" className="rounded-xl bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">{(login.error as Error).message}</p>}
         <Button type="submit" className="h-11 w-full rounded-xl" disabled={login.isPending}>{login.isPending ? "Entrando…" : "Entrar"}</Button>
       </form>
     </AuthLayout>

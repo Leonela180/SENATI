@@ -6,7 +6,7 @@ export function BeforeAfterSlider({ before, after, className, beforeLabel = "Ori
   const [pos, setPos] = useState(50);
   return (
     <figure className={cn("mx-auto w-fit max-w-full space-y-2", className)}>
-      <div className="relative select-none overflow-hidden rounded-3xl bg-muted shadow-xl shadow-[oklch(0.4_0.05_40/0.18)] ring-1 ring-black/5">
+      <div className="relative select-none overflow-hidden rounded-3xl bg-muted shadow-2xl shadow-black/30 ring-1 ring-black/5">
         <img src={after} alt="Resultado editado con IA" className="block max-h-[70vh] w-auto max-w-full" draggable={false} />
         <img src={before} alt="Imagen original" draggable={false}
              className="absolute inset-0 h-full w-full object-cover"

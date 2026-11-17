@@ -167,7 +167,7 @@ export default function Gallery() {
                 <option value="none">Sin álbum</option>
                 {albums?.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
               </select>
-              <Button size="sm" variant="ghost" className="text-red-700" onClick={deleteSelected}><Trash2 className="size-4" aria-hidden />Borrar</Button>
+              <Button size="sm" variant="ghost" className="text-red-700 dark:text-red-300" onClick={deleteSelected}><Trash2 className="size-4" aria-hidden />Borrar</Button>
               <Button size="sm" variant="ghost" onClick={() => setSelected([])}>Cancelar</Button>
             </fieldset>
           )}
@@ -193,7 +193,7 @@ export default function Gallery() {
                       <span className="truncate text-xs" title={im.filename}>{im.filename}</span>
                       <span className="flex shrink-0 gap-1">
                         <Link to={`/app/estudio?image=${im.id}`} className="rounded-lg p-1.5 hover:bg-muted" aria-label="Editar en el Estudio" title="Editar en el Estudio"><Wand2 className="size-4" /></Link>
-                        <button onClick={() => { if (window.confirm("¿Borrar esta imagen y sus resultados?")) del.mutate(im.id); }} className="rounded-lg p-1.5 text-red-700 hover:bg-red-50" aria-label="Borrar" title="Borrar"><Trash2 className="size-4" /></button>
+                        <button onClick={() => { if (window.confirm("¿Borrar esta imagen y sus resultados?")) del.mutate(im.id); }} className="rounded-lg p-1.5 text-red-700 dark:text-red-300 hover:bg-red-500/10" aria-label="Borrar" title="Borrar"><Trash2 className="size-4" /></button>
                       </span>
                     </figcaption>
                   </figure>

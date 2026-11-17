@@ -1,9 +1,9 @@
 import { useSyncExternalStore } from "react";
 
-export const ACCENTS = { copper: "Cobre", ocean: "Océano", forest: "Bosque", violet: "Violeta" } as const;
+export const ACCENTS = { violet: "Aurora", copper: "Atardecer", ocean: "Océano", forest: "Esmeralda" } as const;
 export const AVATARS = { initials: "Iniciales", camera: "Cámara", spark: "Destello", leaf: "Hoja", mountain: "Montaña" } as const;
 type Appearance = { mode: "light" | "dark" | "system"; accent: keyof typeof ACCENTS; avatar: keyof typeof AVATARS; compact: boolean };
-const defaults: Appearance = { mode: "system", accent: "copper", avatar: "initials", compact: false };
+const defaults: Appearance = { mode: "dark", accent: "violet", avatar: "initials", compact: false };
 let current = defaults;
 try {
   const value = JSON.parse(localStorage.getItem("lumia-appearance") || "{}");

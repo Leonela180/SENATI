@@ -85,11 +85,11 @@ export default function Hours() {
             <div><p className="text-xs text-muted-foreground">Esperadas a la fecha</p><p className="text-xl font-semibold">{sum ? h(sum.expected_to_date) : "—"}</p></div>
             <div><p className="text-xs text-muted-foreground">Trabajadas</p><p className="text-xl font-semibold">{sum ? h(sum.worked) : "—"}</p></div>
             <div><p className="text-xs text-muted-foreground">Saldo</p>
-              <p className={cn("flex items-center gap-1 text-xl font-semibold", sum && (sum.balance >= 0 ? "text-emerald-700" : "text-red-700"))}>
+              <p className={cn("flex items-center gap-1 text-xl font-semibold", sum && (sum.balance >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-red-700 dark:text-red-300"))}>
                 {sum && (sum.balance >= 0 ? <TrendingUp className="size-5" aria-hidden /> : <TrendingDown className="size-5" aria-hidden />)}{sum ? h(sum.balance) : "—"}</p></div>
-            <div className={cn("rounded-2xl p-3", sum && sum.to_recover > 0 ? "bg-red-50" : "bg-emerald-50")}>
+            <div className={cn("rounded-2xl p-3", sum && sum.to_recover > 0 ? "bg-red-500/10" : "bg-emerald-500/10")}>
               <p className="text-xs text-muted-foreground">Por recuperar</p>
-              <p className={cn("text-xl font-semibold", sum && sum.to_recover > 0 ? "text-red-800" : "text-emerald-800")}>{sum ? (sum.to_recover > 0 ? h(sum.to_recover) : "Nada 🎉") : "—"}</p>
+              <p className={cn("text-xl font-semibold", sum && sum.to_recover > 0 ? "text-red-700 dark:text-red-300" : "text-emerald-700 dark:text-emerald-300")}>{sum ? (sum.to_recover > 0 ? h(sum.to_recover) : "Nada 🎉") : "—"}</p>
             </div>
           </div>
           <div>
@@ -123,7 +123,7 @@ export default function Hours() {
             {schedule?.days.map((d, i) => days[i] && (
               <div key={d.weekday} className="grid grid-cols-[5.2rem_1fr_1fr] items-center gap-2 sm:grid-cols-[7rem_1fr_1fr] sm:gap-3">
                 <label className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked={days[i].on} onChange={(e) => setDays(days.map((x, j) => (j === i ? { ...x, on: e.target.checked } : x)))} className="accent-[oklch(0.27_0.03_40)]" />
+                  <input type="checkbox" checked={days[i].on} onChange={(e) => setDays(days.map((x, j) => (j === i ? { ...x, on: e.target.checked } : x)))} className="accent-[var(--g2)]" />
                   <span className="sm:hidden">{d.day.slice(0, 3)}</span><span className="hidden sm:inline">{d.day}</span>
                 </label>
                 <Input type="time" aria-label={`Entrada ${d.day}`} disabled={!days[i].on} value={days[i].start} onChange={(e) => setDays(days.map((x, j) => (j === i ? { ...x, start: e.target.value } : x)))} />
@@ -148,9 +148,9 @@ export default function Hours() {
                 <tbody>
                   {entries.map((e) => (
                     <tr key={e.id} className="border-t">
-                      <td className="py-2">{dia(e.clock_in)}</td><td>{hora(e.clock_in)}</td><td>{e.clock_out ? hora(e.clock_out) : <span className="text-amber-700">en curso</span>}</td>
+                      <td className="py-2">{dia(e.clock_in)}</td><td>{hora(e.clock_in)}</td><td>{e.clock_out ? hora(e.clock_out) : <span className="text-amber-700 dark:text-amber-300">en curso</span>}</td>
                       <td>{h(e.hours)}{e.source === "manual" && <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-[10px]" title={e.note ?? ""}>manual</span>}</td>
-                      <td className="text-right">{e.source === "manual" && <button onClick={() => delEntry.mutate(e.id)} aria-label="Borrar registro manual" className="rounded p-1 text-red-700 hover:bg-red-50"><Trash2 className="size-4" /></button>}</td>
+                      <td className="text-right">{e.source === "manual" && <button onClick={() => delEntry.mutate(e.id)} aria-label="Borrar registro manual" className="rounded p-1 text-red-700 dark:text-red-300 hover:bg-red-500/10"><Trash2 className="size-4" /></button>}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -186,9 +186,9 @@ export default function Hours() {
                 {teamRows?.map((r) => (
                   <tr key={r.user_id} className="border-t">
                     <td className="py-2 font-medium">{r.display_name}</td><td>{r.weekly_hours} h</td><td>{h(r.expected_to_date)}</td><td>{h(r.worked)}</td>
-                    <td className={r.balance >= 0 ? "text-emerald-700" : "text-red-700"}>{h(r.balance)}</td>
-                    <td>{r.to_recover > 0 ? <span className="rounded-full bg-red-100 px-2 py-0.5 text-red-900">{h(r.to_recover)}</span> : <span className="text-emerald-700">—</span>}</td>
-                    <td>{r.working_now ? <span className="flex items-center gap-1 text-emerald-700"><span className="size-2 rounded-full bg-emerald-600 pulse-dot" />Trabajando</span> : <span className="text-muted-foreground">Fuera</span>}</td>
+                    <td className={r.balance >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-red-700 dark:text-red-300"}>{h(r.balance)}</td>
+                    <td>{r.to_recover > 0 ? <span className="rounded-full bg-red-500/15 px-2 py-0.5 text-red-700 dark:text-red-300">{h(r.to_recover)}</span> : <span className="text-emerald-700 dark:text-emerald-400">—</span>}</td>
+                    <td>{r.working_now ? <span className="flex items-center gap-1 text-emerald-700 dark:text-emerald-400"><span className="size-2 rounded-full bg-emerald-600 pulse-dot" />Trabajando</span> : <span className="text-muted-foreground">Fuera</span>}</td>
                   </tr>
                 ))}
               </tbody>

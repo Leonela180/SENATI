@@ -33,14 +33,24 @@ def detect_regions(image):
     return tuple(round(v / scale) for v in (x, y, w, h)), eyes
 
 
-def detail_crop(original, generated, eyes, intensity, seed):
-    source = np.asarray(original, dtype=np.uint8)
-    generated = np.asarray(generated, dtype=np.float32)
-    height, width = source.shape[:2]
-    gray = cv2.cvtColor(source, cv2.COLOR_RGB2GRAY).astype(np.float32)
+def _feather(region, sigma):
+    """Difumina una zona binaria para que su influencia baje de forma gradual (sin bordes duros)."""
+    return cv2.GaussianBlur(region.astype(np.float32), (0, 0), max(1.0, sigma))
+
+
+def skin_mask(source, gray, eyes):
+    """Máscara SUAVE del rostro: elipse difuminada, piel por color difuminada y protecciones graduales.
+
+    Antes la selección por color se aplicaba píxel a píxel y los ojos se tapaban con rectángulos duros:
+    eso dejaba parches visibles («efecto mascarilla»). Ahora todo pasa por desenfoques amplios.
+    """
+    height, width = gray.shape
+    soft_sigma = max(2.0, width / 28)
+    face = np.zeros((height, width), np.float32)
+    cv2.ellipse(face, (width // 2, height // 2), (int(width * .40), int(height * .44)), 0, 0, 360, 1, -1)
+    face = _feather(face, soft_sigma)
+    # Probabilidad de piel por crominancia, muestreada en las mejillas y suavizada a baja frecuencia
     color = cv2.cvtColor(source, cv2.COLOR_RGB2YCrCb).astype(np.float32)
-    mask = np.zeros((height, width), np.float32)
-    cv2.ellipse(mask, (width // 2, height // 2), (int(width * .45), int(height * .48)), 0, 0, 360, 1, -1)
     samples = []
     for center in (.27, .73):
         x0, x1 = int(width * (center - .04)), int(width * (center + .04))
@@ -50,20 +60,33 @@ def detail_crop(original, generated, eyes, intensity, seed):
     center = np.median(samples, axis=0)
     spread = np.maximum(np.median(np.abs(samples - center), axis=0) * 3, (14, 12))
     distance = np.sum(((color[..., 1:] - center) / spread) ** 2, axis=2)
-    mask *= np.clip(1 - distance / 4, 0, 1)
-    mask *= (gray > 30)
-    # Boca, fosas nasales y contorno ocular no reciben textura.
-    cv2.ellipse(mask, (width // 2, int(height * .78)), (int(width * .26), int(height * .11)), 0, 0, 360, 0, -1)
-    cv2.ellipse(mask, (width // 2, int(height * .64)), (int(width * .12), int(height * .045)), 0, 0, 360, 0, -1)
+    skin = _feather(np.clip(1 - distance / 6, 0, 1) * (gray > 30), soft_sigma)
+    mask = face * np.clip(skin * 1.25, 0, 1)
+    # Ojos, boca y fosas nasales: protección gradual; el centro de cada zona queda exactamente sin cambios
+    protect_core = np.zeros((height, width), np.uint8)
+    cv2.ellipse(protect_core, (width // 2, int(height * .78)), (int(width * .24), int(height * .10)), 0, 0, 360, 1, -1)
+    cv2.ellipse(protect_core, (width // 2, int(height * .64)), (int(width * .11), int(height * .04)), 0, 0, 360, 1, -1)
     for ex, ey, ew, eh in eyes:
-        cv2.rectangle(mask, (max(0, ex - int(ew * .08)), max(0, ey - int(eh * .35))),
-                      (min(width - 1, ex + int(ew * 1.08)), min(height - 1, ey + int(eh * 1.12))), 0, -1)
-    # Protege lunares y marcas oscuras que ya estaban presentes.
+        cv2.ellipse(protect_core, (int(ex + ew / 2), int(ey + eh / 2)), (max(1, int(ew * .62)), max(1, int(eh * .75))),
+                    0, 0, 360, 1, -1)
+    # Lunares y marcas oscuras existentes: se conservan tal como están
     dark_marks = (gray - cv2.GaussianBlur(gray, (0, 0), 2.0) < -9).astype(np.uint8)
-    dark_marks = cv2.dilate(dark_marks, np.ones((3, 3), np.uint8))
-    mask[dark_marks > 0] = 0
-    soft = cv2.GaussianBlur(mask, (0, 0), max(1.0, width / 200))
-    mask = np.minimum(mask, soft)
+    protect_core |= cv2.dilate(dark_marks, np.ones((3, 3), np.uint8))
+    protection = np.clip(_feather(cv2.dilate(protect_core, np.ones((5, 5), np.uint8)), soft_sigma / 3) * 1.6, 0, 1)
+    mask *= 1 - protection
+    mask[protect_core > 0] = 0
+    # Ventana que llega a cero antes del borde del recorte: el parche nunca deja costuras
+    taper_y = np.clip(np.sin(np.linspace(0, np.pi, height, dtype=np.float32)), 0, 1) ** .5
+    taper_x = np.clip(np.sin(np.linspace(0, np.pi, width, dtype=np.float32)), 0, 1) ** .5
+    return np.clip(mask * taper_y[:, None] * taper_x[None, :], 0, 1)
+
+
+def detail_crop(original, generated, eyes, intensity, seed):
+    source = np.asarray(original, dtype=np.uint8)
+    generated = np.asarray(generated, dtype=np.float32)
+    height, width = source.shape[:2]
+    gray = cv2.cvtColor(source, cv2.COLOR_RGB2GRAY).astype(np.float32)
+    mask = skin_mask(source, gray, eyes)
     rng = np.random.default_rng(seed)
     points = (rng.random((height, width), dtype=np.float32) < .0035).astype(np.float32)
     pores = (cv2.GaussianBlur(points, (0, 0), 2.0) - cv2.GaussianBlur(points, (0, 0), .65)) * 18
@@ -74,7 +97,11 @@ def detail_crop(original, generated, eyes, intensity, seed):
     existing_detail = gray - cv2.GaussianBlur(gray, (0, 0), 1.2)
     generated_detail = generated_gray - cv2.GaussianBlur(generated_gray, (0, 0), 1.2)
     texture = np.clip(pores + relief * .65, -5, 3) * intensity
-    delta = (generated - source) + ((existing_detail - generated_detail) * .85 + texture)[..., None]
+    # Del resultado de la IA solo se transfiere la textura (media y alta frecuencia), no su cambio de tono:
+    # si la cara tomara el tono de la IA y el cuello conservara el original, se vería como una máscara.
+    ai_change = generated - source.astype(np.float32)
+    ai_texture = ai_change - cv2.GaussianBlur(ai_change, (0, 0), max(2.0, width / 24))
+    delta = ai_texture + ((existing_detail - generated_detail) * .85 + texture)[..., None]
     edited = source.astype(np.float32) + delta * mask[..., None]
     eye_count = 0
     for ex, ey, ew, eh in eyes:

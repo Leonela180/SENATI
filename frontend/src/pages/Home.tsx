@@ -4,7 +4,7 @@ import {
   SunMedium, Upload, Users, Wand2, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ConceptCompare, Swatch } from "@/components/Illustration";
+import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 
 const SINTOMAS = [
   { t: "Piel de cera", d: "Superficies lisas y brillantes, sin poros ni variaciones de tono." },
@@ -15,18 +15,21 @@ const SINTOMAS = [
 const MEJORAS = [
   { kind: "piel" as const, icon: ScanFace, t: "Piel con microtextura", d: "Poros y variaciones sutiles de tono, sin embellecer ni cambiar el color de piel." },
   { kind: "ojos" as const, icon: Eye, t: "Ojos coherentes", d: "Reflejos y detalle del iris que hacen creíble la mirada." },
-  { kind: "cabello" as const, icon: Wand2, t: "Cabello natural", d: "Mechones finos donde el modelo original dejó una masa uniforme." },
-  { kind: "luz" as const, icon: SunMedium, t: "Luz creíble", d: "Transiciones de luz y sombra más fotográficas y consistentes." },
+  { kind: "cabello" as const, icon: Wand2, t: "Edición conservadora", d: "Una mezcla de baja intensidad limita los cambios. Compara siempre los contornos y el cabello." },
+  { kind: "luz" as const, icon: SunMedium, t: "Tonos naturales", d: "Ajustes moderados para mantener un aspecto fotográfico. Cada retrato puede responder de forma diferente." },
 ];
 
 const PASOS = [
   { icon: Upload, t: "Sube tu retrato", d: "Un retrato de persona generado por IA en JPG, PNG o WebP de hasta 10 MB." },
   { icon: FileCheck2, t: "Declara su origen", d: "Confirmas que la imagen es sintética y que tienes permiso para usarla." },
-  { icon: Cpu, t: "Se humaniza en tu PC", d: "Un modelo image-to-image local hace una edición de baja intensidad." },
+  { icon: Cpu, t: "El servidor trabaja", d: "La imagen se procesa en segundo plano. Puedes cambiar de pantalla y volver desde el historial." },
   { icon: Download, t: "Compara y descarga", d: "Deslizas entre el antes y el después y descargas el resultado rotulado." },
 ];
 
 const FAQ = [
+  { q: "¿Puedo restaurar una fotografía antigua?", a: "Sí, en el Estudio puedes reducir ruido, recuperar tonos y reparar manchas o rayas pequeñas marcadas por ti. No reconstruye información perdida ni colorea automáticamente. Confirma que tienes permiso para editar la foto." },
+  { q: "¿El asistente necesita una API de pago?", a: "No. El asistente de edición es una guía local de recorridos preparados que recomienda herramientas. No es un modelo de chat y no analiza tus imágenes." },
+  { q: "¿Qué pasa si cierro la pestaña?", a: "El trabajo continúa mientras el servidor permanezca encendido. Puedes consultar su estado y descargar el resultado desde Historial cuando vuelvas a iniciar sesión." },
   { q: "¿Dónde se procesan mis imágenes?", a: "Las imágenes se guardan y editan en la computadora que aloja LUMIA AI. Si accedes desde otro dispositivo, se suben a esa computadora. Generar con IA envía tu descripción a Google (Gemini), con tu consentimiento." },
   { q: "¿El resultado deja de ser una imagen de IA?", a: "No. Sigue siendo una imagen sintética editada. Por eso se descarga rotulada «editado con IA» y conserva los metadatos de procedencia." },
   { q: "¿Cambia el rostro de la persona?", a: "La edición es de baja intensidad para conservar la identidad aparente, la pose, la ropa y el fondo. Si notas cambios, puedes volver a procesar o quedarte con el original." },
@@ -49,8 +52,8 @@ export default function Home() {
               Del retrato generado a una apariencia <span className="text-brand-strong italic">fotográfica</span>
             </h1>
             <p className="max-w-xl text-lg text-muted-foreground">
-              LUMIA AI edita retratos de personas creados con inteligencia artificial para que la piel, los ojos, el cabello y la luz
-              se vean más naturales. Sin embellecer y sin cambiar a la persona.
+              Humaniza retratos sintéticos, restaura fotos deterioradas y prepara tus imágenes en un solo estudio.
+              Compara cada cambio, conserva el original y trabaja con tu equipo.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button size="lg" asChild className="h-12 rounded-full px-7 text-base">
@@ -66,8 +69,29 @@ export default function Home() {
               <li className="flex items-center gap-2"><ShieldCheck className="size-4 text-brand-strong" aria-hidden />Rotulado «editado con IA»</li>
             </ul>
           </div>
-          <ConceptCompare className="mx-auto w-full max-w-md" />
+          <div className="mx-auto w-full max-w-md space-y-4">
+            <BeforeAfterSlider before="/demo/retrato-generado.webp" after="/demo/retrato-humanizado.webp" beforeLabel="Generado con IA" afterLabel="Humanizado en LUMIA" />
+            <p className="text-center text-xs leading-relaxed text-muted-foreground">Retrato fotográfico sintético de muestra. Izquierda: generado con IA. Derecha: el mismo archivo procesado por LUMIA. No es una fotografía de una persona real.</p>
+          </div>
         </div>
+      </section>
+
+      <section id="herramientas" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-20 md:px-6">
+        <div className="max-w-2xl space-y-4"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-strong">Un estudio completo</p><h2 className="font-display text-4xl font-semibold tracking-tight">De la primera foto a tu entrega final</h2><p className="text-muted-foreground">Herramientas para editar, organizar y colaborar. La edición local funciona sin saldo de API externa.</p></div>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            ["01", "Humanización local", "Retratos sintéticos con microtextura y realce de reflejos existentes en los ojos. Comparación y descarga rotulada."],
+            ["02", "Restauración de fotos", "Reduce ruido y recupera tonos. Marca rayas o manchas pequeñas para repararlas sin sobrescribir el original."],
+            ["03", "Estudio de edición", "Quitar lunares, cambiar o quitar fondo, desenfoque gaussiano, nitidez, resolución, luz, color y rotación."],
+            ["04", "Asistente de edición", "Una guía de objetivos y pasos concretos que abre la herramienta indicada. Sin llamadas a servicios de chat."],
+            ["05", "Galería y álbumes", "Carga varias imágenes, organiza tus archivos y guarda resultados para continuar editándolos."],
+            ["06", "Trabajos en segundo plano", "Sigue utilizando la web mientras se procesa una imagen. Recupera el resultado desde el historial."],
+            ["07", "Equipos e invitaciones", "Invita por enlace, prepara un correo o compártelo por WhatsApp. Cada persona crea su propia contraseña."],
+            ["08", "Tu espacio, tu estilo", "Avatares de iniciales o iconos, cuatro acentos, tema claro/oscuro/sistema y navegación compacta en este navegador."],
+            ["09", "Horario y seguimiento", "Configura tu horario, registra entrada y salida, consulta horas y exporta el resumen del equipo a CSV."],
+          ].map(([number, title, description]) => <article key={number} className="space-y-3 rounded-3xl border bg-card p-6 shadow-sm"><span className="text-xs font-semibold tracking-widest text-brand-strong">{number}</span><h3 className="text-lg font-semibold">{title}</h3><p className="text-sm leading-relaxed text-muted-foreground">{description}</p></article>)}
+        </div>
+        <p className="mt-6 text-xs text-muted-foreground">Integración opcional: generación de imágenes con Gemini, disponible cuando el proyecto de Google tenga cuota. No se incluye como servicio activo sin validar esa cuota.</p>
       </section>
 
       {/* ---------- El problema ---------- */}
@@ -98,12 +122,12 @@ export default function Home() {
         <div className="mx-auto max-w-2xl space-y-4 text-center">
           <p className="text-xs font-semibold tracking-[0.18em] text-brand-strong uppercase">Qué mejora</p>
           <h2 className="font-display text-4xl font-semibold tracking-tight text-balance">Cuatro detalles que hacen creíble un rostro</h2>
-          <p className="text-muted-foreground">Cada muestra compara, de forma ilustrativa, el aspecto típico de una imagen generada (izquierda) con el que busca LUMIA AI (derecha).</p>
+          <p className="text-muted-foreground">Acercamientos del resultado de muestra procesado por LUMIA. El comparador superior conserva el original para revisar las diferencias reales.</p>
         </div>
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {MEJORAS.map(({ kind, icon: Icon, t, d }) => (
             <article key={t} className="flex flex-col gap-4 rounded-3xl border bg-card p-5 shadow-sm">
-              <Swatch kind={kind} />
+              <img src="/demo/retrato-humanizado.webp" alt={`Detalle del retrato de muestra: ${t}`} loading="lazy" className="h-40 w-full rounded-2xl object-cover" style={{ objectPosition: ({ piel: "50% 50%", ojos: "50% 34%", cabello: "20% 20%", luz: "50% 60%" })[kind] }} />
               <div className="flex items-center gap-2">
                 <span className="grid size-8 place-items-center rounded-xl bg-brand-soft text-brand-strong"><Icon className="size-4" aria-hidden /></span>
                 <h3 className="font-semibold">{t}</h3>

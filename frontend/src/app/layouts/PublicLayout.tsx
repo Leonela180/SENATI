@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/brand/Logo";
 
 const NAV = [
+  { href: "/#herramientas", label: "Herramientas" },
   { href: "/#como-funciona", label: "Cómo funciona" },
   { href: "/#que-mejora", label: "Qué mejora" },
   { href: "/#privacidad", label: "Privacidad" },
@@ -31,7 +32,7 @@ export default function PublicLayout() {
           <div className="space-y-3">
             <Logo />
             <p className="max-w-sm text-sm text-muted-foreground">
-              Crea con Gemini, edita y organiza tus imágenes. La humanización se procesa en la computadora que aloja LUMIA AI y sus resultados se rotulan como editados con IA.
+              Humaniza, restaura, edita y organiza tus imágenes. Personaliza tu espacio y colabora con tu equipo. Los originales se conservan y los trabajos continúan en el servidor.
             </p>
           </div>
           <div className="space-y-2 text-sm">

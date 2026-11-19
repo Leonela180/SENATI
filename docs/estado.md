@@ -2,6 +2,9 @@
 
 ## Etapa del 19/11/2026
 
+**Respaldo de avance:** consultar [pendientes para retomar](PENDIENTES-2026-11-19.md).
+Las secciones fechadas anteriores son registros históricos, no comprobaciones de la versión actual.
+
 - Chat flotante, ampliacion x2/x4, liderazgo y solicitudes de permiso implementados.
 - Chat de texto con Gemini validado con `gemini-3.5-flash-lite`; generacion de
   imagenes sigue sin cuota disponible.

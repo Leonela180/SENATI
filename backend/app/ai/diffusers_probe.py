@@ -17,7 +17,14 @@ def main():
     from accelerate import disk_offload
     from PIL import Image
     torch.set_num_threads(2)
-    pipe = StableDiffusionImg2ImgPipeline.from_single_file(
+    class CPUOffloadedImg2ImgPipeline(StableDiffusionImg2ImgPipeline):
+        @property
+        def _execution_device(self):
+            # Un UNet offloaded tiene parametros meta: no inferir el dispositivo
+            # a partir del orden de los componentes del pipeline.
+            return torch.device("cpu")
+
+    pipe = CPUOffloadedImg2ImgPipeline.from_single_file(
         args.model, config=args.config, torch_dtype=torch.float16,
         local_files_only=True, safety_checker=None, feature_extractor=None,
         requires_safety_checker=False,
@@ -36,9 +43,9 @@ def main():
     image = Image.open(args.image).convert("RGB")
     with torch.inference_mode():
         result = pipe(
-            prompt="photorealistic photograph of an adult man, natural human facial proportions, realistic brown eyes, short wavy brown hair, teal jacket, beige shirt, soft studio lighting, real skin pores",
-            negative_prompt="cartoon, anime, drawing, illustration, 3d render, giant eyes, doll, distorted face, deformed",
-            image=image, strength=.78, num_inference_steps=16, guidance_scale=7,
+            prompt="natural candid photographic portrait of an adult man, relaxed friendly expression, both eyes fully open, clear realistic brown irises, round aligned pupils, consistent gaze looking directly at camera, small natural window catchlights in both eyes, soft frontal window lighting evenly illuminating the eyes and face, natural human facial proportions, short wavy brown hair, teal jacket, beige shirt, authentic subtle skin pores, documentary photography",
+            negative_prompt="cartoon, anime, drawing, illustration, 3d render, giant eyes, doll, distorted face, deformed, squinting, sleepy eyes, crossed eyes, misaligned pupils, asymmetric eyes, double pupils, empty eyes, black eye sockets, harsh shadows on eyes, glossy plastic skin, beauty retouch",
+            image=image, strength=.74, num_inference_steps=28, guidance_scale=6.5,
             generator=torch.Generator(device="cpu").manual_seed(1234),
         ).images[0]
     result.save(args.output)

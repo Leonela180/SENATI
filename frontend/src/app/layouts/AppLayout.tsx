@@ -47,7 +47,8 @@ export default function AppLayout() {
   if (!me) return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
 
   const sections = SECTIONS.map((s) => (s.title === "Cuenta" && me.role === "admin"
-    ? { ...s, items: [...s.items, { to: "/app/admin", label: "Admin", icon: ShieldCheck }] } : s));
+    ? { ...s, items: [...s.items, { to: "/app/admin", label: "Admin", icon: ShieldCheck }] } : s))
+    .map((s) => ({ ...s, items: s.items.filter((i) => i.to !== "/app/realista" || health?.realistic_available === true) }));
   const links = sections.flatMap((s) => s.items);
   const currentPage = links.find((item) => item.end ? location.pathname === item.to : location.pathname.startsWith(item.to))?.label
     ?? (location.pathname.startsWith("/app/generar") ? "Generar con IA"

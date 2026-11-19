@@ -13,7 +13,6 @@ type Demo = { before: string; after: string; caption: string; beforeLabel?: stri
 type Ejemplo = { tool: string; title: string; text: string; before: string; after: string; caption: string };
 
 const HERRAMIENTAS = [
-  { icon: Wand2, t: "Ilustración a realista · laboratorio", d: "Reinterpreta personajes adultos como retratos fotográficos. Modo experimental: solo se habilita después de validar la calidad y los recursos del servidor." },
   { icon: Sparkles, t: "Humanización y textura de piel", d: "Ajusta microtextura y realza reflejos existentes en los ojos. Compara el cambio, que puede ser sutil según el retrato." },
   { icon: RotateCcw, t: "Restauración de fotos", d: "Reduce el ruido, recupera tonos y repara rayas o manchas pequeñas que marques." },
   { icon: Eraser, t: "Quitar lunares y manchas", d: "Haz clic sobre la zona y se rellena con la piel de alrededor." },

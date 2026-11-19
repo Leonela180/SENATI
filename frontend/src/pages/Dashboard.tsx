@@ -31,11 +31,11 @@ export default function Dashboard() {
   const MODULES = [
     { to: "/app/humanizar", icon: Sparkles, title: "Humanizar", text: "Piel, ojos, cabello y luz más naturales con IA local." },
     { to: "/app/estudio", icon: Wand2, title: "Estudio de edición", text: "Quitar lunares, cambiar fondo, desenfoque y calidad." },
-    { to: "/app/realista", icon: WandSparkles, title: "Ilustración a realista", text: "Laboratorio experimental de reinterpretación de personajes adultos." },
     { to: "/app/calidad", icon: Images, title: "Mejorar resolución", text: "Ampliación ×2 o ×4 con reducción de ruido y enfoque." },
     { to: "/app/equipo", icon: Users, title: "Equipo y permisos", text: "El líder revisa solicitudes y coordina el trabajo del equipo." },
     { to: "/app/galeria", icon: Images, title: "Galería", text: "Sube, organiza en álbumes y procesa en lote." },
   ];
+  if (health?.realistic_available) MODULES.splice(2, 0, { to: "/app/realista", icon: WandSparkles, title: "Ilustración a realista", text: "Laboratorio experimental de reinterpretación de personajes adultos." });
 
   return (
     <div className="space-y-10">

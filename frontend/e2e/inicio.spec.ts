@@ -6,7 +6,7 @@ test("portada: herramientas actuales, vista previa y sin desbordes en celular", 
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("más reales");
-  await expect(page.locator("#herramientas article")).toHaveCount(12);
+  await expect(page.locator("#herramientas article")).toHaveCount(11);
   await expect(page.getByRole("heading", { name: "Restauración de fotos", exact: true })).toBeVisible();
   // Ejemplo real si existe /demo/demo.json; si no, capturas reales de la aplicación (nunca un antes/después simulado)
   const slider = page.getByRole("slider", { name: "Comparar antes y después" }).first();

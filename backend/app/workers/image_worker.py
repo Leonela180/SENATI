@@ -79,6 +79,9 @@ def maintain_heartbeat(app, stop):
 
 # Errores causados por la imagen (no por el servicio): fallan al primer intento y no son incidentes.
 USER_ERRORS = {"sin_rostro"}
+# El motor está ocupado por otro trabajo: no es un fallo del trabajo, así que no consume intentos.
+BUSY_ERRORS = {"motor_ocupado"}
+BUSY_WAIT_SECONDS = 5
 
 
 def process_one(app, engine) -> bool:
@@ -114,13 +117,21 @@ def process_one(app, engine) -> bool:
         log.error("Trabajo %s falló (intento %s): %s", job.id, job.attempt_count, code)
         dst.unlink(missing_ok=True)
         job.error_code = code
-        if code in USER_ERRORS:                                              # la imagen no sirve: reintentar no ayuda
+        busy = code in BUSY_ERRORS
+        if busy:                                                             # espera su turno sin perder un intento
+            job.status, job.error_code = "queued", None
+            job.attempt_count = max(0, job.attempt_count - 1)
+        elif code in USER_ERRORS:                                            # la imagen no sirve: reintentar no ayuda
             job.status, job.finished_at = "failed", utc_now()
         elif job.attempt_count < app.config["AI_MAX_ATTEMPTS"]:
             job.status = "queued"                                            # CU03 flujo 4a: se reencola
         else:
             job.status, job.finished_at = "failed", utc_now()                # CU03 flujo 4b
             db.session.add(ServiceIncident(service_name="worker", error_code=code))
+        db.session.commit()
+        if busy:
+            time.sleep(BUSY_WAIT_SECONDS)
+        return True
     db.session.commit()
     return True
 

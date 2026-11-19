@@ -1,0 +1,29 @@
+{
+  "estado": "validacion_tecnica_superada",
+  "metadata": {
+    "model_id": "stable-diffusion-v1-5:sd15-q4_0",
+    "model_version": "stable-diffusion.cpp-local",
+    "strength": 0.3,
+    "steps": 30,
+    "guidance": 6.0,
+    "seed": 1234,
+    "work_size": [
+      256,
+      320
+    ],
+    "device": "cpu",
+    "vram_gb": 0,
+    "seconds": 133.19,
+    "filtro_seguridad": true,
+    "runtime": "cpp",
+    "blend": 0.35,
+    "facial_detail_applied": true,
+    "eyes_enhanced": 2,
+    "pores_intensity": 0.65,
+    "facial_detail_method": "OpenCV: microtexture and existing reflections",
+    "ram_free_min_gib": 2.6
+  },
+  "original_intacto": true,
+  "source_sha256": "35b1ae1dfc3f6f3db3259cab321cd9d0dab09804933f346b96a6fe3511e92a64",
+  "visual_review": "Sin bordes de mascarilla en esta muestra. Cambio sutil; no demuestra mejora de ropa ni generalizacion a otros retratos."
+}

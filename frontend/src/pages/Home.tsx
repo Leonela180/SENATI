@@ -8,19 +8,22 @@ import { Button } from "@/components/ui/button";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
 
 /** Ejemplo real de la portada, preparado con backend/tools/preparar_portada.py (si no existe, se muestran capturas de la app). */
-type Demo = { before: string; after: string; caption: string };
+type Demo = { before: string; after: string; caption: string; beforeLabel?: string; afterLabel?: string };
 /** Ejemplos reales por herramienta, preparados con backend/tools/preparar_ejemplos.py. */
 type Ejemplo = { tool: string; title: string; text: string; before: string; after: string; caption: string };
 
 const HERRAMIENTAS = [
-  { icon: Sparkles, t: "Humanización y textura de piel", d: "Quita el aspecto «de plástico»: poros, grano fino y ojos con reflejos coherentes en retratos de IA." },
+  { icon: Wand2, t: "Ilustración a realista · laboratorio", d: "Reinterpreta personajes adultos como retratos fotográficos. Modo experimental: solo se habilita después de validar la calidad y los recursos del servidor." },
+  { icon: Sparkles, t: "Humanización y textura de piel", d: "Ajusta microtextura y realza reflejos existentes en los ojos. Compara el cambio, que puede ser sutil según el retrato." },
   { icon: RotateCcw, t: "Restauración de fotos", d: "Reduce el ruido, recupera tonos y repara rayas o manchas pequeñas que marques." },
   { icon: Eraser, t: "Quitar lunares y manchas", d: "Haz clic sobre la zona y se rellena con la piel de alrededor." },
   { icon: Palette, t: "Cambiar el fondo", d: "La IA recorta a la persona: fondo de color, desenfocado o transparente." },
-  { icon: Wand2, t: "Calidad y ajustes", d: "Doble resolución, nitidez, desenfoque gaussiano, luz, color y rotación." },
+  { icon: Wand2, t: "Resolución ×2 y ×4", d: "Amplía hasta 4096 px, reduce ruido y ajusta nitidez, luz y color. Es ampliación digital; no recupera detalle inexistente." },
   { icon: Images, t: "Galería y lotes", d: "Sube varias imágenes, ordénalas en álbumes y procésalas todas a la vez." },
-  { icon: MessageCircle, t: "Asistente de edición", d: "Cuéntale qué quieres lograr y te guía paso a paso a la herramienta indicada." },
-  { icon: Users, t: "Equipos e invitaciones", d: "Invita por enlace, correo o WhatsApp y comparte solo lo que elijas." },
+  { icon: MessageCircle, t: "Asistente flotante", d: "Abre la ayuda desde el botón movible sin salir de tu trabajo. Gemini conversa con consentimiento y cuota; la guía local funciona como alternativa." },
+  { icon: Users, t: "Equipos y supervisión", d: "El creador es líder del equipo: invita integrantes y revisa sus solicitudes de permiso. Comparte únicamente las imágenes que elijas." },
+  { icon: Palette, t: "Tu espacio personalizado", d: "Avatar de iniciales o iconos, temas y colores de acento guardados en este navegador." },
+  { icon: FileCheck2, t: "Historial y trazabilidad", d: "Consulta estados y parámetros, compara el original y vuelve por tus resultados aunque cierres la pestaña. El servidor debe seguir encendido." },
   { icon: CalendarClock, t: "Horario y horas", d: "Marca entrada y salida, mira tus horas por recuperar y exporta el reporte." },
 ];
 
@@ -32,12 +35,12 @@ const PASOS = [
 ];
 
 const FAQ = [
-  { q: "¿Dónde se procesan mis imágenes?", a: "En la computadora que aloja LUMIA AI. Si entras desde otro dispositivo, la imagen se sube a esa computadora. Solo «Generar con IA» envía tu descripción a Google (Gemini), con tu consentimiento." },
+  { q: "¿Dónde se procesan mis imágenes?", a: "La edición se realiza en la computadora que aloja LUMIA. Si entras desde otro dispositivo, tus imágenes se suben a ese servidor. Las descripciones de Generar y los mensajes del chat con IA se envían a Google solo con tu consentimiento; el chat no envía tus fotos." },
   { q: "¿El resultado deja de ser una imagen de IA?", a: "No. Sigue siendo una imagen sintética editada: se descarga rotulada «editado con IA» y conserva sus metadatos de procedencia." },
   { q: "¿Cambia el rostro de la persona?", a: "La edición es de baja intensidad para conservar la identidad, la pose, la ropa y el fondo. Siempre puedes comparar y quedarte con el original." },
   { q: "¿Puedo restaurar una fotografía antigua?", a: "Sí: reduce ruido, recupera tonos y repara daños pequeños que marques. No reconstruye información perdida ni colorea automáticamente." },
   { q: "¿Qué pasa si cierro la pestaña?", a: "El trabajo sigue en el servidor. Cuando vuelvas, lo encuentras en el Historial." },
-  { q: "¿Necesito una tarjeta gráfica?", a: "No. El Estudio funciona en el procesador de cualquier laptop. La humanización con IA es más rápida con NVIDIA, pero también funciona sin ella." },
+  { q: "¿Necesito una tarjeta gráfica?", a: "El Estudio funciona en CPU. La humanización local necesita pesos instalados y suficiente RAM disponible; su rendimiento depende de la computadora. Los modos experimentales solo se habilitan después de validarlos en el servidor." },
 ];
 
 function useDemo() {
@@ -133,7 +136,7 @@ export default function Home() {
           <div className="relative mx-auto mt-16 max-w-4xl">
             {demo ? (
               <div className="space-y-3">
-                <BeforeAfterSlider before={demo.before} after={demo.after} beforeLabel="Generado con IA" afterLabel="Humanizado en LUMIA" />
+                <BeforeAfterSlider before={demo.before} after={demo.after} beforeLabel={demo.beforeLabel || "Generado con IA"} afterLabel={demo.afterLabel || "Humanizado en LUMIA"} />
                 <p className="text-xs text-muted-foreground">{demo.caption}</p>
               </div>
             ) : (
@@ -142,7 +145,7 @@ export default function Home() {
           </div>
 
           <dl className="mx-auto mt-14 grid max-w-2xl grid-cols-3 gap-4">
-            {[["9", "herramientas"], ["100 %", "en tu computadora"], ["S/ 0", "en licencias"]].map(([n, l]) => (
+            {[[String(HERRAMIENTAS.length), "funciones"], ["CPU", "edición local"], ["Original", "siempre conservado"]].map(([n, l]) => (
               <div key={l}><dt className="sr-only">{l}</dt><dd className="font-display text-3xl font-bold text-brand-strong">{n}</dd><p className="text-xs text-muted-foreground">{l}</p></div>
             ))}
           </dl>
@@ -156,7 +159,7 @@ export default function Home() {
         <div className="mx-auto max-w-2xl space-y-4 text-center">
           <p className="text-xs font-semibold tracking-[0.2em] text-brand-strong uppercase">Todo en un estudio</p>
           <h2 className="font-display text-4xl font-bold text-balance md:text-5xl">Lo que puedes hacer con <span className="text-gradient">LUMIA</span></h2>
-          <p className="text-muted-foreground">Herramientas reales que funcionan en tu computadora, sin pagar por servicios externos.</p>
+          <p className="text-muted-foreground">Edición en el servidor, originales privados y herramientas para colaborar. Las integraciones externas y los modos experimentales se identifican por separado.</p>
         </div>
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {HERRAMIENTAS.map(({ icon: Icon, t, d }) => (

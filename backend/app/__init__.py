@@ -31,8 +31,8 @@ def create_app(config_object=Config, **overrides):
     limiter.init_app(app)
     CORS(app, resources={r"/api/*": {"origins": [app.config["FRONTEND_ORIGIN"]]}}, supports_credentials=True)
 
-    from .api import auth, users, images, jobs, teams, admin, gallery, generations, hours, assistant
-    for module in (auth, users, images, jobs, teams, admin, gallery, generations, hours, assistant):
+    from .api import auth, users, images, jobs, teams, admin, gallery, generations, hours, assistant, leave
+    for module in (auth, users, images, jobs, teams, admin, gallery, generations, hours, assistant, leave):
         app.register_blueprint(module.bp, url_prefix="/api/v1")
 
     @app.before_request
@@ -89,6 +89,7 @@ def create_app(config_object=Config, **overrides):
         return jsonify(data={
             "status": "ok",
             "engine": app.config["AI_ENGINE"],
+            "realistic_available": app.config.get("AI_REALISTIC_ENABLED", False) and app.config["AI_ENGINE"] == "local" and app.config.get("AI_LOCAL_RUNTIME") == "cpp",
             # Los presets se ofrecen solo con el motor real (skill §1.4)
             "presets": (["natural"] if app.config.get("AI_LOCAL_RUNTIME") == "cpp" else list(PRESETS)) if app.config["AI_ENGINE"] == "local" else [],
             "runtime": app.config.get("AI_LOCAL_RUNTIME") if app.config["AI_ENGINE"] == "local" else "mock",

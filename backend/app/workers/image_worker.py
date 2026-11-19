@@ -91,10 +91,11 @@ def process_one(app, engine) -> bool:
     dst = path_for("results", key)
     try:
         src = path_for("originals", job.image.original_storage_key)
-        if job.tool == "humanizar":
+        if job.tool in ("humanizar", "realista"):
             if engine is None:
                 raise EngineError("modelo_no_disponible")
-            meta = engine.humanize(str(src), str(dst), job.preset, seed=(job.parameters or {}).get("seed"))
+            options = {"mode": "realista"} if job.tool == "realista" else {}
+            meta = engine.humanize(str(src), str(dst), job.preset, seed=(job.parameters or {}).get("seed"), **options)
         else:                                                                # Estudio de edición (CPU)
             meta = EDITOR.apply(job.tool, str(src), str(dst), job.parameters or {})
         if not dst.is_file() or dst.stat().st_size == 0:                     # RNF-07
@@ -105,7 +106,7 @@ def process_one(app, engine) -> bool:
                           **{k: meta[k] for k in ("seconds", "vram_gb", "work_size", "device", "filtro_seguridad", "width", "height",
                                                 "strength", "steps", "guidance", "seed", "runtime", "blend", "ram_free_min_gib",
                                                 "facial_detail_applied", "eyes_enhanced", "pores_intensity", "facial_detail_method",
-                                                "rostro_detectado", "ojos_protegidos", "cobertura_piel") if k in meta}}
+                                                "rostro_detectado", "ojos_protegidos", "cobertura_piel", "conversion_mode") if k in meta}}
         job.status, job.error_code, job.finished_at = "completed", None, utc_now()
         log.info("Trabajo %s completado en %s s", job.id, meta.get("seconds"))
     except Exception as e:                                                   # noqa: BLE001

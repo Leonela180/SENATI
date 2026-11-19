@@ -13,7 +13,7 @@ export type ImageInfo = {
   album_id?: number | null; created_at?: string; last_job_id?: number | null;
 };
 export type ImagePage = { items: ImageInfo[]; page: number; pages: number; total: number };
-export type Tool = "humanizar" | "quitar_lunar" | "cambiar_fondo" | "desenfoque" | "mejorar_calidad" | "ajustes" | "restaurar" | "textura_piel";
+export type Tool = "humanizar" | "quitar_lunar" | "cambiar_fondo" | "desenfoque" | "mejorar_calidad" | "ajustes" | "restaurar" | "textura_piel" | "realista";
 export type Album = { id: number; name: string; count: number; created_at: string };
 export type Generation = {
   id: number; prompt: string; model: string; status: "completed" | "failed"; image_id: number | null;
@@ -36,7 +36,7 @@ export type TeamStats = {
   days: number; total: number; completed: number; failed: number; avg_seconds: number | null;
   per_day: { day: string; total: number }[];
 };
-export type Health = { status: string; engine: "local" | "mock"; presets: string[]; runtime?: string };
+export type Health = { status: string; engine: "local" | "mock"; presets: string[]; runtime?: string; realistic_available?: boolean };
 export type Overview = {
   api: string; database: string; engine: string;
   worker: { seconds_since_beat: number | null; alive: boolean };

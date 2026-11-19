@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import PublicLayout from "./layouts/PublicLayout";
 import AppLayout from "./layouts/AppLayout";
 import Home from "@/pages/Home";
@@ -18,6 +18,7 @@ import Generate from "@/pages/Generate";
 import Hours from "@/pages/Hours";
 import Assistant from "@/pages/Assistant";
 import Invitation from "@/pages/Invitation";
+import Realistic from "@/pages/Realistic";
 
 export const router = createBrowserRouter([
   { element: <PublicLayout />, children: [{ path: "/", element: <Home /> }] },
@@ -30,7 +31,9 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Dashboard /> },
       { path: "humanizar", element: <Humanize /> },
+      { path: "realista", element: <Realistic /> },
       { path: "estudio", element: <Studio /> },
+      { path: "calidad", element: <Navigate to="/app/estudio?tool=mejorar_calidad" replace /> },
       { path: "galeria", element: <Gallery /> },
       { path: "generar", element: <Generate /> },
       { path: "asistente", element: <Assistant /> },

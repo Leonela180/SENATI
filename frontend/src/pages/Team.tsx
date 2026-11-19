@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { useMe } from "@/features/auth/useAuth";
 import { useAcceptInvite, useCreateTeam, useInvite, useMembers, useRemoveMember, useTeamStats, useWorkspaces } from "@/features/teams/useTeams";
 import { cn } from "@/lib/utils";
+import { LeavePanel } from "@/components/LeavePanel";
 
 export default function Team() {
   const [params, setParams] = useSearchParams();
@@ -78,7 +79,7 @@ export default function Team() {
 
   return (
     <div className="space-y-8">
-      <PageHeader eyebrow="Equipo" title={team.name} description={isOwner ? "Eres el propietario del equipo." : "Eres integrante del equipo."}
+      <PageHeader eyebrow="Equipo" title={team.name} description={isOwner ? "Eres el líder y administrador de este equipo en LUMIA." : "Eres integrante del equipo."}
                   action={
                     <div className="inline-flex rounded-full border bg-card p-1" role="group" aria-label="Periodo">
                       {[7, 30, 90].map((d) => (
@@ -88,6 +89,7 @@ export default function Team() {
                     </div>
                   } />
 
+      <LeavePanel teamId={team.id} isOwner={isOwner} />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {kpis.map(({ icon: Icon, label, value }) => (
           <div key={label} className="rounded-3xl border bg-card p-5 shadow-sm">
@@ -118,7 +120,7 @@ export default function Team() {
               <li key={m.user_id} className="flex items-center gap-3">
                 <span className="grid size-9 shrink-0 place-items-center rounded-full bg-brand-soft text-sm font-semibold text-brand-strong">{m.display_name.charAt(0).toUpperCase()}</span>
                 <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{m.display_name}{m.user_id === me?.id && " (tú)"}</span>
-                  <span className="text-xs text-muted-foreground">{m.role === "owner" ? "Propietario" : "Integrante"}</span></span>
+                  <span className="text-xs text-muted-foreground">{m.role === "owner" ? "Líder del equipo" : "Integrante"}</span></span>
                 {m.role !== "owner" && (isOwner || m.user_id === me?.id) && (
                   <Button size="sm" variant="ghost" onClick={() => remove.mutate({ teamId: team.id, userId: m.user_id })}>
                     {m.user_id === me?.id ? "Salir" : "Retirar"}

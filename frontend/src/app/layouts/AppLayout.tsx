@@ -1,5 +1,5 @@
 import { Navigate, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { CalendarClock, History, Images, LayoutDashboard, LogOut, Menu, ShieldCheck, Sparkles, User, Users, MessageCircle, Wand2, X } from "lucide-react";
+import { CalendarClock, History, Images, LayoutDashboard, LogOut, Menu, ShieldCheck, Sparkles, User, Users, Wand2, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { useLogout, useMe } from "@/features/auth/useAuth";
@@ -8,14 +8,16 @@ import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/api";
 import { QueryError } from "@/components/PageHeader";
 import { UserAvatar } from "@/components/UserAvatar";
+import { FloatingAssistant } from "@/components/FloatingAssistant";
 
 type NavItem = { to: string; label: string; icon: typeof Sparkles; end?: boolean };
 const SECTIONS: { title: string; items: NavItem[] }[] = [
   { title: "", items: [{ to: "/app", label: "Panel", icon: LayoutDashboard, end: true }] },
   { title: "Imágenes", items: [
     { to: "/app/humanizar", label: "Humanizar", icon: Sparkles },
+    { to: "/app/realista", label: "Ilustración a realista", icon: Wand2 },
+    { to: "/app/calidad", label: "Mejorar resolución", icon: Images },
     { to: "/app/estudio", label: "Estudio de edición", icon: Wand2 },
-    { to: "/app/asistente", label: "Chat asistente", icon: MessageCircle },
     { to: "/app/galeria", label: "Galería", icon: Images },
     { to: "/app/historial", label: "Historial", icon: History },
   ] },
@@ -121,6 +123,7 @@ export default function AppLayout() {
           {logout.error && <p role="alert" className="mb-6 rounded-xl border border-destructive/25 bg-card p-4 text-sm text-destructive">No se pudo cerrar la sesión. Inténtalo de nuevo.</p>}
           <Outlet />
         </main>
+        {location.pathname !== "/app/asistente" && <FloatingAssistant />}
       </div>
     </div>
   );

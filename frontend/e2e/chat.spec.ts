@@ -9,8 +9,8 @@ test("chat asistente: responde con la guía local sin clave y lleva a la herrami
   await page.getByLabel(/Contraseña/).first().fill("clave-segura-123");
   await page.getByRole("button", { name: "Crear cuenta" }).click();
   await expect(page).toHaveURL(/\/app$/);
-  await page.getByRole("link", { name: "Chat asistente", exact: true }).first().click();
-  await expect(page.getByRole("heading", { name: "Chatea con tu asistente de edición" })).toBeVisible();
+  await page.getByRole("button", { name: "Abrir asistente", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Chat de ayuda LUMIA" })).toBeVisible();
   await expect(page.getByText(/no está configurada/)).toBeVisible();
   await page.getByLabel("Escribe tu mensaje").fill("Tengo un lunar en la mejilla");
   await page.getByRole("button", { name: "Enviar mensaje" }).click();

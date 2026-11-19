@@ -5,6 +5,7 @@ from .job import ProcessingJob
 from .audit import AuditEvent, ServiceIncident, audit
 from .gallery import Album, Generation
 from .hours import TimeEntry, WorkSchedule
+from .leave import LeaveRequest
 
 __all__ = ["User", "Workspace", "TeamMembership", "TeamInvitation", "Image", "ProcessingJob",
-           "AuditEvent", "ServiceIncident", "audit", "Album", "Generation", "TimeEntry", "WorkSchedule"]
+           "AuditEvent", "ServiceIncident", "audit", "Album", "Generation", "TimeEntry", "WorkSchedule", "LeaveRequest"]

@@ -36,7 +36,7 @@ def main():
                 time.sleep(0.25)
         else:
             raise SystemExit("El servidor E2E no responde.")
-        return subprocess.call([shutil.which("npm.cmd") or "npm", "run", "e2e"], cwd=ROOT / "frontend")
+        return subprocess.call([shutil.which("npm.cmd") or "npm", "run", "e2e", "--", *sys.argv[1:]], cwd=ROOT / "frontend")
     finally:
         for process in processes:
             if process.poll() is None:

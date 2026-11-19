@@ -21,8 +21,8 @@ test("interfaz de escritorio y móvil: módulos, menú y ausencia de desbordamie
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/app");
   await page.getByRole("button", { name: "Abrir menú" }).click();
-  await page.getByRole("link", { name: "Chat asistente", exact: true }).click();
-  await expect(page).toHaveURL(/\/app\/asistente$/);
+  await page.getByRole("link", { name: "Equipo", exact: true }).click();
+  await expect(page).toHaveURL(/\/app\/equipo$/);
   await expect(page.getByRole("button", { name: "Abrir menú" })).toBeVisible();
   for (const route of ["", "generar", "horas", "galeria", "estudio"]) {
     await page.goto(`/app/${route}`);

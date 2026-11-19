@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, Bot, Loader2, Send, ShieldCheck, Sparkles } from "lucide-react";
@@ -7,6 +7,9 @@ import { PageHeader } from "@/components/PageHeader";
 import { api } from "@/lib/api";
 
 const RECIPES = [
+  { name: "Solicitar o revisar un permiso", words: /permiso|lider|jefe|equipo|invit|grupo/, tool: "equipo", steps: ["Abre Equipo. Quien crea el espacio es su líder dentro de LUMIA.", "Como integrante, indica Desde, Hasta y Motivo en Permisos del equipo.", "El líder revisa y aprueba o rechaza; tú puedes consultar la respuesta o cancelar mientras esté pendiente."], limit: "No verifica cargos legales ni modifica automáticamente tus horas. Solo tú y el líder ven el motivo." },
+  { name: "Personalizar mi espacio", words: /avatar|tema|oscuro|claro|personaliz|color de la pagina/, tool: "perfil", steps: ["Abre Perfil y la sección Tu estilo.", "Elige avatar, acento y apariencia; los cambios se aplican al instante.", "Puedes restablecer las preferencias en cualquier momento."], limit: "Las preferencias se guardan en este navegador, no se sincronizan entre dispositivos." },
+  { name: "Convertir una ilustración", words: /pixar|disney|ilustr|personaje|convertir|dibujo/, tool: "realista", steps: ["Abre Ilustración a realista en el laboratorio.", "Revisa si el modo está habilitado: necesita una validación de calidad y un motor real compatible.", "Si está disponible, elige un personaje adulto y confirma tu permiso de uso."], limit: "Es experimental y puede cambiar los rasgos. No se garantiza una conversión fiel ni se ofrece mientras esté deshabilitado." },
   { name: "Quitar el aspecto de plástico", words: /plastic|artificial|piel lisa|muy lis|muneca|poros|textura/, tool: "textura_piel", steps: ["Abre el retrato en Textura de piel realista. Empieza con intensidad al 60–70 %.", "Compara con el deslizador: los poros deben verse de cerca, no desde lejos.", "Si quieres más naturalidad, después usa Humanizar o activa las pecas suaves."], limit: "Es un filtro digital: agrega textura a la piel detectada; no cambia la forma del rostro ni corrige la iluminación." },
   { name: "Recuperar una foto antigua", words: /antigu|vieja|restaur|rayad|deterior|descolor|recuerdo/, tool: "restaurar", steps: ["Abre la foto en Restaurar foto. Empieza con recuperación de tonos al 40–60 %.", "Marca solo las rayas o manchas pequeñas. Ajusta el pincel para no tocar ojos ni contornos.", "Compara el resultado y guarda una copia antes de seguir editando."], limit: "La restauración corrige tonos y daños pequeños; no recupera información inexistente ni colorea automáticamente." },
   { name: "Preparar un retrato profesional", words: /fondo|profesional|cv|curricul|recort|transparent/, tool: "cambiar_fondo", steps: ["Selecciona Cambiar fondo y elige un color neutro o transparencia.", "Revisa los bordes del cabello y los hombros antes de descargar.", "Guarda el resultado y aplica Ajustes si necesitas corregir la luz."], limit: "Los cabellos finos y fondos complejos pueden necesitar otra fotografía." },
@@ -19,6 +22,10 @@ type Recipe = typeof RECIPES[number];
 type Msg = { role: "user" | "model"; text: string; tool?: string | null; recipe?: Recipe; source?: "gemini" | "local"; note?: string };
 
 const TOOL_LINKS: Record<string, { label: string; to: string }> = {
+  equipo: { label: "Equipo y permisos", to: "/app/equipo" },
+  horas: { label: "Horario y horas", to: "/app/horas" },
+  perfil: { label: "Personalizar mi espacio", to: "/app/perfil" },
+  realista: { label: "Laboratorio realista", to: "/app/realista" },
   humanizar: { label: "Humanizar", to: "/app/humanizar" },
   galeria: { label: "Galería", to: "/app/galeria" },
   generar: { label: "Generar con IA", to: "/app/generar" },
@@ -41,7 +48,8 @@ function localAnswer(text: string): Msg {
     : { role: "model", source: "local", text: "No encontré un recorrido para eso. Prueba con «restaurar foto antigua», «cambiar fondo», «quitar lunar» o «reducir ruido», o elige un objetivo de la lista." };
 }
 
-export default function Assistant() {
+export default function Assistant({ compact = false }: { compact?: boolean } = {}) {
+  const fieldId = useId();
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Msg[]>([]);
   const [busy, setBusy] = useState(false);
@@ -75,12 +83,12 @@ export default function Assistant() {
     } finally { setBusy(false); }
   }
 
-  return <div className="mx-auto max-w-5xl space-y-8">
-    <PageHeader eyebrow="Asistente LUMIA" title="Chatea con tu asistente de edición" description="Cuéntale qué quieres lograr con tu foto: te explica los pasos y te lleva a la herramienta indicada." />
-    <div className="grid gap-6 lg:grid-cols-[18rem_minmax(0,1fr)]">
-      <aside className="space-y-4 rounded-3xl border bg-card p-5 lg:self-start">
+  return <div className={compact ? "h-full overflow-y-auto" : "mx-auto max-w-5xl space-y-8"}>
+    {!compact && <PageHeader eyebrow="Asistente LUMIA" title="Chatea con tu asistente de edición" description="Cuéntale qué quieres lograr con tu foto: te explica los pasos y te lleva a la herramienta indicada." />}
+    <div className={compact ? "space-y-2" : "grid gap-6 lg:grid-cols-[18rem_minmax(0,1fr)]"}>
+      <aside className={compact ? "space-y-2 px-4 py-2" : "space-y-4 rounded-3xl border bg-card p-5 lg:self-start"}>
         <p className="font-display text-lg font-semibold">Objetivos rápidos</p>
-        {RECIPES.map(r => <button key={r.tool} onClick={() => void ask(r.name)} className="flex w-full items-center justify-between gap-2 rounded-xl border p-3 text-left text-sm transition hover:bg-muted">{r.name}<ArrowUpRight className="size-4 shrink-0" aria-hidden /></button>)}
+        {!compact && RECIPES.map(r => <button key={r.tool} onClick={() => void ask(r.name)} className="flex w-full items-center justify-between gap-2 rounded-xl border p-3 text-left text-sm transition hover:bg-muted">{r.name}<ArrowUpRight className="size-4 shrink-0" aria-hidden /></button>)}
         <div className="space-y-2 rounded-2xl bg-secondary p-4 text-xs leading-relaxed">
           <label className="flex items-start gap-2 font-medium">
             <input type="checkbox" checked={consent} onChange={e => toggleConsent(e.target.checked)} className="mt-0.5" />
@@ -98,7 +106,7 @@ export default function Assistant() {
           <div><p className="font-semibold">Asistente LUMIA</p>
             <p className="text-xs text-muted-foreground">{aiReady ? "Conversación con IA (Gemini)" : "Guía local"}</p></div>
         </div>
-        <div className="min-h-[24rem] flex-1 space-y-4 overflow-y-auto p-5 sm:max-h-[60vh]" aria-live="polite" aria-relevant="additions">
+        <div className={compact ? "h-64 space-y-4 overflow-y-auto p-4" : "min-h-[24rem] flex-1 space-y-4 overflow-y-auto p-5 sm:max-h-[60vh]"} aria-live="polite" aria-relevant="additions">
           <div className="flex gap-3"><span className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-soft text-brand-strong"><Sparkles className="size-4" aria-hidden /></span>
             <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-secondary px-4 py-3 text-sm leading-relaxed">¡Hola! Soy el asistente de LUMIA. Dime qué quieres mejorar en tu foto y te digo cómo hacerlo.</div></div>
           {messages.length === 0 && <div className="flex flex-wrap gap-2 pl-11">{SUGERENCIAS.map(s => <button key={s} onClick={() => void ask(s)} className="rounded-full border bg-background px-3 py-1.5 text-xs transition hover:bg-accent">{s}</button>)}</div>}
@@ -116,8 +124,8 @@ export default function Assistant() {
           <div ref={end} />
         </div>
         <form onSubmit={e => { e.preventDefault(); void ask(input); }} className="flex gap-2 border-t p-4">
-          <label htmlFor="assistant-message" className="sr-only">Escribe tu mensaje</label>
-          <input id="assistant-message" value={input} onChange={e => setInput(e.target.value)} maxLength={1000} placeholder="Escribe tu mensaje…" className="min-w-0 flex-1 rounded-full border bg-background px-4 py-3 text-sm" />
+          <label htmlFor={fieldId} className="sr-only">Escribe tu mensaje</label>
+          <input id={fieldId} value={input} onChange={e => setInput(e.target.value)} maxLength={1000} placeholder="Escribe tu mensaje…" className="min-w-0 flex-1 rounded-full border bg-background px-4 py-3 text-sm" />
           <Button type="submit" disabled={!input.trim() || busy} className="size-11 rounded-full p-0" aria-label="Enviar mensaje"><Send className="size-4" aria-hidden /></Button>
         </form>
       </section>

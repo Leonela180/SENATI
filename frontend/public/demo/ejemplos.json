@@ -1,0 +1,69 @@
+[
+  {
+    "tool": "textura_piel",
+    "title": "Textura de piel",
+    "text": "Microtextura calculada sobre la piel detectada; no cambia la forma del rostro.",
+    "before": "/demo/ej_piel_antes.webp",
+    "after": "/demo/ej_piel_despues.webp",
+    "caption": "Retrato sintetico propio. Edicion digital, no IA generativa. Resultado directo de LUMIA: 0.84 s.",
+    "metadata": {
+      "model_id": "lumia-editor",
+      "model_version": "opencv-4.14.0",
+      "tool": "textura_piel",
+      "seconds": 0.84,
+      "width": 800,
+      "height": 1000,
+      "rostro_detectado": true,
+      "ojos_protegidos": 2,
+      "cobertura_piel": 0.165
+    }
+  },
+  {
+    "tool": "mejorar_calidad",
+    "title": "Resolucion x4",
+    "text": "Ampliacion digital con reduccion de ruido, contraste local y enfoque.",
+    "before": "/demo/ej_calidad_antes.webp",
+    "after": "/demo/ej_calidad_despues.webp",
+    "caption": "Entrada reducida a 256 px para un experimento controlado. El antes se amplia por bicubica para comparar al mismo tamano; no se recupera informacion inexistente. Resultado directo de LUMIA: 0.23 s.",
+    "metadata": {
+      "model_id": "lumia-editor",
+      "model_version": "opencv-4.14.0",
+      "tool": "mejorar_calidad",
+      "seconds": 0.23,
+      "width": 820,
+      "height": 1024
+    }
+  },
+  {
+    "tool": "restaurar",
+    "title": "Recuperar tonos",
+    "text": "Correccion conservadora de contraste y ruido sobre una copia.",
+    "before": "/demo/ej_restaurar_antes.webp",
+    "after": "/demo/ej_restaurar_despues.webp",
+    "caption": "Deterioro simulado expresamente para demostrar el editor. No es una fotografia antigua real. Resultado directo de LUMIA: 0.54 s.",
+    "metadata": {
+      "model_id": "lumia-editor",
+      "model_version": "opencv-4.14.0",
+      "tool": "restaurar",
+      "seconds": 0.54,
+      "width": 800,
+      "height": 1000
+    }
+  },
+  {
+    "tool": "cambiar_fondo",
+    "title": "Fondo de retrato",
+    "text": "Segmentacion local de la persona y sustitucion del fondo por un color.",
+    "before": "/demo/ej_fondo_antes.webp",
+    "after": "/demo/ej_fondo_despues.webp",
+    "caption": "Retrato sintetico propio. El recorte lo calcula U2-Net en CPU. Resultado directo de LUMIA: 2.29 s.",
+    "metadata": {
+      "model_id": "rembg-u2net",
+      "model_version": "opencv-4.14.0",
+      "tool": "cambiar_fondo",
+      "seconds": 2.29,
+      "width": 800,
+      "height": 1000
+    }
+  }
+]

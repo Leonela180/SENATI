@@ -32,6 +32,7 @@ class Config:
     AI_LITE_WORK_SIDE = int(os.getenv("AI_LITE_WORK_SIDE", "320"))
     AI_RESULT_BLEND = float(os.getenv("AI_RESULT_BLEND", "0.35"))
     AI_DETAIL_INTENSITY = float(os.getenv("AI_DETAIL_INTENSITY", "0.65"))
+    AI_REALISTIC_ENABLED = os.getenv("AI_REALISTIC_ENABLED", "0") == "1"
     AI_WORKER_CONCURRENCY = int(os.getenv("AI_WORKER_CONCURRENCY", "1"))
     AI_MAX_ATTEMPTS = 3                                        # reintentos limitados (RNF-08)
     FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
@@ -40,7 +41,7 @@ class Config:
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
     GEMINI_IMAGE_MODEL = os.getenv("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
     GEMINI_TIMEOUT = int(os.getenv("GEMINI_TIMEOUT", "90"))
-    GEMINI_CHAT_MODEL = os.getenv("GEMINI_CHAT_MODEL", "gemini-2.5-flash")
+    GEMINI_CHAT_MODEL = os.getenv("GEMINI_CHAT_MODEL", "gemini-3.5-flash-lite")
     GEMINI_CHAT_TIMEOUT = int(os.getenv("GEMINI_CHAT_TIMEOUT", "30"))
 
     # Compartir por internet (scripts/compartir.ps1): confiar en las cabeceras del túnel para conocer la IP

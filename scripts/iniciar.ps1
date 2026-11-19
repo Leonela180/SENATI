@@ -7,14 +7,23 @@ if (-not (Test-Path "$root\.env")) { Write-Error "Falta .env: copia .env.example
 if (-not (Test-Path $py)) { Write-Error "Falta el entorno de Python: ejecuta scripts\instalar.ps1" }
 
 $envs = @{}
-Get-Content "$root\.env" | Where-Object { $_ -match "^\s*([A-Z_]+)=(.*)$" } | ForEach-Object { $envs[$Matches[1]] = $Matches[2].Trim() }
+Get-Content "$root\.env" | Where-Object { $_ -match "^\s*([A-Z_]+)=(.*)$" } | ForEach-Object {
+    $settingName = $Matches[1]
+    $settingValue = $Matches[2].Trim()
+    if ($settingValue.Length -ge 2 -and (($settingValue.StartsWith("'") -and $settingValue.EndsWith("'")) -or ($settingValue.StartsWith('"') -and $settingValue.EndsWith('"')))) {
+        $settingValue = $settingValue.Substring(1, $settingValue.Length - 2)
+    }
+    $envs[$settingName] = $settingValue
+}
 foreach ($k in "SECRET_KEY", "DATABASE_URL") { if (-not $envs[$k]) { Write-Error "Falta $k en .env" } }
 if ($Compartir) {
     $env:TRUST_PROXY = '1'
     $env:APP_ENV = 'production'
     $envs['TRUST_PROXY'] = '1'
 }
-if ($envs["AI_ENGINE"] -eq "local" -and -not (Test-Path (Join-Path $root $envs["AI_MODEL_PATH"]))) {
+$configuredModelPath = $envs["AI_MODEL_PATH"]
+if ($configuredModelPath -and -not [System.IO.Path]::IsPathRooted($configuredModelPath)) { $configuredModelPath = Join-Path $root $configuredModelPath }
+if ($envs["AI_ENGINE"] -eq "local" -and (-not $configuredModelPath -or -not (Test-Path -LiteralPath $configuredModelPath))) {
     Write-Error "AI_ENGINE=local pero no están los pesos en $($envs['AI_MODEL_PATH'])"
 }
 if ($envs["AI_ENGINE"] -ne "local") { Write-Warning "AI_ENGINE=$($envs['AI_ENGINE']): SIMULACIÓN, SIN IA REAL" }

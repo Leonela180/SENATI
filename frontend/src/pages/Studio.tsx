@@ -14,7 +14,7 @@ import { useCreateJob } from "@/features/jobs/useJobs";
 import { cn } from "@/lib/utils";
 import type { Job, Tool } from "@/lib/types";
 
-type EditTool = Exclude<Tool, "humanizar">;
+type EditTool = Exclude<Tool, "humanizar" | "realista">;
 const TOOLS: { id: EditTool; label: string; icon: typeof Eraser; help: string }[] = [
   { id: "textura_piel", label: "Textura de piel", icon: Fingerprint, help: "Quita el aspecto «de plástico»: agrega poros, grano fino y pequeños brillos solo en la piel. Ojos, boca, cejas y lunares no se tocan." },
   { id: "restaurar", label: "Restaurar foto", icon: RotateCcw, help: "Recupera tonos y contraste y reduce ruido. Marca rayas o manchas pequeñas para repararlas. No reconstruye rostros ni colorea fotos en blanco y negro." },
@@ -57,6 +57,7 @@ export default function Studio() {
   const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => { setPoints([]); setJobId(null); setDone(null); }, [imageId, tool]);
+  useEffect(() => { const requested = params.get("tool"); if (TOOLS.some(t => t.id === requested)) setTool(requested as EditTool); }, [params]);
   const src = imageId ? `/api/v1/images/${imageId}/content` : "";
   const toolInfo = TOOLS.find((t) => t.id === tool)!;
 
@@ -245,14 +246,15 @@ export default function Studio() {
           {tool === "mejorar_calidad" && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Escala">
-                {[1, 2].map((s) => (
+                {[1, 2, 4].map((s) => (
                   <button key={s} role="radio" aria-checked={quality.scale === s} onClick={() => setQuality({ ...quality, scale: s })}
                           className={cn("rounded-xl border px-2 py-2 text-xs", quality.scale === s ? "border-primary bg-secondary font-medium" : "hover:bg-muted")}>
-                    {s === 1 ? "Mismo tamaño" : "Doble resolución"}
+                    {s === 1 ? "Mismo tamaño" : `Ampliar ×${s}`}
                   </button>
                 ))}
               </div>
               <Slider label="Nitidez" value={quality.sharpen} min={0} max={2} step={0.1} onChange={(v) => setQuality({ ...quality, sharpen: v })} />
+              <p className="text-xs leading-relaxed text-muted-foreground">Ampliación Lanczos con reducción de ruido y enfoque. Hasta 4096 px en el lado mayor; no inventa detalle perdido ni equivale a superresolución generativa.</p>
               <label className="flex items-center gap-2 text-sm"><Checkbox checked={quality.denoise} onCheckedChange={(v) => setQuality({ ...quality, denoise: v === true })} />Reducir ruido</label>
             </div>
           )}

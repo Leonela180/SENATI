@@ -26,6 +26,10 @@ def request_job():
     tool = d.get("tool") or "humanizar"
     if tool not in TOOL_ES:
         return fail("herramienta_invalida", "La herramienta no existe.", 400)
+    if tool == "realista":
+        from flask import current_app
+        if not current_app.config.get("AI_REALISTIC_ENABLED") or current_app.config["AI_ENGINE"] != "local" or current_app.config.get("AI_LOCAL_RUNTIME") != "cpp":
+            return fail("motor_no_compatible", "La conversión experimental todavía no está habilitada o falta el motor local CPP real.", 503)
     if image.owner_user_id != g.user.id:                                                # solo se edita lo propio
         return fail("no_encontrado", "No encontrado.", 404)
     try:

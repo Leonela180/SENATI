@@ -19,14 +19,14 @@ ERROR_ES = {
     "parametros_invalidos": "Los ajustes de la herramienta no son válidos.",
     "sin_rostro": "No se encontró un rostro de frente en la imagen. Prueba con un retrato donde la cara se vea completa.",
 }
-TOOL_ES = {"restaurar": "Restaurar fotografía", "humanizar": "Humanización", "quitar_lunar": "Quitar lunar o mancha", "cambiar_fondo": "Cambiar fondo",
+TOOL_ES = {"realista": "Ilustración a retrato realista", "restaurar": "Restaurar fotografía", "humanizar": "Humanización", "quitar_lunar": "Quitar lunar o mancha", "cambiar_fondo": "Cambiar fondo",
            "desenfoque": "Desenfoque gaussiano", "mejorar_calidad": "Mejorar calidad", "ajustes": "Ajustes de imagen",
            "textura_piel": "Textura de piel realista"}
 PUBLIC_PARAMS = ("strength", "steps", "guidance", "seed", "work_size", "seconds", "vram_gb", "device", "filtro_seguridad",
                  "scale", "sharpen", "denoise", "radius", "scope", "mode", "color", "puntos", "width", "height",
                  "brightness", "contrast", "saturation", "warmth", "rotate", "runtime", "blend", "ram_free_min_gib",
                  "facial_detail_applied", "eyes_enhanced", "pores_intensity", "facial_detail_method", "intensity",
-                 "pecas", "rostro_detectado", "ojos_protegidos", "cobertura_piel")
+                 "pecas", "rostro_detectado", "ojos_protegidos", "cobertura_piel", "conversion_mode")
 
 
 class ToolParamsError(ValueError):
@@ -79,7 +79,10 @@ def clean_tool_params(tool, params, image):
             raise ToolParamsError("scope")
         return {"scope": scope, "radius": num("radius", 0.5, 40, 6)}
     if tool == "mejorar_calidad":
-        scale = int(num("scale", 1, 2, 2))
+        scale = num("scale", 1, 4, 2)
+        if scale not in (1, 2, 4):
+            raise ToolParamsError("scale")
+        scale = int(scale)
         return {"scale": scale, "sharpen": round(num("sharpen", 0, 2, 0.6), 2), "denoise": bool(p.get("denoise", True))}
     if tool == "ajustes":
         rotate = int(num("rotate", 0, 270, 0))
@@ -110,7 +113,10 @@ def create_job(user, image, preset, idem_key, tool="humanizar", tool_params=None
     existing = db.session.query(ProcessingJob).filter_by(requested_by=user.id, idempotency_key=idem_key).first()
     if existing:
         return existing, False
-    if tool == "humanizar":
+    if tool == "realista":
+        preset = "natural"
+        params = {"strength": .78, "steps": 32, "guidance": 7.0, "conversion_mode": "ilustracion_a_realista"}
+    elif tool == "humanizar":
         if current_app.config["AI_ENGINE"] != "local" or preset not in PRESETS or current_app.config.get("AI_LOCAL_RUNTIME") == "cpp":
             preset = "natural"
         params = dict(PRESETS[preset], seed=DEFAULT_SEED)    # RNF-10: parámetros y semilla registrados

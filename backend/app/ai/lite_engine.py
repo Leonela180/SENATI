@@ -84,8 +84,19 @@ class LiteHumanizationEngine(HumanizationEngine):
         if not self.executable.is_file() or not self.model_path.is_file():
             raise EngineError("modelo_no_disponible")
         with self.model_path.open("rb") as stream:
-            if stream.read(4) != b"GGUF":
-                raise EngineError("modelo_no_disponible")
+            magic = stream.read(4)
+            if magic != b"GGUF":
+                import struct
+                stream.seek(0)
+                try:
+                    length = struct.unpack("<Q", stream.read(8))[0]
+                    if not 2 <= length <= 16 * 1024**2:
+                        raise ValueError()
+                    header = json.loads(stream.read(length))
+                    if not isinstance(header, dict) or not any(name.startswith("model.diffusion_model.") for name in header):
+                        raise ValueError()
+                except (ValueError, OSError, struct.error):
+                    raise EngineError("modelo_no_disponible") from None
         if not (self.models_dir / "safety_checker/model.fp16.safetensors").is_file():
             raise EngineError("filtro_no_disponible")
         self.scratch.mkdir(parents=True, exist_ok=True)
@@ -109,9 +120,17 @@ class LiteHumanizationEngine(HumanizationEngine):
             raise EngineError("contenido_bloqueado" if report.get("code") == "contenido_bloqueado" else "filtro_no_disponible")
         return stats
 
-    def humanize(self, input_path, output_path, preset, seed=None):
+    def humanize(self, input_path, output_path, preset, seed=None, mode="humanizar"):
         started = time.monotonic()
         parameters = PRESETS.get(preset, PRESETS["natural"])
+        positive, negative = POSITIVE, NEGATIVE
+        if mode == "realista":
+            parameters = {"strength": .78, "steps": 32, "guidance": 7.0}
+            positive = ("Photorealistic editorial photograph of an adult human person inspired by the input animated character, "
+                        "real human facial proportions, realistic small eyes, natural skin pores, lifelike fabric and hair, "
+                        "preserve the general hairstyle, outfit colors, pose and composition, soft cinematic natural lighting, "
+                        "high quality photography, realistic anatomy, adult.")
+            negative = NEGATIVE + ", illustration, painting, animation, 3D render, giant eyes, doll, child"
         seed = DEFAULT_SEED if seed is None else int(seed)
         with exclusive_inference(self.scratch / "humanization.lock"), temporary_workspace(self.scratch, getattr(self, "diagnostics", None)) as temporary:
             directory = Path(temporary)
@@ -123,11 +142,13 @@ class LiteHumanizationEngine(HumanizationEngine):
             source_path, raw_path = directory / "input.png", directory / "raw.png"
             work.save(source_path)
             safety_input = self.check_safety(source_path, directory, "input")
-            (directory / "prompt.txt").write_text(POSITIVE, encoding="utf-8")
-            (directory / "negative.txt").write_text(NEGATIVE, encoding="utf-8")
+            (directory / "prompt.txt").write_text(positive, encoding="utf-8")
+            (directory / "negative.txt").write_text(negative, encoding="utf-8")
             inference = run_limited([
-                self.executable, "--model", self.model_path, "--backend", "cpu", "--params-backend", "disk",
+                self.executable, "--model", self.model_path, "--backend", "cpu", "--params-backend", "cpu" if mode == "realista" else "disk",
+                *(["--mmap"] if mode == "realista" else []),
                 "--disable-prefetch", "--threads", "2",
+                *(["--linear-scale", "0.0078125", "--attn-scale", "0.0078125"] if mode == "realista" else []),
                 "--flash-attn", "auto", "--init-img", source_path, "--output", raw_path,
                 "--width", str(work.width), "--height", str(work.height), "--steps", str(parameters["steps"]),
                 "--strength", str(parameters["strength"]), "--cfg-scale", str(parameters["guidance"]),
@@ -140,8 +161,11 @@ class LiteHumanizationEngine(HumanizationEngine):
                 if generated.size != work.size:
                     raise EngineError("resultado_inexistente")
                 result = generated.convert("RGB").crop(crop).resize(original.size, Image.Resampling.LANCZOS)
-            result = Image.blend(original, result, self.blend)
-            result, detail_metadata = enhance_facial_detail(original, result, self.detail_intensity, seed)
+            if mode == "realista":
+                detail_metadata = {"conversion_mode": "ilustracion_a_realista"}
+            else:
+                result = Image.blend(original, result, self.blend)
+                result, detail_metadata = enhance_facial_detail(original, result, self.detail_intensity, seed)
             result_path = directory / "result.png"
             result.save(result_path)
             safety_output = self.check_safety(result_path, directory, "output")
@@ -149,5 +173,5 @@ class LiteHumanizationEngine(HumanizationEngine):
         return {"model_id": self.model_id, "model_version": self.model_version,
                 **parameters, "seed": seed, "work_size": list(work.size), "device": "cpu", "vram_gb": 0,
                 "seconds": round(time.monotonic() - started, 2), "filtro_seguridad": True,
-                "runtime": "cpp", "blend": self.blend, **detail_metadata,
+                "runtime": "cpp", "blend": 1.0 if mode == "realista" else self.blend, **detail_metadata,
                 "ram_free_min_gib": min(item["ram_free_min_gib"] for item in (safety_input, inference, safety_output))}

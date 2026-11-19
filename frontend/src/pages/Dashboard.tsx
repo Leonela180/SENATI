@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, CalendarClock, Cpu, History as HistoryIcon, Images, MessageCircle, Sparkles, Users, Wand2, WandSparkles } from "lucide-react";
+import { ArrowRight, CalendarClock, Cpu, History as HistoryIcon, Images, Sparkles, Users, Wand2, WandSparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState, PageHeader, QueryError } from "@/components/PageHeader";
 import { JobCard } from "@/components/JobCard";
@@ -31,7 +31,9 @@ export default function Dashboard() {
   const MODULES = [
     { to: "/app/humanizar", icon: Sparkles, title: "Humanizar", text: "Piel, ojos, cabello y luz más naturales con IA local." },
     { to: "/app/estudio", icon: Wand2, title: "Estudio de edición", text: "Quitar lunares, cambiar fondo, desenfoque y calidad." },
-    { to: "/app/asistente", icon: MessageCircle, title: "Chat asistente", text: "Cuéntale qué quieres mejorar y te guía a la herramienta." },
+    { to: "/app/realista", icon: WandSparkles, title: "Ilustración a realista", text: "Laboratorio experimental de reinterpretación de personajes adultos." },
+    { to: "/app/calidad", icon: Images, title: "Mejorar resolución", text: "Ampliación ×2 o ×4 con reducción de ruido y enfoque." },
+    { to: "/app/equipo", icon: Users, title: "Equipo y permisos", text: "El líder revisa solicitudes y coordina el trabajo del equipo." },
     { to: "/app/galeria", icon: Images, title: "Galería", text: "Sube, organiza en álbumes y procesa en lote." },
   ];
 
@@ -50,7 +52,7 @@ export default function Dashboard() {
             <p className="text-sm leading-relaxed text-muted-foreground">Recupera una foto deteriorada o prepara un retrato con la guía del asistente. Tus originales se conservan para comparar cada cambio.</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Button size="lg" asChild className="rounded-xl"><Link to="/app/asistente"><WandSparkles className="size-4" aria-hidden />Elegir mi recorrido</Link></Button>
+            <Button size="lg" className="rounded-xl" onClick={() => window.dispatchEvent(new Event("lumia-open-chat"))}><WandSparkles className="size-4" aria-hidden />Consultar al asistente</Button>
             <Button size="lg" variant="outline" asChild className="rounded-xl bg-card"><Link to="/app/estudio"><Wand2 className="size-4" aria-hidden />Abrir Estudio</Link></Button>
           </div>
         </div>

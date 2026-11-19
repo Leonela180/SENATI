@@ -116,9 +116,15 @@ def textura_piel(rgb: np.ndarray, intensity: float, freckles: bool = False, seed
     x1, y1 = min(rgb.shape[1], fx + fw + int(fw * .45)), min(rgb.shape[0], fy + fh + int(fh * .85))
     fw, fh = min(fw, rgb.shape[1] - fx), min(fh, rgb.shape[0] - fy)
     crop = np.ascontiguousarray(rgb[y0:y1, x0:x1])
-    box = (fx - x0, fy - y0, fw, fh)
-    local_eyes = [(ex - fx, ey - fy, ew, eh) for ex, ey, ew, eh in eyes]
-    textured, coverage = texture_crop(crop, box, local_eyes, intensity, freckles, seed)
+    scale = min(1.0, 1200 / max(crop.shape[:2]))
+    work = cv2.resize(crop, (max(1, round(crop.shape[1] * scale)), max(1, round(crop.shape[0] * scale)))) if scale < 1 else crop
+    box = tuple(round(v * scale) for v in (fx - x0, fy - y0, fw, fh))
+    local_eyes = [tuple(round(v * scale) for v in (ex - fx, ey - fy, ew, eh)) for ex, ey, ew, eh in eyes]
+    textured, coverage = texture_crop(work, box, local_eyes, intensity, freckles, seed)
+    if scale < 1:
+        delta = textured.astype(np.float32) - work.astype(np.float32)
+        delta = cv2.resize(delta, (crop.shape[1], crop.shape[0]), interpolation=cv2.INTER_LINEAR)
+        textured = np.rint(crop.astype(np.float32) + delta).clip(0, 255).astype(np.uint8)
     out = rgb.copy()
     out[y0:y1, x0:x1] = textured
     return out, {"rostro_detectado": True, "ojos_protegidos": len(eyes), "cobertura_piel": round(coverage, 3)}

@@ -1,5 +1,19 @@
 # Estado de LUMIA AI
 
+## Etapa del 19/11/2026
+
+- Chat flotante, ampliacion x2/x4, liderazgo y solicitudes de permiso implementados.
+- Chat de texto con Gemini validado con `gemini-3.5-flash-lite`; generacion de
+  imagenes sigue sin cuota disponible.
+- 115 pruebas backend aprobadas, 1 omitida; 6 pruebas frontend aprobadas;
+  los 14 recorridos de navegador completaron sin fallos.
+- Portada con fotografias sinteticas propias y resultados reales del editor.
+  La muestra de humanizacion local tardo 133,19 s; el cambio es sutil.
+- Base respaldada y migrada a `f8c0e2a4b6d8`; `alembic check` sin diferencias.
+- La conversion de personajes permanece deshabilitada hasta superar revision
+  visual. Los experimentos se documentan en [etapa-2026-11-19.md](etapa-2026-11-19.md).
+- Faltan la integracion y puesta en marcha finales y las cuentas de demostracion.
+
 ## Cierre de comprobacion de entrega
 
 - Nueva etapa: restauracion conservadora de fotos deterioradas, guia local de edicion, preferencias de apariencia/avatar y enlaces de invitacion dirigidos con correo/WhatsApp preparados.

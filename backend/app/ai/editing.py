@@ -94,7 +94,7 @@ def mejorar_calidad(rgb: np.ndarray, scale: int, sharpen: float, denoise: bool) 
     if scale > 1:
         h, w = img.shape[:2]
         k = min(scale, MAX_SIDE_OUT / max(h, w))
-        if k > 1:
+        if k != 1:
             img = cv2.resize(img, (int(w * k), int(h * k)), interpolation=cv2.INTER_LANCZOS4)
     lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
     lab[..., 0] = cv2.createCLAHE(clipLimit=1.4, tileGridSize=(8, 8)).apply(lab[..., 0])

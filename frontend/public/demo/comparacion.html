@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LUMIA · Antes y después</title><link rel="stylesheet" href="/demo/comparacion.css"><script src="/demo/comparacion.js" defer></script></head>
+<body><main>
+  <header><a class="brand" href="/">LUMIA <span>AI</span></a><a href="/app/galeria">Abrir mi galería ↗</a></header>
+  <p class="eyebrow">Resultados propios · procesos reales</p>
+  <h1>El antes y el después,<br><em>sin perder detalle.</em></h1>
+  <p class="intro">Mira las imágenes juntas o mueve el deslizador. Los originales son sintéticos y los resultados se procesaron realmente con LUMIA.</p>
+  <section class="controls" aria-label="Opciones de comparación">
+    <label>Ejemplo<select id="example"><option>Cargando ejemplos…</option></select></label>
+    <div class="buttons"><button id="side" aria-pressed="true">Juntos</button><button id="slide" aria-pressed="false">Deslizador</button><button id="zoom" aria-pressed="false">Acercar detalle</button></div>
+  </section>
+  <h2 id="title">Comparación</h2><p id="description"></p>
+  <section id="pair" class="pair" aria-label="Antes y después juntos">
+    <figure><figcaption><span class="dot muted"></span> ANTES · original</figcaption><div class="frame"><img id="before" alt="Imagen original antes del procesamiento"></div></figure>
+    <figure><figcaption><span class="dot"></span> DESPUÉS · resultado de LUMIA</figcaption><div class="frame"><img id="after" alt="Resultado real procesado por LUMIA"></div></figure>
+  </section>
+  <section id="slider-view" hidden aria-label="Comparador deslizable">
+    <div class="stack frame"><img id="after-slide" alt="Resultado procesado"><img id="before-slide" alt="Original para comparar"><span id="divider" aria-hidden="true"></span><span class="badge left">ANTES</span><span class="badge right">DESPUÉS</span></div>
+    <label class="range-label">Mostrar porcentaje del antes <output id="percentage">50 %</output><input id="range" type="range" min="0" max="100" value="50"></label>
+  </section>
+  <p id="caption" class="caption"></p><p id="error" role="alert" hidden></p>
+  <footer><strong>Cómo se hizo</strong><p>Crear el original con la herramienta de imágenes de esta conversación → subirlo a una cuenta DEMO → procesarlo en LUMIA → guardar las etapas en PostgreSQL, galería e historial.</p><p>Un resultado fotográfico sigue siendo sintético. La conversión puede cambiar rasgos y ropa; la humanización puede ser sutil. No se utiliza Gemini para generar estos ejemplos.</p></footer>
+</main></body></html>

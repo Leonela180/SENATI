@@ -70,6 +70,7 @@ function Ejemplos({ items }: { items: Ejemplo[] }) {
         <p className="text-xs font-semibold tracking-[0.2em] text-brand-strong uppercase">Ejemplos reales</p>
         <h2 className="font-display text-4xl font-bold text-balance md:text-5xl">Mira la diferencia</h2>
         <p className="text-muted-foreground">Cada ejemplo es el resultado real de la herramienta, sin retoques externos. Desliza para comparar.</p>
+        <a href="/demo/comparacion.html" className="inline-flex rounded-full border bg-card px-5 py-3 text-sm font-medium text-brand-strong hover:bg-accent">Ver antes y después juntos en pantalla completa ↗</a>
       </div>
       <div role="tablist" aria-label="Herramientas" className="mt-10 flex flex-wrap justify-center gap-2">
         {items.map((x, j) => (

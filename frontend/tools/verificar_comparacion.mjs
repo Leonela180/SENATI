@@ -1,0 +1,34 @@
+import { chromium, expect } from '@playwright/test';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+const folder = new URL('../../docs/evidencias/comparacion_20261120/', import.meta.url);
+await mkdir(folder, { recursive: true });
+const browser = await chromium.launch({ headless: true });
+const page = await browser.newPage({ viewport: { width: 1440, height: 1200 } });
+const errors = [];
+page.on('pageerror', error => errors.push(error.message));
+try {
+  await page.goto('http://localhost:5000/demo/comparacion.html');
+  await expect(page.locator('#title')).toHaveText('Personaje a retrato');
+  await expect.poll(() => page.locator('#before').evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true);
+  await expect.poll(() => page.locator('#after').evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true);
+  await page.screenshot({ path: fileURLToPath(new URL('antes-despues-juntos.png', folder)), fullPage: true });
+  await page.getByRole('button', { name: 'Deslizador', exact: true }).click();
+  await expect(page.locator('#slider-view')).toBeVisible();
+  await page.locator('#range').focus();
+  await page.locator('#range').press('Home');
+  await page.locator('#range').press('ArrowRight');
+  await expect(page.locator('#percentage')).toHaveText('1 %');
+  await page.getByRole('button', { name: 'Juntos', exact: true }).click();
+  await page.locator('#example').selectOption({ label: 'Retrato nuevo · Textura y luz' });
+  await expect(page.locator('#title')).toHaveText('Retrato nuevo · Textura y luz');
+  await expect.poll(() => page.locator('#after').evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true);
+  await page.screenshot({ path: fileURLToPath(new URL('retrato-nuevo-juntos.png', folder)), fullPage: true });
+  await page.getByRole('button', { name: 'Acercar detalle', exact: true }).click();
+  await expect(page.locator('body')).toHaveClass('zoom');
+  await page.setViewportSize({ width: 390, height: 844 });
+  const fits = await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth);
+  if (!fits || errors.length) throw new Error('Desborde o errores de JavaScript');
+  await writeFile(new URL('verificacion.json', folder), JSON.stringify({ status: 'passed', side_by_side: true, slider: true, zoom: true, mobile: true, errors }, null, 2));
+  console.log('Comparacion: imagenes cargadas, vista paralela, deslizador, acercamiento y movil correctos.');
+} finally { await browser.close(); }

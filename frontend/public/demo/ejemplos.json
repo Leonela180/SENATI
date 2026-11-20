@@ -137,5 +137,47 @@
         ]
       }
     }
+  },
+  {
+    "tool": "retrato_nuevo_textura_piel",
+    "title": "Retrato nuevo · Textura",
+    "text": "Microtextura digital real sobre la piel detectada; ojos y boca protegidos.",
+    "before": "/demo/retrato_nuevo_antes.webp",
+    "after": "/demo/retrato_nuevo_textura_piel.webp",
+    "caption": "Original sintetico propio generado en esta conversacion. Trabajo DEMO 218 realmente procesado y guardado en la cuenta individual4. No es un despues generado externamente.",
+    "metadata": {
+      "job_id": 218,
+      "parameters": {
+        "cobertura_piel": 0.195,
+        "height": 1254,
+        "intensity": 0.8,
+        "ojos_protegidos": 2,
+        "pecas": false,
+        "rostro_detectado": true,
+        "seconds": 2.62,
+        "width": 1254
+      }
+    }
+  },
+  {
+    "tool": "retrato_nuevo_ajustes",
+    "title": "Retrato nuevo · Textura y luz",
+    "text": "Microtextura seguida de ajustes suaves de luz y contraste. Edicion ligera, sin difusion generativa.",
+    "before": "/demo/retrato_nuevo_antes.webp",
+    "after": "/demo/retrato_nuevo_ajustes.webp",
+    "caption": "Original sintetico propio generado en esta conversacion. Trabajo DEMO 219 realmente procesado y guardado en la cuenta individual4. No es un despues generado externamente.",
+    "metadata": {
+      "job_id": 219,
+      "parameters": {
+        "brightness": 1.02,
+        "contrast": 1.06,
+        "height": 1254,
+        "rotate": 0,
+        "saturation": 0.97,
+        "seconds": 0.33,
+        "warmth": 0.03,
+        "width": 1254
+      }
+    }
   }
 ]

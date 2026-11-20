@@ -2,9 +2,11 @@
 
 Entrega SENATI: incluye humanizacion local, Estudio con restauracion conservadora de fotos, guia de edicion sin API, personalizacion de apariencia y avatar, y equipos con invitaciones dirigidas compartibles por correo/WhatsApp. Consulta [la guia de demostracion](docs/entrega-senati.md) para conocer el alcance y los requisitos reales.
 
-Aplicación web para crear, editar y organizar imágenes generadas por IA. Incluye humanización de retratos con un motor local, Estudio de edición, galería, equipos y control de horas. Los originales se conservan en la computadora que aloja la aplicación; si accedes desde otro dispositivo, las imágenes se suben a esa computadora. La generación con Gemini envía tu descripción a Google con consentimiento.
+Aplicación web para editar y organizar imágenes generadas por IA. Incluye humanización de retratos con un motor local, Estudio de edición, galería, equipos con permisos, control de horas y un chat asistente. Los originales se conservan en la computadora que aloja la aplicación; si accedes desde otro dispositivo, las imágenes se suben a esa computadora. El chat con Gemini envía solo el texto que escribes, y solo con tu consentimiento; la generación de imágenes por API está desactivada (`GEMINI_IMAGE_ENABLED=0`).
 
-**Entrega actual en esta laptop:** humanización real con `AI_ENGINE=local`, motor CPU optimizado, microtextura de piel y realce de reflejos existentes en los ojos. El circuito público de subida, procesamiento, comparación y descarga está comprobado. Gemini está integrado, pero su generación sigue bloqueada por la cuota de Google. Consulta la [guía práctica SENATI](docs/entrega-senati.md).
+**Entrega actual en esta laptop:** humanización real con `AI_ENGINE=local`, motor CPU optimizado, microtextura de piel y realce de reflejos existentes en los ojos. El circuito público de subida, procesamiento, comparación y descarga está comprobado. Consulta la [guía práctica SENATI](docs/entrega-senati.md).
+
+> **¿Buscas dónde está algo?** La **[guía de arquitectura](docs/ARQUITECTURA.md)** tiene el mapa por módulos, cómo se conecta cada parte, cómo funciona el chatbot y una tabla «quiero cambiar… → archivo».
 
 Proyecto de Innovación SENATI «Mejora de piel con IA».
 
@@ -12,7 +14,7 @@ Proyecto de Innovación SENATI «Mejora de piel con IA».
 
 ## Módulos
 
-Estado y orden de cierre actual: [auditoría del 20/11/2026](docs/auditoria-2026-11-20.md).
+Último estado y pendientes: [auditoría](docs/historial/auditoria-2026-11-20.md) y [cierre del 20/11/2026](docs/historial/cierre-2026-11-20.md).
 La demostración se prepara con cuentas y grupos identificados como DEMO; las
 credenciales permanecen en `private_data/demo_senati/ACCESOS-PRIVADOS.md`, fuera de Git.
 
@@ -20,7 +22,7 @@ credenciales permanecen en `private_data/demo_senati/ACCESOS-PRIVADOS.md`, fuera
 |---|---|---|
 | **Humanizar** | Stable Diffusion 1.5 *image-to-image*: piel, ojos, cabello y luz más naturales | Recomendable; en CPU funciona a 512 px y tarda minutos |
 | **Estudio de edición** | Restauración conservadora, textura de piel, quitar lunares o manchas, cambiar fondo, desenfoque, ampliación digital ×2/×4 y ajustes de color y rotación | No (CPU) |
-| **Generar con IA** | Crea imágenes a partir de una descripción con Gemini (Google), con aviso y consentimiento | No (servicio externo) |
+| **Generar con IA** | Desactivado por defecto (`GEMINI_IMAGE_ENABLED=0`). El código se conserva; el chat redacta prompts para crear la imagen fuera y subirla | No (servicio externo) |
 | **Galería** | Subida múltiple, álbumes, búsqueda, mover, borrar y procesamiento por lotes | No |
 | **Historial y detalle** | Comparador antes/después, descarga rotulada y trazabilidad | No |
 | **Horario y horas** | Horario semanal, marcar entrada/salida, registros manuales con motivo, horas trabajadas vs. esperadas, horas por recuperar y reporte del equipo en CSV | No |
@@ -38,7 +40,7 @@ se conserva; su cuota externa debe estar disponible para poder generar imágenes
 
 - Windows 10/11 · Python 3.12 · Node.js 20 o superior · PostgreSQL 17
 - 16 GB de RAM. Sin GPU NVIDIA funciona todo; la humanización corre en el procesador (más lenta)
-- Para generar imágenes: una clave de Gemini en `.env` (`GEMINI_API_KEY`) e internet
+- Para el chat con IA: una clave de Gemini en `.env` (`GEMINI_API_KEY`) e internet
 
 ## Arranque rápido
 
@@ -56,24 +58,36 @@ Antes de instalar, copia `.env.example` como `.env` y complétalo. **El `.env` n
 ## Estructura
 
 ```text
-backend/    Flask + SQLAlchemy + Alembic (app/, migrations/, tests/, tools/)
-  app/ai/       interfaz HumanizationEngine, MockEngine, motor local SD 1.5 y evaluación (Anexo A)
-  app/workers/  worker de la cola (FOR UPDATE SKIP LOCKED, reintentos, latido)
-frontend/   React + TypeScript + Vite + Tailwind + shadcn/ui + TanStack Query
-scripts/    instalar, iniciar, detener, verificar y diagnóstico (.ps1)
-docs/       estado del proyecto, guía para la laptop y evidencias
-models/     pesos del modelo (fuera de Git)
-private_data/  originales y resultados (fuera de Git)
+backend/       Servidor: Flask + SQLAlchemy + Alembic
+  app/api/        rutas /api/v1 (una por módulo: auth, images, jobs, gallery, teams, leave, hours, assistant…)
+  app/services/   lógica de cada módulo (trabajos, equipos, horas, Gemini, instrucciones del chat)
+  app/models/     tablas de PostgreSQL
+  app/ai/         motores: humanización local SD 1.5, Estudio (OpenCV), textura de piel, laboratorio realista
+  app/workers/    worker de la cola (FOR UPDATE SKIP LOCKED, reintentos, latido)
+  migrations/     cambios de la base de datos (Alembic)
+  tests/          pruebas del servidor (pytest)
+  tools/          scripts de apoyo: demostración, motor de IA y pruebas (ver tools/README.md)
+frontend/      Pantallas: React + TypeScript + Vite + Tailwind + shadcn/ui + TanStack Query
+  src/pages/      una pantalla por módulo
+  src/features/   hooks que conectan cada pantalla con la API (y la guía local del chat)
+  src/components/ piezas reutilizables (chat flotante, comparador, permisos…)
+  src/lib/api.ts  conexión con el servidor
+  src/styles/     colores y tema
+  e2e/            recorridos de navegador (Playwright)
+scripts/       instalar, iniciar, detener, verificar y diagnóstico (.ps1)
+docs/          ARQUITECTURA.md, guías, evidencias/, historial/ (notas por fecha) y referencia/ (guía y skill originales)
+models/        pesos del modelo (fuera de Git)
+private_data/  originales, resultados y accesos DEMO (fuera de Git)
 ```
 
 ## Documentación
 
-- [Entrega práctica SENATI](docs/entrega-senati.md): cómo abrir, compartir, demostrar y comprobar el proyecto; límites actuales de Gemini y Humanizar.
-- [Auditoría local y plan de mejoras (16/11/2026)](docs/auditoria-2026-11-16.md): diferencias verificadas entre código, entorno y PostgreSQL; etapas y comprobaciones pendientes.
-
-- [docs/pendientes-entrega.md](docs/pendientes-entrega.md): qué está resuelto y qué falta.
-- [docs/estado.md](docs/estado.md): qué está implementado, qué está probado y qué falta.
+- [Arquitectura y mapa de módulos](docs/ARQUITECTURA.md): dónde está cada cosa y cómo cambiarla.
+- [Entrega práctica SENATI](docs/entrega-senati.md): cómo abrir, compartir, demostrar y comprobar el proyecto.
 - [docs/LAPTOP_PASO_A_PASO.md](docs/LAPTOP_PASO_A_PASO.md): instalación y prueba de la IA real en la laptop.
 - [docs/desarrollo-local.md](docs/desarrollo-local.md): cómo trabajar con tres ventanas (API, worker, frontend).
-- [docs/motor-ia.md](docs/motor-ia.md): ficha del modelo (se completa en la laptop).
-- `infromacion/`: guía de implementación, skill V7 e informe.
+- [docs/motor-ia.md](docs/motor-ia.md): ficha del modelo.
+- [docs/CIERRE_EN_LA_LAPTOP.md](docs/CIERRE_EN_LA_LAPTOP.md): cambiar claves, instalación limpia (CP-14) y evaluación de retratos.
+- [docs/RETOMAR-LUMIA.md](docs/RETOMAR-LUMIA.md): punto para retomar el trabajo.
+- `docs/historial/`: auditorías, cierres y pendientes de cada fecha (registro histórico).
+- `docs/referencia/`: guía de implementación y skill V7 originales.

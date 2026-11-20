@@ -59,7 +59,7 @@ Las secciones fechadas anteriores son registros históricos, no comprobaciones d
 - Prueba pública real: 156,08 s, original intacto, microtextura aplicada y dos zonas oculares realzadas, descarga rotulada y ningún error JavaScript. El latido del worker no superó 5 s de antigüedad durante el trabajo. Mínimo observado de RAM disponible: 1,59 GiB.
 - Los prototipos privados de piel/ojos sirvieron de referencia para un ajuste genérico con detección automática. Las máscaras calibradas a una sola foto no se reutilizan indiscriminadamente.
 - La validación técnica y visual de un retrato no sustituye una evaluación con varios retratos/revisores ni garantiza idéntica calidad con cualquier imagen.
-- Guía breve: [entrega-senati.md](entrega-senati.md). Evidencias: `docs/evidencias/mejoras_20261116/`.
+- Guía breve: [entrega-senati.md](../entrega-senati.md). Evidencias: `docs/evidencias/mejoras_20261116/`.
 
 Los apartados siguientes conservan las evidencias históricas de desarrollo y no sustituyen esta comprobación local.
 

@@ -1,4 +1,7 @@
-"""Cliente mínimo de la API de Gemini para generar imágenes (sin SDK: solo la biblioteca estándar).
+"""MÓDULO CHATBOT y GENERAR · Conexión con la API de Gemini (Google), sin SDK: solo la biblioteca estándar.
+
+- chat(): conversación de texto del asistente. Sus instrucciones están en asistente_instrucciones.py.
+- generate_image(): generación de imágenes (desactivada por defecto con GEMINI_IMAGE_ENABLED=0).
 
 La clave se lee de GEMINI_API_KEY en .env; nunca se escribe en el código, en Git ni en los registros.
 """
@@ -9,6 +12,8 @@ import re
 import time
 import urllib.error
 import urllib.request
+
+from .asistente_instrucciones import CHAT_SYSTEM, CHAT_TOOLS, MAX_TOKENS_RESPUESTA, TEMPERATURA
 
 ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 MAX_RESPONSE_BYTES = 20 * 1024 * 1024
@@ -57,32 +62,6 @@ def generate_image(prompt: str, api_key: str, model: str, timeout: int = 90) -> 
     raise GeminiError("gemini_sin_imagen")                 # bloqueo por políticas o respuesta sin imagen
 
 
-CHAT_SYSTEM = (
-    "Eres el asistente de LUMIA AI, un estudio de edición de imágenes. Responde SIEMPRE en español, "
-    "con calidez y en pocas líneas (máximo 6 líneas o 4 pasos cortos). Solo ayudas con: edición de fotos, "
-    "retratos generados por IA y el uso de LUMIA. Si preguntan otra cosa, dilo amablemente y vuelve al tema. "
-    "Herramientas disponibles (usa estos identificadores): humanizar (piel, ojos y luz más naturales en "
-    "retratos generados por IA), restaurar (fotos antiguas: ruido, tonos, rayas pequeñas), quitar_lunar "
-    "(lunares o manchas pequeñas), cambiar_fondo (color, desenfocado o transparente), desenfoque (gaussiano, "
-    "de todo o solo del fondo), mejorar_calidad (ampliacion digital x2/x4 con enfoque suave, no 4K ni recuperacion de detalles), ajustes (brillo, "
-    "contraste, saturación, calidez, rotación), textura_piel (poros y grano natural cuando la piel se ve lisa "
-    "o de plástico; es un filtro digital rápido), galeria (subir y organizar en álbumes). La generación de imágenes "
-    "por API está desactivada: no la recomiendes como disponible. Sí puedes redactar prompts de texto listos "
-    "para copiar en ChatGPT o Gemini; explica que la persona debe crear allí la imagen y subirla a LUMIA. "
-    "No prometas acceso ilimitado ni API gratuita por tener una suscripción de chat. "
-    "No puedes ver las imágenes del usuario: si hace falta, pide que las describa. Nunca ayudes a "
-    "suplantar identidades, quitar marcas de edición con IA ni hacer pasar una imagen sintética por la foto de "
-    "una persona real. También orientas sobre equipo (invitaciones, líder y permisos internos), horas (marcaciones), "
-    "perfil (avatar y colores) y realista (reinterpretación experimental de personajes adultos; puede estar deshabilitada). "
-    "El creador es administrador del equipo dentro de LUMIA; eso no acredita ser jefe legal de una empresa. "
-    "No ves fotos, registros privados ni estados reales del usuario, y no puedes aprobar permisos ni ejecutar acciones. "
-    "La ampliación de calidad es digital x2/x4 hasta 4096px, no superresolución generativa. "
-    "Si recomiendas una herramienta, termina con una línea exacta: HERRAMIENTA: <identificador>."
-)
-CHAT_TOOLS = {"humanizar", "restaurar", "quitar_lunar", "cambiar_fondo", "desenfoque", "mejorar_calidad",
-              "ajustes", "textura_piel", "galeria", "generar", "equipo", "horas", "perfil", "realista"}
-
-
 def chat(messages: list[dict], api_key: str, model: str, timeout: int = 30) -> tuple[str, str | None]:
     """Conversación de texto con Gemini. messages = [{role: user|model, text}]. Devuelve (respuesta, herramienta)."""
     if not api_key:
@@ -92,7 +71,7 @@ def chat(messages: list[dict], api_key: str, model: str, timeout: int = 30) -> t
     body = json.dumps({
         "systemInstruction": {"parts": [{"text": CHAT_SYSTEM}]},
         "contents": [{"role": m["role"], "parts": [{"text": m["text"]}]} for m in messages],
-        "generationConfig": {"temperature": 0.5, "maxOutputTokens": 600},
+        "generationConfig": {"temperature": TEMPERATURA, "maxOutputTokens": MAX_TOKENS_RESPUESTA},
     }).encode("utf-8")
     req = urllib.request.Request(ENDPOINT.format(model=model), data=body, method="POST",
                                  headers={"Content-Type": "application/json", "x-goog-api-key": api_key})

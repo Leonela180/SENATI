@@ -2,7 +2,7 @@
 
 Fecha: 16/11/2026. Revisión local sobre `main`, commit inicial `6c16aa9`.
 
-> **Actualización tras la implementación:** el diagnóstico de abajo conserva la fotografía inicial. Con autorización del usuario se verificó Python 3.12.10 fuera del aislamiento (el error de intérprete también estaba condicionado por permisos), se instalaron las dependencias ausentes y se aplicó la migración `c3e5a7f1b9d2` tras verificar el respaldo. Alembic ya no encuentra diferencias. Pasan 69 pruebas backend, 6 unitarias frontend y los seis recorridos de navegador de la versión final. El enlace HTTPS responde y usa cookie Secure/CSRF. Gemini reconoce el modelo y la clave, pero la generación real devuelve 429 por cuota; Humanizar sigue en mock. Ver [entrega práctica](entrega-senati.md).
+> **Actualización tras la implementación:** el diagnóstico de abajo conserva la fotografía inicial. Con autorización del usuario se verificó Python 3.12.10 fuera del aislamiento (el error de intérprete también estaba condicionado por permisos), se instalaron las dependencias ausentes y se aplicó la migración `c3e5a7f1b9d2` tras verificar el respaldo. Alembic ya no encuentra diferencias. Pasan 69 pruebas backend, 6 unitarias frontend y los seis recorridos de navegador de la versión final. El enlace HTTPS responde y usa cookie Secure/CSRF. Gemini reconoce el modelo y la clave, pero la generación real devuelve 429 por cuota; Humanizar sigue en mock. Ver [entrega práctica](../entrega-senati.md).
 
 ## Alcance y límites
 

@@ -3,7 +3,7 @@ import { api } from "@/lib/api";
 import type { Generation, ImageInfo } from "@/lib/types";
 
 export const useGenerationStatus = () =>
-  useQuery({ queryKey: ["gen-status"], queryFn: () => api<{ configured: boolean; model: string }>("/generations/status") });
+  useQuery({ queryKey: ["gen-status"], queryFn: () => api<{ enabled: boolean; configured: boolean; model: string }>("/generations/status") });
 
 export const useGenerations = () => useQuery({ queryKey: ["generations"], queryFn: () => api<Generation[]>("/generations") });
 

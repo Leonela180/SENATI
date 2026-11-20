@@ -31,7 +31,8 @@ def generation_json(gen):
 @bp.get("/generations/status")
 @login_required
 def status():
-    return ok({"configured": bool(current_app.config["GEMINI_API_KEY"]), "model": current_app.config["GEMINI_IMAGE_MODEL"]})
+    enabled = current_app.config.get("GEMINI_IMAGE_ENABLED", False)
+    return ok({"enabled": enabled, "configured": enabled and bool(current_app.config["GEMINI_API_KEY"]), "model": current_app.config["GEMINI_IMAGE_MODEL"]})
 
 
 @bp.get("/generations")
@@ -52,6 +53,8 @@ def generate():
     prompt = (d.get("prompt") or "").strip()
     if not (5 <= len(prompt) <= 1000):
         return fail("datos_invalidos", "Escribe una descripción de 5 a 1000 caracteres.", 400)
+    if not current_app.config.get("GEMINI_IMAGE_ENABLED", False):
+        return fail("generacion_desactivada", "La generación de imágenes por API está desactivada. Puedes usar el chatbot de texto y editar imágenes con el motor local.", 503)
     album_id = d.get("album_id")
     if album_id is not None:
         from ..models import Album

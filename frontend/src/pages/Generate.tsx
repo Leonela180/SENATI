@@ -34,7 +34,7 @@ export default function Generate() {
       {status && !status.configured && (
         <div role="status" className="flex gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-700 dark:text-amber-300">
           <AlertTriangle className="size-5 shrink-0" aria-hidden />
-          <p><strong>Falta configurar Gemini.</strong> La generación está pendiente de activación por el administrador. Puedes seguir utilizando la galería y las herramientas del Estudio.</p>
+          <p>{status.enabled === false ? <><strong>Generación de imágenes por API desactivada.</strong> Gemini se utiliza por separado para el chatbot de texto y los prompts. Puedes subir imágenes creadas en tus aplicaciones y editarlas con LUMIA.</> : <><strong>Falta configurar Gemini.</strong> La generación está pendiente de activación por el administrador. Puedes seguir utilizando la galería y las herramientas del Estudio.</>}</p>
         </div>
       )}
       {statusError && <QueryError onRetry={() => { void checkStatus(); }} retrying={checkingStatus} />}

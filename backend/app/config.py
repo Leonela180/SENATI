@@ -40,6 +40,7 @@ class Config:
 
     # Generación de imágenes con Gemini (servicio EXTERNO: requiere consentimiento en cada solicitud)
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+    GEMINI_IMAGE_ENABLED = os.getenv("GEMINI_IMAGE_ENABLED", "0") == "1"
     GEMINI_IMAGE_MODEL = os.getenv("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
     GEMINI_TIMEOUT = int(os.getenv("GEMINI_TIMEOUT", "90"))
     GEMINI_CHAT_MODEL = os.getenv("GEMINI_CHAT_MODEL", "gemini-3.5-flash-lite")

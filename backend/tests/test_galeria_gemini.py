@@ -62,6 +62,7 @@ def test_gemini_exige_consentimiento(app, client):
 
 
 def test_gemini_sin_clave_responde_claro(app, client):
+    app.config["GEMINI_IMAGE_ENABLED"] = True
     register(client)
     app.config["GEMINI_API_KEY"] = ""
     r = client.post("/api/v1/generations", json={"prompt": "retrato de estudio", "consent": True})
@@ -70,6 +71,7 @@ def test_gemini_sin_clave_responde_claro(app, client):
 
 
 def test_gemini_genera_y_guarda_en_la_galeria(app, client, monkeypatch):
+    app.config["GEMINI_IMAGE_ENABLED"] = True
     register(client)
     app.config["GEMINI_API_KEY"] = "clave-de-prueba"
     png = upload_bytes().getvalue()
@@ -84,6 +86,7 @@ def test_gemini_genera_y_guarda_en_la_galeria(app, client, monkeypatch):
 
 
 def test_gemini_error_del_servicio(app, client, monkeypatch):
+    app.config["GEMINI_IMAGE_ENABLED"] = True
     register(client)
     app.config["GEMINI_API_KEY"] = "x"
 
@@ -92,6 +95,19 @@ def test_gemini_error_del_servicio(app, client, monkeypatch):
     monkeypatch.setattr(gen_api, "generate_image", boom)
     r = client.post("/api/v1/generations", json={"prompt": "retrato de estudio", "consent": True})
     assert r.status_code == 429 and r.json["error"]["code"] == "gemini_limite"
+
+
+def test_imagenes_desactivadas_no_llaman_a_google(app, client, monkeypatch):
+    register(client)
+    app.config.update(GEMINI_IMAGE_ENABLED=False, GEMINI_API_KEY="clave-de-prueba")
+    def forbidden(*args):
+        raise AssertionError("No se debe llamar a Google para imagenes")
+    monkeypatch.setattr(gen_api, "generate_image", forbidden)
+    status = client.get("/api/v1/generations/status").json["data"]
+    assert status["enabled"] is False and status["configured"] is False
+    response = client.post("/api/v1/generations", json={"prompt": "retrato de estudio", "consent": True})
+    assert response.status_code == 503 and response.json["error"]["code"] == "generacion_desactivada"
+    assert db.session.query(Generation).count() == 0
 
 
 def test_cliente_gemini_lee_la_imagen_de_la_respuesta(monkeypatch):

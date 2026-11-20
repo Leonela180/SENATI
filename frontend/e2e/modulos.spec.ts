@@ -44,9 +44,9 @@ test("horario y horas: horario, entrada y salida", async ({ page }) => {
   await expect(page.getByRole("cell", { name: "en curso" })).toHaveCount(0);
 });
 
-test("generar con IA pide consentimiento y avisa si falta la clave", async ({ page }) => {
+test("generar por API permanece desactivado en el alcance de texto", async ({ page }) => {
   await registrar(page, "Gemini");
   await page.goto("/app/generar");
-  await expect(page.getByText("Falta configurar Gemini")).toBeVisible();
+  await expect(page.getByText("Generación de imágenes por API desactivada.", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Generar imagen" })).toBeDisabled();
 });

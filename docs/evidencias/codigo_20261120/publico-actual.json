@@ -1,0 +1,23 @@
+{
+  "url": "https://painting-informed-motors-footage.trycloudflare.com",
+  "checks": [
+    "portada HTTPS con ejemplos",
+    "sesion segura, galeria DEMO y comparador de trabajo real",
+    "repeticion real conserva herramienta y completa resultado",
+    "asistente flotante",
+    "lider, integrantes y permisos del grupo DEMO",
+    "laboratorio disponible con selector de personaje"
+  ],
+  "errors": [],
+  "health": {
+    "engine": "local",
+    "presets": [
+      "natural"
+    ],
+    "realistic_available": true,
+    "runtime": "cpp",
+    "status": "ok",
+    "worker_seconds_since_beat": 4
+  },
+  "status": "passed"
+}

@@ -1,5 +1,10 @@
 # Para retomar LUMIA
 
+**Actualización posterior del 20/11/2026:** código sincronizado, instalador corregido
+y copia limpia comprobada. Estado técnico actual en
+[VALIDACION-CODIGO-2026-11-20.md](VALIDACION-CODIGO-2026-11-20.md).
+Las notas inferiores describen el punto de respaldo anterior.
+
 Última sesión guardada: 20/11/2026. La usuaria dejó la revisión visual para otra ocasión.
 
 - Código funcional publicado hasta `3b6e08e`; esta nota se añade después.

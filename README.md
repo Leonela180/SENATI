@@ -82,6 +82,8 @@ private_data/  originales, resultados y accesos DEMO (fuera de Git)
 
 ## Documentación
 
+- [Última validación de código e instalación](docs/VALIDACION-CODIGO-2026-11-20.md): actualización, pruebas, instalación aislada y límites comprobados.
+
 - [Arquitectura y mapa de módulos](docs/ARQUITECTURA.md): dónde está cada cosa y cómo cambiarla.
 - [Entrega práctica SENATI](docs/entrega-senati.md): cómo abrir, compartir, demostrar y comprobar el proyecto.
 - [docs/LAPTOP_PASO_A_PASO.md](docs/LAPTOP_PASO_A_PASO.md): instalación y prueba de la IA real en la laptop.

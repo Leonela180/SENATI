@@ -16,21 +16,31 @@ New-Item -ItemType Directory -Force "private_data\originals", "private_data\resu
 
 Write-Host "1/4 Entorno de Python" -ForegroundColor Cyan
 Set-Location "$root\backend"
-if (-not (Test-Path ".venv")) { python -m venv .venv }
+if (-not (Test-Path ".venv")) {
+    python -m venv .venv
+    if ($LASTEXITCODE -ne 0) { throw "No se pudo crear el entorno de Python." }
+}
 $py = "$root\backend\.venv\Scripts\python.exe"
 & $py -m pip install --upgrade pip
+if ($LASTEXITCODE -ne 0) { throw "No se pudo actualizar pip." }
 & $py -m pip install -e ".[dev]"
+if ($LASTEXITCODE -ne 0) { throw "No se pudieron instalar las dependencias del backend." }
 
 Write-Host "2/4 PyTorch y motor de IA" -ForegroundColor Cyan
 if ($SinIA) {
     Write-Warning "Se omite el motor de IA (-SinIA). Solo funcionará AI_ENGINE=mock (simulación, sin IA real)."
 } elseif (Get-Command nvidia-smi -ErrorAction SilentlyContinue) {
     & $py -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
+    if ($LASTEXITCODE -ne 0) { throw "No se pudo instalar PyTorch para NVIDIA." }
 } else {
     Write-Warning "Sin GPU NVIDIA: se instala PyTorch para CPU."
     & $py -m pip install torch torchvision
+    if ($LASTEXITCODE -ne 0) { throw "No se pudo instalar PyTorch para CPU." }
 }
-if (-not $SinIA) { & $py -m pip install -e ".[ia]" }
+if (-not $SinIA) {
+    & $py -m pip install -e ".[ia]"
+    if ($LASTEXITCODE -ne 0) { throw "No se pudieron instalar las dependencias de IA." }
+}
 
 Write-Host "2b/4 Modelo para recortar el fondo (Estudio de edición, ~170 MB, una sola vez)" -ForegroundColor Cyan
 Push-Location "$root\backend"
@@ -40,14 +50,19 @@ Pop-Location
 
 Write-Host "3/4 Migraciones de PostgreSQL" -ForegroundColor Cyan
 & "$root\backend\.venv\Scripts\alembic.exe" upgrade head
+if ($LASTEXITCODE -ne 0) { throw "No se pudieron aplicar las migraciones. No se compilo el frontend." }
 
 Write-Host "4/4 Frontend" -ForegroundColor Cyan
 Set-Location "$root\frontend"
 npm ci
+if ($LASTEXITCODE -ne 0) { throw "No se pudieron instalar las dependencias del frontend." }
 npm run build
+if ($LASTEXITCODE -ne 0) { throw "El frontend no compilo; la instalacion no esta completa." }
 
-$model = (Select-String -Path "$root\.env" -Pattern "^AI_MODEL_PATH=(.+)$").Matches.Groups[1].Value
-if (-not $model -or -not (Test-Path (Join-Path $root $model))) {
+$modelSetting = Select-String -Path "$root\.env" -Pattern "^AI_MODEL_PATH=(.+)$" | Select-Object -First 1
+$model = if ($modelSetting) { $modelSetting.Matches.Groups[1].Value.Trim().Trim('"').Trim("'") } else { $null }
+$modelPath = if ($model) { if ([IO.Path]::IsPathRooted($model)) { $model } else { Join-Path $root $model } } else { $null }
+if (-not $SinIA -and (-not $modelPath -or -not (Test-Path -LiteralPath $modelPath))) {
     Write-Warning "No se encuentran los pesos del modelo en '$model'. Cópialos antes de usar AI_ENGINE=local."
 }
 Write-Host "Instalación completa. Ejecuta scripts\iniciar.ps1" -ForegroundColor Green

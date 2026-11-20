@@ -46,7 +46,7 @@ Las cuentas DEMO se guardan en el PostgreSQL de la laptop. Sus claves están en
 | `servidor_pruebas.py` | Levanta la API y el worker contra la base `lumia_test`, sin Gemini, para Playwright |
 | `probar_navegador.py` | Inicia el servidor de pruebas, corre Playwright y lo cierra |
 | `medir_api.py` | Mide los tiempos de respuesta de la API (RNF-03) |
-| `validar_gemini.py` | Prueba manual de la clave de Gemini, sin mostrarla |
+| `validar_gemini.py` | Prueba texto por defecto, sin mostrar clave ni respuesta. Imágenes solo con `--imagenes` y `GEMINI_IMAGE_ENABLED=1` |
 
 Los ensayos antiguos (prototipos de ojos y piel y las pruebas de SD 1.5 en CPU)
 se retiraron el 20/11/2026. Si se necesitan, siguen en el historial de Git.

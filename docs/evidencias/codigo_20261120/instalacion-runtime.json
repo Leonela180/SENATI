@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "checks": [
+    "registro y sesion en esquema exclusivo",
+    "carga, segmentacion real, comparacion y descarga PNG",
+    "chat flotante y guia local sin API"
+  ],
+  "engine": "mock",
+  "errors": []
+}

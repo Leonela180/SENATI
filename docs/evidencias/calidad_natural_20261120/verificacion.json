@@ -1,0 +1,30 @@
+{
+  "status": "passed",
+  "results": [
+    {
+      "label": "Ampliación ×4 · tonos naturales",
+      "beforeSize": [
+        512,
+        640
+      ],
+      "afterSize": [
+        2048,
+        2560
+      ],
+      "loaded": true
+    },
+    {
+      "label": "Edición natural por etapas",
+      "beforeSize": [
+        640,
+        640
+      ],
+      "afterSize": [
+        1280,
+        1280
+      ],
+      "loaded": true
+    }
+  ],
+  "errors": []
+}

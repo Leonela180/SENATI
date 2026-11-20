@@ -21,7 +21,7 @@ const TOOLS: { id: EditTool; label: string; icon: typeof Eraser; help: string }[
   { id: "quitar_lunar", label: "Quitar lunar", icon: Eraser, help: "Haz clic sobre cada lunar o mancha. Se rellena con la piel de alrededor." },
   { id: "cambiar_fondo", label: "Cambiar fondo", icon: Palette, help: "La IA recorta a la persona y cambia el fondo por un color, un desenfoque o transparencia." },
   { id: "desenfoque", label: "Desenfoque", icon: Droplets, help: "Desenfoque gaussiano de toda la imagen o solo del fondo (efecto retrato)." },
-  { id: "mejorar_calidad", label: "Mejorar calidad", icon: Wand2, help: "Reduce el ruido, duplica la resolución y mejora la nitidez." },
+  { id: "mejorar_calidad", label: "Mejorar calidad", icon: Wand2, help: "Amplía ×2 o ×4 con enfoque suave y limpieza opcional. Conserva los tonos; no reconstruye detalles perdidos ni convierte automáticamente a 4K." },
   { id: "ajustes", label: "Ajustes", icon: SlidersHorizontal, help: "Brillo, contraste, saturación, calidez y rotación." },
 ];
 
@@ -49,7 +49,7 @@ export default function Studio() {
   const [brush, setBrush] = useState(12);
   const [bg, setBg] = useState({ mode: "color", color: "#f4efe8", radius: 14 });
   const [blur, setBlur] = useState({ radius: 6, scope: "fondo" });
-  const [quality, setQuality] = useState({ scale: 2, sharpen: 0.6, denoise: true });
+  const [quality, setQuality] = useState({ scale: 2, sharpen: 0.35, denoise: false });
   const [adj, setAdj] = useState({ brightness: 1, contrast: 1, saturation: 1, warmth: 0, rotate: 0 });
   const [skin, setSkin] = useState({ intensity: 0.7, pecas: false });
   const [jobId, setJobId] = useState<number | null>(null);
@@ -254,7 +254,7 @@ export default function Studio() {
                 ))}
               </div>
               <Slider label="Nitidez" value={quality.sharpen} min={0} max={2} step={0.1} onChange={(v) => setQuality({ ...quality, sharpen: v })} />
-              <p className="text-xs leading-relaxed text-muted-foreground">Ampliación Lanczos con reducción de ruido y enfoque. Hasta 4096 px en el lado mayor; no inventa detalle perdido ni equivale a superresolución generativa.</p>
+              <p className="text-xs leading-relaxed text-muted-foreground">Ampliación bicúbica con enfoque suave, sin contraste automático. ×4 significa cuatro veces las dimensiones, sujeto al límite de 4096 px; no significa 4K ni recuperación de detalle perdido.</p>
               <label className="flex items-center gap-2 text-sm"><Checkbox checked={quality.denoise} onCheckedChange={(v) => setQuality({ ...quality, denoise: v === true })} />Reducir ruido</label>
             </div>
           )}

@@ -1,6 +1,24 @@
 import numpy as np
 from app.ai.editing import mejorar_calidad
 from tests.conftest import register, upload
+import cv2
+
+
+def test_calidad_sin_ajustes_no_cambia_tonos_ni_contraste():
+    rng = np.random.default_rng(42)
+    image = rng.integers(20, 220, (80, 90, 3), dtype=np.uint8)
+    assert np.array_equal(mejorar_calidad(image, 1, 0, False), image)
+
+
+def test_enfoque_no_produce_halos_fuertes_ni_cambia_canales():
+    image = np.full((32, 32, 3), (65, 85, 105), dtype=np.uint8)
+    image[:, 16:] = (155, 175, 195)
+    base = cv2.resize(image, (128, 128), interpolation=cv2.INTER_CUBIC)
+    output = mejorar_calidad(image, 4, 2, False)
+    delta = output.astype(int)-base.astype(int)
+    assert np.abs(delta).max() <= 3
+    assert np.array_equal(delta[..., 0], delta[..., 1])
+    assert np.array_equal(delta[..., 1], delta[..., 2])
 
 
 def test_calidad_limita_salida_a_4096():

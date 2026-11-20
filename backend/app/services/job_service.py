@@ -83,7 +83,7 @@ def clean_tool_params(tool, params, image):
         if scale not in (1, 2, 4):
             raise ToolParamsError("scale")
         scale = int(scale)
-        return {"scale": scale, "sharpen": round(num("sharpen", 0, 2, 0.6), 2), "denoise": bool(p.get("denoise", True))}
+        return {"scale": scale, "sharpen": round(num("sharpen", 0, 2, 0.35), 2), "denoise": bool(p.get("denoise", False))}
     if tool == "ajustes":
         rotate = int(num("rotate", 0, 270, 0))
         if rotate not in (0, 90, 180, 270):

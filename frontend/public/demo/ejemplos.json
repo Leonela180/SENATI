@@ -20,18 +20,32 @@
   },
   {
     "tool": "mejorar_calidad",
-    "title": "Resolucion x4",
-    "text": "Ampliacion digital con reduccion de ruido, contraste local y enfoque.",
-    "before": "/demo/ej_calidad_antes.webp",
-    "after": "/demo/ej_calidad_despues.webp",
-    "caption": "Entrada reducida a 256 px para un experimento controlado. El antes se amplia por bicubica para comparar al mismo tamano; no se recupera informacion inexistente. Resultado directo de LUMIA: 0.23 s.",
+    "title": "Ampliación ×4 · tonos naturales",
+    "text": "Aumenta las dimensiones con enfoque suave; no es 4K ni superresolución generativa.",
+    "before": "/demo/ej_calidad_natural_v2_antes.webp",
+    "after": "/demo/ej_calidad_natural_v2_despues.webp",
+    "caption": "Trabajo real DEMO 220, version natural-v2. Entrada 512×640 px; salida 2048×2560 px. Original sin reduccion artificial a 256 px. Sin CLAHE ni suavizado intenso. No se reconstruye informacion perdida.",
     "metadata": {
-      "model_id": "lumia-editor",
-      "model_version": "opencv-4.14.0",
-      "tool": "mejorar_calidad",
-      "seconds": 0.23,
-      "width": 820,
-      "height": 1024
+      "job_id": 220,
+      "model_version": "opencv-4.14.0-natural-v2",
+      "parameters": {
+        "denoise": false,
+        "height": 2560,
+        "scale": 4,
+        "seconds": 0.78,
+        "sharpen": 0.3,
+        "width": 2048
+      },
+      "dimensions": {
+        "antes": [
+          512,
+          640
+        ],
+        "despues": [
+          2048,
+          2560
+        ]
+      }
     }
   },
   {
@@ -88,21 +102,31 @@
   },
   {
     "tool": "flujo_artesana",
-    "title": "Edición por etapas",
-    "text": "Fondo, ajustes de luz y ampliación digital x2 encadenados en una cuenta DEMO.",
-    "before": "/demo/ej_flujo_artesana_antes.webp",
-    "after": "/demo/ej_flujo_artesana_despues.webp",
-    "caption": "Retrato sintetico propio. Resultado real del trabajo DEMO 16; no es una conversion de dibujo a persona. Fondo, ajustes de luz y ampliación digital x2 encadenados en una cuenta DEMO.",
+    "title": "Edición natural por etapas",
+    "text": "Luz suave y ampliación ×2, conservando el fondo, los tonos y la textura del retrato.",
+    "before": "/demo/ej_etapas_naturales_v2_antes.webp",
+    "after": "/demo/ej_etapas_naturales_v2_despues.webp",
+    "caption": "Trabajo real DEMO 222, version natural-v2. Entrada 640×640 px; salida 1280×1280 px. Original sin reduccion artificial a 256 px. Sin CLAHE ni suavizado intenso. No se reconstruye informacion perdida.",
     "metadata": {
-      "job_id": 16,
-      "tool": "mejorar_calidad",
+      "job_id": 222,
+      "model_version": "opencv-4.14.0-natural-v2",
       "parameters": {
-        "denoise": true,
+        "denoise": false,
         "height": 1280,
         "scale": 2,
-        "seconds": 0.51,
-        "sharpen": 0.5,
+        "seconds": 0.29,
+        "sharpen": 0.25,
         "width": 1280
+      },
+      "dimensions": {
+        "antes": [
+          640,
+          640
+        ],
+        "despues": [
+          1280,
+          1280
+        ]
       }
     }
   },

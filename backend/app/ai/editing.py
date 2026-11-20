@@ -4,7 +4,7 @@
 - cambiar_fondo    → segmentación de la persona con U²-Net (rembg, ONNX en CPU, ~0,3 s por imagen)
                      y nuevo fondo: color, desenfocado o transparente.
 - desenfoque       → desenfoque gaussiano de toda la imagen o solo del fondo (efecto retrato).
-- mejorar_calidad  → reducción de ruido, escalado ×2 (Lanczos), contraste local suave (CLAHE) y nitidez.
+- mejorar_calidad  → escalado bicubico ×2/×4 y enfoque limitado de luminancia, sin contraste local forzado.
 - ajustes          → brillo, contraste, saturación, calidez y rotación.
 - textura_piel     → poros, grano fino y micro-brillos sobre la piel «de plástico» (ver skin_texture.py).
 
@@ -88,20 +88,26 @@ def cambiar_fondo(rgb: np.ndarray, mode: str, color: str, radius: float, alpha: 
 
 
 def mejorar_calidad(rgb: np.ndarray, scale: int, sharpen: float, denoise: bool) -> np.ndarray:
+    """Ampliacion conservadora: no aplica contraste local ni reconstruye detalle."""
     img = rgb
     if denoise:
-        img = cv2.fastNlMeansDenoisingColored(img, None, 3, 3, 7, 21)
+        # Una limpieza intensa destruye poros y fibras: conservar el 80 % de
+        # la señal original, en lugar de alisar toda la imagen.
+        clean = cv2.fastNlMeansDenoisingColored(img, None, 2, 2, 7, 21)
+        img = cv2.addWeighted(img, .8, clean, .2, 0)
     if scale > 1:
         h, w = img.shape[:2]
         k = min(scale, MAX_SIDE_OUT / max(h, w))
         if k != 1:
-            img = cv2.resize(img, (int(w * k), int(h * k)), interpolation=cv2.INTER_LANCZOS4)
-    lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
-    lab[..., 0] = cv2.createCLAHE(clipLimit=1.4, tileGridSize=(8, 8)).apply(lab[..., 0])
-    img = cv2.cvtColor(lab, cv2.COLOR_LAB2RGB)
-    if sharpen > 0:                               # máscara de enfoque (unsharp mask)
-        soft = cv2.GaussianBlur(img, (0, 0), 1.2)
-        img = cv2.addWeighted(img, 1 + sharpen, soft, -sharpen, 0)
+            img = cv2.resize(img, (int(w * k), int(h * k)), interpolation=cv2.INTER_CUBIC)
+    if sharpen > 0:
+        # Enfocar solo luminancia y acotar la correccion evita halos fuertes,
+        # manchas cromaticas y el aspecto de dibujo del CLAHE + unsharp RGB.
+        luminance = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY).astype(np.float32)
+        detail = luminance - cv2.GaussianBlur(luminance, (0, 0), .85)
+        detail[np.abs(detail) < 1.25] = 0
+        delta = np.clip(detail * min(float(sharpen), 2) * .35, -3, 3)
+        img = np.clip(np.rint(img.astype(np.float32) + delta[..., None]), 0, 255).astype(np.uint8)
     return img
 
 
@@ -180,5 +186,6 @@ class EditingEngine:
             else:
                 out = cambiar_fondo(rgb, params["mode"], params.get("color", "#ffffff"), float(params.get("radius", 12)), alpha)
         save_labeled(out, output_path, info, label=label)
-        return {"model_id": model_id, "model_version": self.model_version, "tool": tool,
+        version = f"{self.model_version}-natural-v2" if tool == "mejorar_calidad" else self.model_version
+        return {"model_id": model_id, "model_version": version, "tool": tool,
                 "seconds": round(time.perf_counter() - t0, 2), "width": out.width, "height": out.height, **extra}

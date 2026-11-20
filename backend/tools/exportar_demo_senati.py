@@ -23,6 +23,9 @@ def main():
     selections = [("1", "1-0", "fondo_artesana", "Fondo de estudio", "Recorte con IA local y fondo de color sobre un retrato sintético propio."),
                   ("1", "1-2", "flujo_artesana", "Edición por etapas", "Fondo, ajustes de luz y ampliación digital x2 encadenados en una cuenta DEMO.")]
     for source, record, key, title, text in selections:
+        existing = next((item for item in items if item.get("tool") == key), None)
+        if existing and existing.get("metadata", {}).get("model_version", "").endswith("natural-v2"):
+            continue  # No reponer una muestra antigua que ya fue corregida.
         job_id = account["jobs"][record]["id"]
         job = call(client, "GET", f"/jobs/{job_id}")
         if job["status"] != "completed" or job["model_id"] == "mock":

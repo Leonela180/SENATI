@@ -9,7 +9,15 @@ function display() {
   for (const id of ['before', 'before-slide']) el(id).src = example.before;
   for (const id of ['after', 'after-slide']) el(id).src = example.after;
 }
-el('example').addEventListener('change', display);
+el('example').addEventListener('change', () => {
+  const selected = examples[Number(el('example').value)];
+  if (selected) {
+    const url = new URL(location.href);
+    url.searchParams.set('ejemplo', selected.tool);
+    history.replaceState(null, '', url);
+  }
+  display();
+});
 for (const mode of ['side','slide']) el(mode).addEventListener('click', () => {
   el('pair').hidden = mode !== 'side';
   el('slider-view').hidden = mode !== 'slide';
@@ -33,5 +41,8 @@ fetch('/demo/ejemplos.json').then(response => { if (!response.ok) throw new Erro
   el('example').replaceChildren(...examples.map((item,index) => {
     const option = document.createElement('option'); option.value = String(index); option.textContent = item.title; return option;
   }));
+  const requested = new URLSearchParams(location.search).get('ejemplo');
+  const index = examples.findIndex(item => item.tool === requested);
+  if (index >= 0) el('example').value = String(index);
   display();
 }).catch(() => { el('error').hidden = false; el('error').textContent = 'No se pudieron cargar los ejemplos. Abre esta página desde LUMIA encendido.'; });

@@ -64,7 +64,7 @@ CHAT_SYSTEM = (
     "Herramientas disponibles (usa estos identificadores): humanizar (piel, ojos y luz más naturales en "
     "retratos generados por IA), restaurar (fotos antiguas: ruido, tonos, rayas pequeñas), quitar_lunar "
     "(lunares o manchas pequeñas), cambiar_fondo (color, desenfocado o transparente), desenfoque (gaussiano, "
-    "de todo o solo del fondo), mejorar_calidad (doble resolución, nitidez, menos ruido), ajustes (brillo, "
+    "de todo o solo del fondo), mejorar_calidad (ampliacion digital x2/x4 con enfoque suave, no 4K ni recuperacion de detalles), ajustes (brillo, "
     "contraste, saturación, calidez, rotación), textura_piel (poros y grano natural cuando la piel se ve lisa "
     "o de plástico; es un filtro digital rápido), galeria (subir y organizar en álbumes). La generación de imágenes "
     "por API está desactivada: no la recomiendes como disponible. Sí puedes redactar prompts de texto listos "

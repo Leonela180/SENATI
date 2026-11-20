@@ -1,0 +1,18 @@
+LUMIA AI — 20/11/2026 — comprobaciones observadas en esta sesión
+
+Backend final: 121 passed in 38.37s (PostgreSQL de pruebas aislado).
+Frontend: 6 tests passed; TypeScript/Vite build correcto.
+Playwright completo tras corregir edición encadenada: 14 passed (57.7s).
+Recorridos posteriores inicio.spec.ts + modulos.spec.ts: 4 passed (15.7s).
+Recorridos finales nueva_etapa.spec.ts: 3 passed (10.4s), con avances solo para líder.
+PostgreSQL real: f8c0e2a4b6d8 (head); alembic check sin operaciones pendientes.
+
+Las pruebas de navegador simulan la humanización y no llaman a Gemini.
+Inferencias reales independientes:
+- Conversión sin representación especificada: trabajo DEMO 131, 409.88 s, filtros aprobados.
+- Conversión masculina: trabajo DEMO 212, 418.30 s, filtros aprobados.
+- Humanización: trabajo DEMO 213, 133.67 s, filtros aprobados.
+- Humanización: trabajo DEMO 214, 148.31 s, filtros aprobados.
+
+La prueba pública y las cifras DEMO están en publico-real.json y demo-verificada.json.
+No se incluyen claves, contraseñas ni fotos privadas en esta evidencia.

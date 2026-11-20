@@ -1,5 +1,7 @@
 # LUMIA AI — Hoja de pendientes para la entrega SENATI
 
+**Hoja histórica:** el estado vigente está en [cierre del 20/11/2026](cierre-2026-11-20.md).
+
 **Actualizado:** 17 de noviembre de 2026. Esta hoja separa tres cosas: lo que está implementado y comprobado, lo que solo se puede comprobar en la laptop del proyecto y lo que depende de servicios externos.
 
 ## ✅ Resuelto en esta etapa

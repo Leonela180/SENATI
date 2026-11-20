@@ -26,7 +26,7 @@ PUBLIC_PARAMS = ("strength", "steps", "guidance", "seed", "work_size", "seconds"
                  "scale", "sharpen", "denoise", "radius", "scope", "mode", "color", "puntos", "width", "height",
                  "brightness", "contrast", "saturation", "warmth", "rotate", "runtime", "blend", "ram_free_min_gib",
                  "facial_detail_applied", "eyes_enhanced", "pores_intensity", "facial_detail_method", "intensity",
-                 "pecas", "rostro_detectado", "ojos_protegidos", "cobertura_piel", "conversion_mode")
+                 "pecas", "rostro_detectado", "ojos_protegidos", "cobertura_piel", "conversion_mode", "character")
 
 
 class ToolParamsError(ValueError):
@@ -115,7 +115,10 @@ def create_job(user, image, preset, idem_key, tool="humanizar", tool_params=None
         return existing, False
     if tool == "realista":
         preset = "natural"
-        params = {"strength": .78, "steps": 32, "guidance": 7.0, "conversion_mode": "ilustracion_a_realista"}
+        character = (tool_params or {}).get("character", "adult_person") if isinstance(tool_params, dict) or tool_params is None else None
+        if character not in ("adult_person", "adult_man", "adult_woman"):
+            raise ToolParamsError("character")
+        params = {"strength": .74, "steps": 28, "guidance": 6.5, "seed": 1234, "character": character, "conversion_mode": "ilustracion_a_realista"}
     elif tool == "humanizar":
         if current_app.config["AI_ENGINE"] != "local" or preset not in PRESETS or current_app.config.get("AI_LOCAL_RUNTIME") == "cpp":
             preset = "natural"

@@ -84,12 +84,13 @@ def create_app(config_object=Config, **overrides):
     def health():
         db.session.execute(text("SELECT 1"))
         from .ai.prompts import PRESETS
+        from .ai.capabilities import realistic_available
         beat = storage / "worker.heartbeat"
         worker_age = round(time.time() - beat.stat().st_mtime) if beat.exists() else None
         return jsonify(data={
             "status": "ok",
             "engine": app.config["AI_ENGINE"],
-            "realistic_available": app.config.get("AI_REALISTIC_ENABLED", False) and app.config["AI_ENGINE"] == "local" and app.config.get("AI_LOCAL_RUNTIME") == "cpp",
+            "realistic_available": realistic_available(app.config),
             # Los presets se ofrecen solo con el motor real (skill §1.4)
             "presets": (["natural"] if app.config.get("AI_LOCAL_RUNTIME") == "cpp" else list(PRESETS)) if app.config["AI_ENGINE"] == "local" else [],
             "runtime": app.config.get("AI_LOCAL_RUNTIME") if app.config["AI_ENGINE"] == "local" else "mock",

@@ -8,7 +8,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { EmptyState, QueryError } from "@/components/PageHeader";
 import { ApiError } from "@/lib/api";
 import { fecha, presetLabel } from "@/components/JobCard";
-import { useCreateJob, useJob } from "@/features/jobs/useJobs";
+import { useRetryJob, useJob } from "@/features/jobs/useJobs";
 import { useSetVisibility } from "@/features/images/useImages";
 import { useWorkspaces } from "@/features/teams/useTeams";
 
@@ -21,7 +21,7 @@ export default function JobDetail() {
   const id = Number(useParams().id);
   const nav = useNavigate();
   const { data: job, isError, error, isFetching, refetch } = useJob(id);
-  const retry = useCreateJob();
+  const retry = useRetryJob();
   const share = useSetVisibility();
   const { data: workspaces } = useWorkspaces();
   const inTeam = workspaces?.some((w) => w.kind === "team");
@@ -75,11 +75,12 @@ export default function JobDetail() {
               )}
               {job.is_owner && (
                 <Button variant="outline" className="h-11 w-full rounded-xl" disabled={retry.isPending}
-                        onClick={() => retry.mutate({ image_id: job.image_id, preset: job.preset, key: crypto.randomUUID() },
+                        onClick={() => retry.mutate({ id: job.id, key: crypto.randomUUID() },
                                                     { onSuccess: (j) => nav(`/app/trabajos/${j.id}`) })}>
                   <RotateCcw className="size-4" aria-hidden />{job.status === "failed" ? "Reintentar" : "Procesar de nuevo"}
                 </Button>
               )}
+              {retry.error && <p role="alert" className="text-sm text-destructive">{(retry.error as Error).message}</p>}
               {job.is_owner && inTeam && (
                 <Button variant="ghost" className="h-11 w-full rounded-xl" disabled={share.isPending}
                         onClick={() => share.mutate({ imageId: job.image_id, visibility: job.visibility === "team" ? "private" : "team" },

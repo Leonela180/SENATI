@@ -65,5 +65,77 @@
       "width": 800,
       "height": 1000
     }
+  },
+  {
+    "tool": "fondo_artesana",
+    "title": "Fondo de estudio",
+    "text": "Recorte con IA local y fondo de color sobre un retrato sintético propio.",
+    "before": "/demo/ej_fondo_artesana_antes.webp",
+    "after": "/demo/ej_fondo_artesana_despues.webp",
+    "caption": "Retrato sintetico propio. Resultado real del trabajo DEMO 14; no es una conversion de dibujo a persona. Recorte con IA local y fondo de color sobre un retrato sintético propio.",
+    "metadata": {
+      "job_id": 14,
+      "tool": "cambiar_fondo",
+      "parameters": {
+        "color": "#d8e7e8",
+        "height": 640,
+        "mode": "color",
+        "radius": 12.0,
+        "seconds": 0.55,
+        "width": 640
+      }
+    }
+  },
+  {
+    "tool": "flujo_artesana",
+    "title": "Edición por etapas",
+    "text": "Fondo, ajustes de luz y ampliación digital x2 encadenados en una cuenta DEMO.",
+    "before": "/demo/ej_flujo_artesana_antes.webp",
+    "after": "/demo/ej_flujo_artesana_despues.webp",
+    "caption": "Retrato sintetico propio. Resultado real del trabajo DEMO 16; no es una conversion de dibujo a persona. Fondo, ajustes de luz y ampliación digital x2 encadenados en una cuenta DEMO.",
+    "metadata": {
+      "job_id": 16,
+      "tool": "mejorar_calidad",
+      "parameters": {
+        "denoise": true,
+        "height": 1280,
+        "scale": 2,
+        "seconds": 0.51,
+        "sharpen": 0.5,
+        "width": 1280
+      }
+    }
+  },
+  {
+    "tool": "realista",
+    "title": "Personaje a retrato",
+    "text": "Reinterpretacion local de un personaje adulto sintetico; puede cambiar rasgos, prendas y accesorios.",
+    "before": "/demo/ej_realista_antes.webp",
+    "after": "/demo/ej_realista_despues.webp",
+    "caption": "Resultado real DEMO 212, CPU con offload a disco, 418.3 s. Filtros antes/despues aprobados. No representa una identidad real ni garantiza identicos resultados con otros personajes.",
+    "metadata": {
+      "job_id": 212,
+      "parameters": {
+        "blend": 1.0,
+        "character": "adult_man",
+        "conversion_mode": "ilustracion_a_realista",
+        "device": "cpu",
+        "filtro_seguridad": true,
+        "guidance": 6.5,
+        "height": 512,
+        "ram_free_min_gib": 1.36,
+        "runtime": "diffusers_disk_offload",
+        "seconds": 418.3,
+        "seed": 1234,
+        "steps": 28,
+        "strength": 0.74,
+        "vram_gb": 0,
+        "width": 512,
+        "work_size": [
+          512,
+          512
+        ]
+      }
+    }
   }
 ]

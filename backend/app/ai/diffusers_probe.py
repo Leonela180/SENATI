@@ -11,6 +11,9 @@ def main():
     parser = argparse.ArgumentParser()
     for name in ("model", "config", "image", "output"):
         parser.add_argument("--" + name, required=True)
+    parser.add_argument("--prompt-file", required=True)
+    parser.add_argument("--negative-file", required=True)
+    parser.add_argument("--seed", type=int, default=1234)
     args = parser.parse_args()
     import torch
     from diffusers import StableDiffusionImg2ImgPipeline, DPMSolverMultistepScheduler
@@ -43,10 +46,10 @@ def main():
     image = Image.open(args.image).convert("RGB")
     with torch.inference_mode():
         result = pipe(
-            prompt="natural candid photographic portrait of an adult man, relaxed friendly expression, both eyes fully open, clear realistic brown irises, round aligned pupils, consistent gaze looking directly at camera, small natural window catchlights in both eyes, soft frontal window lighting evenly illuminating the eyes and face, natural human facial proportions, short wavy brown hair, teal jacket, beige shirt, authentic subtle skin pores, documentary photography",
-            negative_prompt="cartoon, anime, drawing, illustration, 3d render, giant eyes, doll, distorted face, deformed, squinting, sleepy eyes, crossed eyes, misaligned pupils, asymmetric eyes, double pupils, empty eyes, black eye sockets, harsh shadows on eyes, glossy plastic skin, beauty retouch",
+            prompt=Path(args.prompt_file).read_text(encoding="utf-8"),
+            negative_prompt=Path(args.negative_file).read_text(encoding="utf-8"),
             image=image, strength=.74, num_inference_steps=28, guidance_scale=6.5,
-            generator=torch.Generator(device="cpu").manual_seed(1234),
+            generator=torch.Generator(device="cpu").manual_seed(args.seed),
         ).images[0]
     result.save(args.output)
     print(json.dumps({"status": "generated", "size": result.size}), flush=True)

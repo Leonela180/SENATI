@@ -12,15 +12,27 @@ Proyecto de Innovación SENATI «Mejora de piel con IA».
 
 ## Módulos
 
+Estado y orden de cierre actual: [auditoría del 20/11/2026](docs/auditoria-2026-11-20.md).
+La demostración se prepara con cuentas y grupos identificados como DEMO; las
+credenciales permanecen en `private_data/demo_senati/ACCESOS-PRIVADOS.md`, fuera de Git.
+
 | Módulo | Qué hace | ¿Necesita GPU? |
 |---|---|---|
 | **Humanizar** | Stable Diffusion 1.5 *image-to-image*: piel, ojos, cabello y luz más naturales | Recomendable; en CPU funciona a 512 px y tarda minutos |
-| **Estudio de edición** | Quitar lunares o manchas, cambiar el fondo (color, desenfocado o transparente), desenfoque gaussiano, mejorar calidad (×2) y ajustes de color y rotación | No (CPU, segundos) |
+| **Estudio de edición** | Restauración conservadora, textura de piel, quitar lunares o manchas, cambiar fondo, desenfoque, ampliación digital ×2/×4 y ajustes de color y rotación | No (CPU) |
 | **Generar con IA** | Crea imágenes a partir de una descripción con Gemini (Google), con aviso y consentimiento | No (servicio externo) |
 | **Galería** | Subida múltiple, álbumes, búsqueda, mover, borrar y procesamiento por lotes | No |
 | **Historial y detalle** | Comparador antes/después, descarga rotulada y trazabilidad | No |
 | **Horario y horas** | Horario semanal, marcar entrada/salida, registros manuales con motivo, horas trabajadas vs. esperadas, horas por recuperar y reporte del equipo en CSV | No |
-| **Equipo y administración** | Invitaciones de un solo uso, compartir imágenes, estadísticas agregadas y supervisión técnica | No |
+| **Equipo y administración** | Invitaciones dirigidas de un solo uso, imágenes compartidas, líder que revisa permisos, estadísticas y supervisión técnica | No |
+| **Asistente flotante** | Ayuda sin abandonar la pantalla: guía local y conversación Gemini de texto con consentimiento | No; Gemini necesita internet y cuota |
+| **Apariencia y perfil** | Tema, colores y avatar guardados en el navegador | No |
+
+La conversión de ilustraciones a personas realistas es un laboratorio experimental:
+deshabilitado por defecto y validado con trabajos reales en esta laptop antes de
+activarlo localmente. No garantiza identidad ni idéntica calidad con otros personajes.
+El código de generación con Gemini
+se conserva; su cuota externa debe estar disponible para poder generar imágenes.
 
 ## Requisitos
 

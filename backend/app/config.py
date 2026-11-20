@@ -33,6 +33,7 @@ class Config:
     AI_RESULT_BLEND = float(os.getenv("AI_RESULT_BLEND", "0.35"))
     AI_DETAIL_INTENSITY = float(os.getenv("AI_DETAIL_INTENSITY", "0.65"))
     AI_REALISTIC_ENABLED = os.getenv("AI_REALISTIC_ENABLED", "0") == "1"
+    AI_REALISTIC_MODEL_PATH = _path("AI_REALISTIC_MODEL_PATH", "./models/sd15-compact.safetensors")
     AI_WORKER_CONCURRENCY = int(os.getenv("AI_WORKER_CONCURRENCY", "1"))
     AI_MAX_ATTEMPTS = 3                                        # reintentos limitados (RNF-08)
     FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")

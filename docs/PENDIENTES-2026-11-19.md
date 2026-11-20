@@ -1,5 +1,8 @@
 # Pendientes para retomar LUMIA AI
 
+**Registro histórico.** Varios puntos se completaron después: consultar
+[cierre del 20/11/2026](cierre-2026-11-20.md) antes de retomar tareas.
+
 Este es un respaldo de avance, no una declaración de entrega al 100 %.
 
 ## Implementado y comprobado

@@ -19,7 +19,14 @@ test("galería → estudio (fondo) → seguir editando (desenfoque)", async ({ p
   await page.getByRole("tab", { name: "Cambiar fondo" }).click();
   await page.getByRole("button", { name: "Aplicar" }).click();
   await expect(page.getByRole("link", { name: "Descargar resultado" })).toBeVisible({ timeout: 60_000 });
+  // Una respuesta lenta al guardar no debe permitir editar la imagen anterior
+  // mientras está por cambiar la selección de la galería.
+  await page.route("**/api/v1/jobs/*/save", async route => {
+    await new Promise(resolve => setTimeout(resolve, 700));
+    await route.continue();
+  });
   await page.getByRole("button", { name: "Seguir editando este resultado" }).click();
+  await expect(page.getByRole("tab", { name: "Desenfoque" })).toBeDisabled();
   await page.getByRole("tab", { name: "Desenfoque" }).click();
   await page.getByRole("button", { name: "Aplicar" }).click();
   await expect(page.getByRole("slider", { name: "Comparar antes y después" })).toBeVisible({ timeout: 60_000 });

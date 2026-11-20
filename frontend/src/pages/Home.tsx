@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BeforeAfterSlider } from "@/components/BeforeAfterSlider";
+import { useHealth } from "@/features/jobs/useJobs";
 
 /** Ejemplo real de la portada, preparado con backend/tools/preparar_portada.py (si no existe, se muestran capturas de la app). */
 type Demo = { before: string; after: string; caption: string; beforeLabel?: string; afterLabel?: string };
@@ -28,7 +29,7 @@ const HERRAMIENTAS = [
 
 const PASOS = [
   { icon: Upload, t: "Sube", d: "JPG, PNG o WebP de hasta 10 MB." },
-  { icon: FileCheck2, t: "Confirma", d: "Declaras que es una imagen generada por IA y que puedes usarla." },
+  { icon: FileCheck2, t: "Confirma", d: "Confirmas tu permiso de uso y la autorización de las personas que aparezcan." },
   { icon: Zap, t: "Procesa", d: "El servidor trabaja en segundo plano; puedes seguir navegando." },
   { icon: Download, t: "Compara y descarga", d: "Desliza entre antes y después y descarga el resultado rotulado." },
 ];
@@ -105,8 +106,11 @@ function AppShot({ src, alt, className = "" }: { src: string; alt: string; class
 }
 
 export default function Home() {
+  const { data: health } = useHealth();
+  const herramientas = health?.realistic_available ? [...HERRAMIENTAS, { icon: Wand2, t: "De personaje a retrato", d: "Reinterpreta ilustraciones de personajes adultos como retratos sintéticos. Motor local experimental, con filtros y comparación del resultado." }] : HERRAMIENTAS;
   const demo = useDemo();
-  const ejemplos = useEjemplos();
+  const todosLosEjemplos = useEjemplos();
+  const ejemplos = todosLosEjemplos.filter(item => item.tool !== "realista" || health?.realistic_available);
   return (
     <>
       {/* ---------- Portada ---------- */}
@@ -144,7 +148,7 @@ export default function Home() {
           </div>
 
           <dl className="mx-auto mt-14 grid max-w-2xl grid-cols-3 gap-4">
-            {[[String(HERRAMIENTAS.length), "funciones"], ["CPU", "edición local"], ["Original", "siempre conservado"]].map(([n, l]) => (
+            {[[String(herramientas.length), "funciones"], ["CPU", "edición local"], ["Original", "siempre conservado"]].map(([n, l]) => (
               <div key={l}><dt className="sr-only">{l}</dt><dd className="font-display text-3xl font-bold text-brand-strong">{n}</dd><p className="text-xs text-muted-foreground">{l}</p></div>
             ))}
           </dl>
@@ -161,7 +165,7 @@ export default function Home() {
           <p className="text-muted-foreground">Edición en el servidor, originales privados y herramientas para colaborar. Las integraciones externas y los modos experimentales se identifican por separado.</p>
         </div>
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {HERRAMIENTAS.map(({ icon: Icon, t, d }) => (
+          {herramientas.map(({ icon: Icon, t, d }) => (
             <article key={t} className="group relative rounded-3xl border bg-card p-6 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
               <span className="grid size-12 place-items-center rounded-2xl bg-brand-soft text-brand-strong transition group-hover:scale-105"><Icon className="size-6" aria-hidden /></span>
               <h3 className="mt-5 text-lg font-semibold">{t}</h3>

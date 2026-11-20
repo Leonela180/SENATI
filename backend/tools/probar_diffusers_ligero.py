@@ -21,10 +21,14 @@ try:
         source, result = folder / "input.png", folder / "resultado.png"
         prepared.save(source)
         engine.check_safety(source, folder, "input")
+        from app.ai.realistic_engine import POSITIVE, NEGATIVE
+        (folder / "prompt.txt").write_text(POSITIVE, encoding="utf-8")
+        (folder / "negative.txt").write_text(NEGATIVE, encoding="utf-8")
         stats = run_limited([sys.executable, "-m", "app.ai.diffusers_probe",
             "--model", ROOT / "models/sd15-compact.safetensors",
             "--config", ROOT / "models/stable-diffusion-v1-5",
-            "--image", source, "--output", result], folder / "pytorch.log",
+            "--image", source, "--output", result,
+            "--prompt-file", folder / "prompt.txt", "--negative-file", folder / "negative.txt"], folder / "pytorch.log",
             cwd=ROOT / "backend", timeout=900)
         engine.check_safety(result, folder, "output")
         report = {"estado": "prueba_tecnica_completa", "stats": stats, "calidad_visual": "pendiente"}

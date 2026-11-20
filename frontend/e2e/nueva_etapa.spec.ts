@@ -52,10 +52,12 @@ test("lider revisa permiso solicitado por integrante", async ({ page, browser })
     await member.getByRole("button", { name: "Solicitar permiso" }).click();
     await expect(member.getByText("Pendiente", { exact: true })).toBeVisible();
     await page.reload();
+    await expect(page.getByRole("heading", { name: "Avance por integrante" })).toBeVisible();
     await page.getByRole("button", { name: "Aprobar", exact: true }).click();
     await expect(page.getByText("Aprobado", { exact: true })).toBeVisible();
     await page.screenshot({ path: path.resolve("../docs/evidencias/etapa_20261119/lider_permisos.png"), fullPage: true });
     await member.reload();
+    await expect(member.getByRole("heading", { name: "Avance por integrante" })).toHaveCount(0);
     await expect(member.getByText("Aprobado", { exact: true })).toBeVisible();
   } finally { await context.close(); }
 });

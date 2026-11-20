@@ -33,3 +33,13 @@ export function useCreateJob() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["jobs"] }),
   });
 }
+
+export function useRetryJob() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (b: { id: number; key: string }) => api<Job>(`/jobs/${b.id}/retry`, {
+      method: "POST", headers: { "Idempotency-Key": b.key },
+    }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["jobs"] }),
+  });
+}

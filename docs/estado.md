@@ -1,5 +1,22 @@
 # Estado de LUMIA AI
 
+## Cierre funcional del 20/11/2026
+
+Estado vigente: [cierre y demostración](cierre-2026-11-20.md).
+Se corrigieron la edición encadenada y el reintento de herramientas, se prepararon
+20 cuentas DEMO en 5 grupos y 5 perfiles individuales y se integró la conversión
+experimental con resultados reales. Las secciones inferiores son registros anteriores.
+
+## Revisión del 20/11/2026
+
+Lista actual y orden de cierre: [auditoría del 20 de noviembre](auditoria-2026-11-20.md).
+GitHub revisado hasta `5bee905`: espera del motor sin consumir intentos y laboratorio
+oculto cuando está deshabilitado. Backend: 117 pruebas aprobadas; frontend: 6;
+compilación correcta y PostgreSQL sin migraciones pendientes. La calidad visual
+de la conversión sigue pendiente; no se declara el proyecto completo.
+Navegador en esta revisión: 13 recorridos aprobados y 1 fallido al encadenar
+quitar fondo y desenfoque; detalle y evidencia en la auditoría enlazada.
+
 ## Etapa del 19/11/2026
 
 **Respaldo de avance:** consultar [pendientes para retomar](PENDIENTES-2026-11-19.md).

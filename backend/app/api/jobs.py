@@ -28,8 +28,9 @@ def request_job():
         return fail("herramienta_invalida", "La herramienta no existe.", 400)
     if tool == "realista":
         from flask import current_app
-        if not current_app.config.get("AI_REALISTIC_ENABLED") or current_app.config["AI_ENGINE"] != "local" or current_app.config.get("AI_LOCAL_RUNTIME") != "cpp":
-            return fail("motor_no_compatible", "La conversión experimental todavía no está habilitada o falta el motor local CPP real.", 503)
+        from ..ai.capabilities import realistic_available
+        if not realistic_available(current_app.config):
+            return fail("motor_no_compatible", "La conversión experimental todavía no está habilitada o faltan los pesos del motor local.", 503)
     if image.owner_user_id != g.user.id:                                                # solo se edita lo propio
         return fail("no_encontrado", "No encontrado.", 404)
     try:
@@ -67,6 +68,32 @@ def history():
 @login_required
 def job_detail(job_id):
     return ok(job_json(get_job_or_404(job_id), g.user))
+
+
+@bp.post("/jobs/<int:job_id>/retry")
+@login_required
+def retry_job(job_id):
+    original = get_job_or_404(job_id)
+    if original.requested_by != g.user.id or original.image.owner_user_id != g.user.id:
+        abort(404)
+    if original.status not in ("completed", "failed"):
+        return fail("trabajo_activo", "Espera a que termine este trabajo antes de repetirlo.", 409)
+    key = (request.headers.get("Idempotency-Key") or "").strip()
+    if not 8 <= len(key) <= 100:
+        return fail("sin_clave", "Falta la clave de idempotencia.", 400)
+    if original.tool == "realista":
+        from flask import current_app
+        from ..ai.capabilities import realistic_available
+        if not realistic_available(current_app.config):
+            return fail("motor_no_compatible", "La conversión experimental no está habilitada.", 503)
+    try:
+        # Los puntos de retoque se recuperan del registro privado, no de los
+        # parámetros públicos que deliberadamente no exponen coordenadas.
+        job, created = create_job(g.user, original.image, original.preset, key, original.tool, original.parameters)
+    except ToolParamsError:
+        return fail("parametros_invalidos", "Revisa los ajustes desde el Estudio.", 400)
+    db.session.commit()
+    return ok(job_json(job, g.user), 201 if created else 200)
 
 
 @bp.get("/jobs/<int:job_id>/compare")

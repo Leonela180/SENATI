@@ -10,6 +10,7 @@ import { useMe } from "@/features/auth/useAuth";
 import { useAcceptInvite, useCreateTeam, useInvite, useMembers, useRemoveMember, useTeamStats, useWorkspaces } from "@/features/teams/useTeams";
 import { cn } from "@/lib/utils";
 import { LeavePanel } from "@/components/LeavePanel";
+import { TeamProgress } from "@/components/TeamProgress";
 
 export default function Team() {
   const [params, setParams] = useSearchParams();
@@ -89,6 +90,7 @@ export default function Team() {
                     </div>
                   } />
 
+      {isOwner && <TeamProgress teamId={team.id} />}
       <LeavePanel teamId={team.id} isOwner={isOwner} />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {kpis.map(({ icon: Icon, label, value }) => (

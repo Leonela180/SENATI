@@ -102,3 +102,28 @@ def stats(team_id):
     if days not in (7, 30, 90):                                     # CU06 flujo 4a: filtro por periodo
         days = 30
     return ok(team_stats(team_id, days))
+
+
+@bp.get("/teams/<int:team_id>/progress")
+@login_required
+def shared_progress(team_id):
+    """Avance por integrante solo sobre material compartido, exclusivo del líder."""
+    from sqlalchemy import func, select
+    from ..models import Image, ProcessingJob
+    membership = get_team_membership_or_404(team_id)
+    if membership.role != "owner":
+        return fail("solo_propietario", "Solo el líder puede consultar este resumen.", 403)
+    members = db.session.execute(select(User.id, User.display_name).join(
+        TeamMembership, TeamMembership.user_id == User.id).where(
+        TeamMembership.team_workspace_id == team_id).order_by(User.display_name)).all()
+    jobs = db.session.execute(select(ProcessingJob.requested_by, ProcessingJob.status, func.count()).join(
+        Image, ProcessingJob.image_id == Image.id).where(Image.workspace_id == team_id,
+        Image.visibility == "team").group_by(ProcessingJob.requested_by, ProcessingJob.status)).all()
+    images = dict(db.session.execute(select(Image.owner_user_id, func.count()).where(
+        Image.workspace_id == team_id, Image.visibility == "team").group_by(Image.owner_user_id)).all())
+    grouped = {}
+    for user_id, status, count in jobs:
+        grouped.setdefault(user_id, {})[status] = count
+    return ok([{"user_id": user_id, "display_name": name, "shared_images": images.get(user_id, 0),
+                **{status: grouped.get(user_id, {}).get(status, 0) for status in ("completed", "queued", "processing", "failed")}}
+               for user_id, name in members])

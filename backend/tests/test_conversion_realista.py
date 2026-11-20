@@ -25,13 +25,17 @@ def test_conversion_no_reaplica_dibujo_ni_mezcla_original(tmp_path, monkeypatch)
     assert metadata["conversion_mode"] == "ilustracion_a_realista"
 
 
-def test_conversion_exige_motor_real_y_respeta_idempotencia(app, client):
+def test_conversion_exige_motor_real_y_respeta_idempotencia(app, client, tmp_path):
     register(client)
     image_id = upload(client).json["data"]["id"]
     headers = {"Idempotency-Key": "conversion-probar-001"}
     body = {"tool": "realista", "image_id": image_id}
     assert client.post("/api/v1/jobs", json=body, headers=headers).status_code == 503
-    app.config.update(AI_ENGINE="local", AI_LOCAL_RUNTIME="cpp", AI_REALISTIC_ENABLED=True)
+    model = tmp_path / "compact.safetensors"
+    app.config.update(AI_ENGINE="local", AI_LOCAL_RUNTIME="cpp", AI_REALISTIC_ENABLED=True, AI_REALISTIC_MODEL_PATH=model)
+    assert client.post("/api/v1/jobs", json=body, headers=headers).status_code == 503
+    model.write_bytes(b"fixture")
+    assert client.post("/api/v1/jobs", json={**body, "params": {"character": "otro"}}, headers=headers).status_code == 400
     first = client.post("/api/v1/jobs", json=body, headers=headers)
     assert first.status_code == 201
     second = client.post("/api/v1/jobs", json=body, headers=headers)

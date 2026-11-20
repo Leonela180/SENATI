@@ -92,7 +92,7 @@ export default function Studio() {
   }
 
   function apply() {
-    if (!imageId) return;
+    if (!imageId || saveResult.isPending || createJob.isPending || !image) return;
     createJob.mutate({ image_id: imageId, preset: "natural", key: crypto.randomUUID(), tool, params: toolParams() },
       { onSuccess: (j) => { setJobId(j.id); setDone(null); } });
   }
@@ -148,9 +148,9 @@ export default function Studio() {
 
       <div className="flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Herramientas">
         {TOOLS.map(({ id, label, icon: Icon }) => (
-          <button key={id} role="tab" aria-selected={tool === id} onClick={() => setTool(id)}
+          <button key={id} role="tab" aria-selected={tool === id} disabled={saveResult.isPending || createJob.isPending} onClick={() => setTool(id)}
                   className={cn("flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm transition",
-                    tool === id ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:bg-muted")}>
+                    tool === id ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:bg-muted", "disabled:cursor-wait disabled:opacity-60")}>
             <Icon className="size-4" aria-hidden />{label}
           </button>
         ))}
@@ -285,7 +285,7 @@ export default function Studio() {
             </div>
           ) : (
             <Button size="lg" className="h-12 w-full rounded-xl text-base" onClick={apply}
-                    disabled={createJob.isPending || (!!jobId && !done) || (tool === "quitar_lunar" && !points.length)}>
+                    disabled={!image || saveResult.isPending || createJob.isPending || (!!jobId && !done) || (tool === "quitar_lunar" && !points.length)}>
               <Sparkles className="size-4" aria-hidden />Aplicar
             </Button>
           )}

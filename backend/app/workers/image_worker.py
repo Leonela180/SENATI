@@ -97,8 +97,13 @@ def process_one(app, engine) -> bool:
         if job.tool in ("humanizar", "realista"):
             if engine is None:
                 raise EngineError("modelo_no_disponible")
-            options = {"mode": "realista"} if job.tool == "realista" else {}
-            meta = engine.humanize(str(src), str(dst), job.preset, seed=(job.parameters or {}).get("seed"), **options)
+            selected_engine = engine
+            options = {}
+            if job.tool == "realista":
+                from app.ai.realistic_engine import RealisticEngine
+                selected_engine = RealisticEngine(engine, app.config["AI_REALISTIC_MODEL_PATH"])
+                options["character"] = (job.parameters or {}).get("character", "adult_person")
+            meta = selected_engine.humanize(str(src), str(dst), job.preset, seed=(job.parameters or {}).get("seed"), **options)
         else:                                                                # Estudio de edición (CPU)
             meta = EDITOR.apply(job.tool, str(src), str(dst), job.parameters or {})
         if not dst.is_file() or dst.stat().st_size == 0:                     # RNF-07
@@ -114,7 +119,8 @@ def process_one(app, engine) -> bool:
         log.info("Trabajo %s completado en %s s", job.id, meta.get("seconds"))
     except Exception as e:                                                   # noqa: BLE001
         code = e.code if isinstance(e, EngineError) else "motor_error"
-        log.error("Trabajo %s falló (intento %s): %s", job.id, job.attempt_count, code)
+        message = log.info if code in BUSY_ERRORS else log.error
+        message("Trabajo %s: intento %s, estado del motor %s", job.id, job.attempt_count, code)
         dst.unlink(missing_ok=True)
         job.error_code = code
         busy = code in BUSY_ERRORS
